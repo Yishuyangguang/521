@@ -1,10 +1,10 @@
 /**
  * 众水不灭 · 雅歌之印
  * 文件名: css/pet.css
- * 作用: 恩典灵宠悬浮挂件、5阶神圣形态光环、晋阶进度条与连胜互动弹窗样式
+ * 作用: 恩典灵宠悬浮挂件、5阶神圣形态光环、晋阶进度条与连胜互动弹窗样式 (门禁解锁平滑淡入隔离)
  */
 
-/* ================= 1. 悬浮灵宠微标 ================= */
+/* ================= 1. 悬浮灵宠微标 (默认隐藏，门禁解锁后淡入) ================= */
 .grace-pet-widget {
   position: fixed;
   bottom: 96px;
@@ -15,12 +15,23 @@
   align-items: center;
   cursor: pointer;
   user-select: none;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateZ(0) scale(0.8);
+  -webkit-transform: translateZ(0) scale(0.8);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.5s, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.grace-pet-widget:hover {
+.grace-pet-widget.grace-pet-widget--visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateZ(0) scale(1);
+  -webkit-transform: translateZ(0) scale(1);
+}
+
+.grace-pet-widget.grace-pet-widget--visible:hover {
   transform: scale(1.1) translateY(-4px);
 }
 
