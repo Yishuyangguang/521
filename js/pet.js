@@ -1,13 +1,14 @@
 /**
  * 众水不灭 · 雅歌之印
  * 文件名: js/pet.js
- * 作用: 恩典灵宠状态管理、5阶进化晋升体系、自然日连胜增幅算法与深度自愈数据持久化
+ * 作用: 恩典灵宠状态管理、5阶进化晋升体系、自然日连胜增幅、12徽章陈列室与全局成就条件拦截引擎
  * 持久化策略: 本地 LocalStorage 深度自愈 + 云端免密双向同步
  */
 
 class GracePetManager {
   constructor(config) {
     this.config = config || window.LOVE_CONFIG || {};
+    this.isEvaluatingBadges = false; // 防递归死锁执行锁
     this.petData = this.loadLocalPetData();
   }
 
@@ -89,9 +90,6 @@ class GracePetManager {
     return { mult: 1.0, title: "每日同行 (1.0x)" };
   }
 
-  /**
-   * 获取标准化自然日字符串 (YYYY-MM-DD)
-   */
   getTodayDateStr() {
     const d = new Date();
     const y = d.getFullYear();
@@ -101,7 +99,7 @@ class GracePetManager {
   }
 
   /**
-   * 1. 深度自愈读取本地持久化数据 (防御老版本 undefined 崩溃)
+   * 深度自愈读取本地持久化数据
    */
   loadLocalPetData() {
     let raw = null;
@@ -115,9 +113,6 @@ class GracePetManager {
     return this.migrateSchema(raw || this.config.petData);
   }
 
-  /**
-   * Schema 自动迁移补全引擎
-   */
   migrateSchema(input) {
     const src = (input && typeof input === "object") ? input : {};
     const glow = typeof src.glowEnergy === "number" ? src.glowEnergy : 100;
@@ -130,19 +125,20 @@ class GracePetManager {
       gratitudeCount: Number(src.gratitudeCount) || 0,
       sacrificeCount: Number(src.sacrificeCount) || 0,
       logs: Array.isArray(src.logs) ? src.logs : [],
-      // 新版 5 阶 12 徽章扩容字段
       currentLevel: tier.level,
-      unlockedBadges: Array.isArray(src.unlockedBadges) ? src.unlockedBadges : [],
+      unlockedBadges: Array.isArray(src.unlockedBadges) ? src.unlockedBadges : ["lvl_1"],
       streakDays: Number(src.streakDays) || 0,
       longestStreak: Number(src.longestStreak) || 0,
       lastInteractionDate: typeof src.lastInteractionDate === "string" ? src.lastInteractionDate : null,
-      totalGlowEarned: Number(src.totalGlowEarned) || glow
+      totalGlowEarned: Number(src.totalGlowEarned) || glow,
+      // 辅助统计指标
+      flippedCardsCount: Number(src.flippedCardsCount) || 0,
+      playedSongsCount: Number(src.playedSongsCount) || 0,
+      foundEggsCount: Number(src.foundEggsCount) || 0,
+      checklistDoneCount: Number(src.checklistDoneCount) || 0
     };
   }
 
-  /**
-   * 2. 本地持久化安全写入
-   */
   saveLocalPetData() {
     try {
       localStorage.setItem("love_universe_pet_data", JSON.stringify(this.petData));
@@ -153,15 +149,101 @@ class GracePetManager {
     this.checkNaturalDayStreakReset();
     this.injectDOM();
     this.bindEvents();
+    this.bindAchievementInterceptors();
+    this.checkAllBadgeUnlocks();
     this.updateUI();
 
-    // 初始化时拉取云端数据进行智能合并
     await this.fetchCloudPetData();
   }
 
   /**
-   * 检测跨日连胜断更自愈
+   * 全局成就条件拦截监听器 (监听各业务子模块广播)
    */
+  bindAchievementInterceptors() {
+    window.addEventListener("achievement:trigger", (e) => {
+      const detail = e.detail || {};
+      const type = detail.type;
+
+      if (type === "icebreaker_resolved") {
+        this.unlockSpecificBadge("first_peace");
+      } else if (type === "checklist_updated") {
+        this.petData.checklistDoneCount = Number(detail.completedCount) || (this.petData.checklistDoneCount + 1);
+        if (this.petData.checklistDoneCount >= 10) {
+          this.unlockSpecificBadge("checklist_100");
+        }
+      } else if (type === "polaroid_flipped") {
+        this.petData.flippedCardsCount = (this.petData.flippedCardsCount || 0) + 1;
+        if (this.petData.flippedCardsCount >= 3) {
+          this.unlockSpecificBadge("photo_50");
+        }
+      } else if (type === "music_played") {
+        this.petData.playedSongsCount = (this.petData.playedSongsCount || 0) + 1;
+        if (this.petData.playedSongsCount >= 5) {
+          this.unlockSpecificBadge("music_100");
+        }
+      } else if (type === "egg_discovered") {
+        this.petData.foundEggsCount = (this.petData.foundEggsCount || 0) + 1;
+        if (this.petData.foundEggsCount >= 2) {
+          this.unlockSpecificBadge("egg_hunter");
+        }
+      }
+
+      this.saveLocalPetData();
+      this.checkAllBadgeUnlocks();
+      this.updateUI();
+    });
+  }
+
+  /**
+   * 校验并自动解锁符合条件的徽章
+   */
+  checkAllBadgeUnlocks() {
+    if (this.isEvaluatingBadges) return;
+    this.isEvaluatingBadges = true;
+
+    // 1. 等级徽章检测
+    const tier = GracePetManager.getTierInfo(this.petData.glowEnergy);
+    for (let i = 1; i <= tier.level; i++) {
+      this.unlockSpecificBadge(`lvl_${i}`, false);
+    }
+
+    // 2. 7日连胜检测
+    if (this.petData.streakDays >= 7 || this.petData.longestStreak >= 7) {
+      this.unlockSpecificBadge("streak_7", false);
+    }
+
+    // 3. 舍己十诫检测
+    if (this.petData.sacrificeCount >= 10) {
+      this.unlockSpecificBadge("sacrifice_10", false);
+    }
+
+    this.isEvaluatingBadges = false;
+  }
+
+  /**
+   * 解锁单枚徽章 (幂等性 + 庆贺动效触发)
+   */
+  unlockSpecificBadge(badgeId, triggerModal = true) {
+    if (!Array.isArray(this.petData.unlockedBadges)) {
+      this.petData.unlockedBadges = [];
+    }
+
+    if (this.petData.unlockedBadges.includes(badgeId)) return;
+
+    this.petData.unlockedBadges.push(badgeId);
+    this.saveLocalPetData();
+
+    // 查找徽章元数据
+    const allBadges = (window.PetCelebrationManager && window.PetCelebrationManager.BADGE_DEFINITIONS) || [];
+    const badgeMeta = allBadges.find(b => b.id === badgeId);
+
+    if (badgeMeta && triggerModal && window.PetCelebration) {
+      window.PetCelebration.triggerBadgeUnlock(badgeMeta);
+    }
+
+    this.syncToCloud(`✨ 荣耀解锁新徽章【${(badgeMeta && badgeMeta.name) || badgeId}】！`);
+  }
+
   checkNaturalDayStreakReset() {
     const last = this.petData.lastInteractionDate;
     if (!last) return;
@@ -174,7 +256,6 @@ class GracePetManager {
       const todayTime = new Date(today.replace(/-/g, "/")).getTime();
       const diffDays = Math.round((todayTime - lastTime) / (1000 * 3600 * 24));
 
-      // 若间隔大于 1 天且今天尚未互动，连胜断更归零
       if (diffDays > 1) {
         this.petData.streakDays = 0;
         this.saveLocalPetData();
@@ -182,9 +263,6 @@ class GracePetManager {
     } catch (_) {}
   }
 
-  /**
-   * 交互时更新自然日连胜天数
-   */
   updateStreakOnInteraction() {
     const today = this.getTodayDateStr();
     const last = this.petData.lastInteractionDate;
@@ -192,7 +270,7 @@ class GracePetManager {
     if (!last) {
       this.petData.streakDays = 1;
     } else if (last === today) {
-      // 当日再次互动，保持当前连胜不重复自增
+      // 当天重复互动不累加
     } else {
       try {
         const lastTime = new Date(last.replace(/-/g, "/")).getTime();
@@ -211,11 +289,12 @@ class GracePetManager {
 
     this.petData.longestStreak = Math.max(this.petData.longestStreak || 0, this.petData.streakDays);
     this.petData.lastInteractionDate = today;
+
+    if (this.petData.streakDays >= 7) {
+      this.unlockSpecificBadge("streak_7");
+    }
   }
 
-  /**
-   * 从云端拉取并智能合并最新数据
-   */
   async fetchCloudPetData() {
     try {
       const res = await fetch("/api/love/pet");
@@ -223,13 +302,15 @@ class GracePetManager {
       const data = await res.json();
       if (data.success && data.petData) {
         const cloudData = this.migrateSchema(data.petData);
-
         const localTotal = (this.petData.gratitudeCount || 0) + (this.petData.sacrificeCount || 0);
         const cloudTotal = (cloudData.gratitudeCount || 0) + (cloudData.sacrificeCount || 0);
 
         if (cloudTotal >= localTotal) {
-          this.petData = cloudData;
+          // 合并双方已解锁的徽章集合
+          const mergedBadges = Array.from(new Set([...(this.petData.unlockedBadges || []), ...(cloudData.unlockedBadges || [])]));
+          this.petData = { ...cloudData, unlockedBadges: mergedBadges };
           this.saveLocalPetData();
+          this.checkAllBadgeUnlocks();
           this.updateUI();
         }
       }
@@ -255,7 +336,7 @@ class GracePetManager {
     `;
     document.body.appendChild(widget);
 
-    // 2. 灵宠核心互动弹窗
+    // 2. 灵宠核心互动弹窗 (含 12 徽章陈列室挂载区)
     const modal = document.createElement("div");
     modal.className = "grace-pet-modal";
     modal.id = "grace-pet-modal";
@@ -274,7 +355,6 @@ class GracePetManager {
           <div class="grace-pet-sub" id="grace-pet-display-desc">${tier.desc}</div>
         </div>
 
-        <!-- 5 阶进化晋级能量进度条 -->
         <div class="grace-level-progress-box">
           <div class="grace-level-progress-meta">
             <span id="progress-level-current">LV.${tier.level} ${tier.title}</span>
@@ -285,7 +365,6 @@ class GracePetManager {
           </div>
         </div>
 
-        <!-- 核心统计网格 -->
         <div class="grace-stats-grid">
           <div class="grace-stat-box">
             <div class="grace-stat-val" id="stat-glow-energy">${this.petData.glowEnergy}</div>
@@ -305,7 +384,15 @@ class GracePetManager {
           </div>
         </div>
 
-        <!-- 喂养与舍己操作区 -->
+        <!-- 🌟 12 徽章专属荣誉陈列室 -->
+        <div class="grace-badges-section">
+          <div class="grace-badges-header">
+            <span class="grace-badges-title">🎖️ 圣约印记 · 12 勋章陈列室</span>
+            <span class="grace-badges-count" id="grace-badges-unlocked-count">已解锁 0 / 12</span>
+          </div>
+          <div class="grace-badge-grid" id="grace-badge-grid-container"></div>
+        </div>
+
         <div class="grace-action-section">
           <div class="grace-action-title">
             <span>💧 献上今日感恩之露</span>
@@ -350,9 +437,6 @@ class GracePetManager {
     }
   }
 
-  /**
-   * 献上感恩之露 (注入连胜增幅倍率)
-   */
   feedGratitude() {
     const input = document.getElementById("gratitude-input");
     const text = input ? input.value.trim() : "";
@@ -387,11 +471,13 @@ class GracePetManager {
     this.petData.icon = newTier.icon;
 
     this.saveLocalPetData();
+    this.checkAllBadgeUnlocks();
     this.updateUI();
 
-    // 晋阶升级判定与庆贺
     if (newTier.level > oldTier.level) {
-      this.handleLevelUpCelebration(oldTier.level, newTier);
+      if (window.PetCelebration) {
+        window.PetCelebration.triggerLevelUp(newTier);
+      }
     } else if (window.Effects) {
       if (typeof window.Effects.fireFireworks === "function") window.Effects.fireFireworks();
       if (typeof window.Effects.playAudio === "function") window.Effects.playAudio("stamp");
@@ -400,9 +486,6 @@ class GracePetManager {
     this.syncToCloud(`✓ 已献上感恩之露 (+${addedGlow} 光芒能量)！`);
   }
 
-  /**
-   * 触发舍己之果 (高阶光芒与强力连胜注入)
-   */
   triggerSacrifice() {
     if (!confirm("确定要在本次争执或意见分歧中，主动选择退让与包容吗？\n爱情不是讲理的地方，而是舍己与接纳的地方。")) return;
 
@@ -433,30 +516,19 @@ class GracePetManager {
     this.petData.icon = newTier.icon;
 
     this.saveLocalPetData();
+    this.checkAllBadgeUnlocks();
     this.updateUI();
 
     if (newTier.level > oldTier.level) {
-      this.handleLevelUpCelebration(oldTier.level, newTier);
+      if (window.PetCelebration) {
+        window.PetCelebration.triggerLevelUp(newTier);
+      }
     } else if (window.Effects) {
       if (typeof window.Effects.fireConfetti === "function") window.Effects.fireConfetti();
       if (typeof window.Effects.playAudio === "function") window.Effects.playAudio("gatekeeperPass");
     }
 
     this.syncToCloud(`🕊️ 结出宝贵舍己之果 (+${addedGlow} 光芒)，愿爱化解一切隔阂！`);
-  }
-
-  /**
-   * 晋阶等级提升庆贺动效
-   */
-  handleLevelUpCelebration(fromLevel, toTier) {
-    if (window.Effects) {
-      if (typeof window.Effects.fireConfetti === "function") window.Effects.fireConfetti();
-      if (typeof window.Effects.fireFireworks === "function") window.Effects.fireFireworks();
-      if (typeof window.Effects.showMiniToast === "function") {
-        window.Effects.showMiniToast(`✨ 恭喜灵宠荣耀晋阶！升至 LV.${toTier.level}【${toTier.title}】🕊️`);
-      }
-    }
-    if (navigator.vibrate) navigator.vibrate([100, 50, 150]);
   }
 
   updateUI() {
@@ -482,6 +554,9 @@ class GracePetManager {
     const progressTarget = document.getElementById("progress-level-target");
     const progressFill = document.getElementById("grace-level-progress-fill");
 
+    const badgeContainer = document.getElementById("grace-badge-grid-container");
+    const badgeCountEl = document.getElementById("grace-badges-unlocked-count");
+
     if (widgetIcon) widgetIcon.textContent = tier.icon;
     if (widgetBadge) widgetBadge.textContent = `LV.${tier.level} ${tier.title}`;
     if (bigIcon) bigIcon.textContent = tier.icon;
@@ -496,7 +571,6 @@ class GracePetManager {
     if (nameEl) nameEl.textContent = tier.title;
     if (descEl) descEl.textContent = tier.desc;
 
-    // 进度条百分比计算
     if (progressCurrent) progressCurrent.textContent = `LV.${tier.level} ${tier.title}`;
     if (progressTarget) {
       progressTarget.textContent = tier.nextReq
@@ -519,6 +593,27 @@ class GracePetManager {
     if (statGrat) statGrat.textContent = this.petData.gratitudeCount;
     if (statSac) statSac.textContent = this.petData.sacrificeCount;
     if (streakTag) streakTag.textContent = `连胜加成 ${bonus.mult}x`;
+
+    // 渲染 12 徽章网格状态
+    const allBadges = (window.PetCelebrationManager && window.PetCelebrationManager.BADGE_DEFINITIONS) || [];
+    const unlockedList = this.petData.unlockedBadges || [];
+
+    if (badgeCountEl) {
+      badgeCountEl.textContent = `已解锁 ${unlockedList.length} / ${allBadges.length}`;
+    }
+
+    if (badgeContainer) {
+      badgeContainer.innerHTML = allBadges.map(badge => {
+        const isUnlocked = unlockedList.includes(badge.id);
+        return `
+          <div class="grace-badge-card ${isUnlocked ? 'unlocked' : 'locked'}" title="${badge.name}: ${badge.desc}" onclick="window.Effects && window.Effects.showMiniToast('${badge.icon} 【${badge.name}】: ${badge.desc}')">
+            <span class="grace-badge-icon">${badge.icon}</span>
+            <span class="grace-badge-name">${badge.name}</span>
+            <span class="grace-badge-desc-tip">${isUnlocked ? '✓ 已获得' : '未解锁'}</span>
+          </div>
+        `;
+      }).join("");
+    }
 
     if (container) {
       const logs = this.petData.logs || [];
@@ -555,3 +650,5 @@ class GracePetManager {
     return String(str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
 }
+
+window.GracePetManager = GracePetManager;
