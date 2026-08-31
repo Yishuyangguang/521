@@ -1,7 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印
  * 文件名: css/themes.css
- * 作用: 12 款男女高奢主题变量定义与浅色系/深色系高饱和自适应对比度 (彻底根除文字泛白发虚)
+ * 作用: 12 款男女高奢主题变量定义与浅色系/深色系高饱和自适应对比度 (彻底根除文字泛白发虚，自适应悬浮爱心晶体光晕)
  */
 
 /* ================= 🌌 基础语义变量定义 (默认深色星河基线) ================= */
@@ -419,4 +419,11 @@ body[data-theme-type="light"] .universe-footer__text {
   color: var(--text-sub) !important;
   font-weight: 800 !important;
   text-shadow: none !important;
+}
+
+/* 浅色模式下爱心音乐晶体高饱和度适配 */
+body[data-theme-type="light"] .heart-music-capsule {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(244, 63, 94, 0.4) !important;
+  box-shadow: 0 8px 24px rgba(190, 18, 60, 0.2), 0 0 16px rgba(244, 63, 94, 0.25) !important;
 }
