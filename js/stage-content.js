@@ -1,8 +1,9 @@
 /**
  * 众水不灭 · 雅歌之印
  * 文件名: js/stage-content.js
- * 作用: 独立管理恋爱期、订婚期、结婚期三大阶段专属的待办清单与舍己特权券数据
- * 核心准则: 严格界限隔离，恋爱期绝不出现越界同居或亲密日常
+ * 作用: 
+ *   1. 独立管理恋爱期、订婚期、结婚期三大阶段专属的待办清单与舍己特权券数据
+ *   2. 提供星轨中枢舞台生命周期管理器 (StageManager)，实现 iOS 滚动锁定、Hash 路由栈、全局事件委托与生命周期广播
  */
 
 window.STAGE_CONTENT = {
@@ -231,3 +232,162 @@ window.STAGE_CONTENT = {
     ]
   }
 };
+
+// ================= 2. 星轨中枢舞台生命周期控制器 (StageManager) =================
+class StageManager {
+  constructor() {
+    this.currentStage = null;
+    this.lockedScrollY = 0;
+    this.container = null;
+    this.overlay = null;
+    this.isTransitioning = false;
+    this.initialized = false;
+  }
+
+  init() {
+    this.container = document.getElementById("stage-modal-container");
+    this.overlay = document.getElementById("stage-modal-overlay");
+
+    if (this.initialized) return;
+    this.initialized = true;
+
+    // 全局事件委托：任意深度的中枢卡片点击均可精准捕获
+    document.addEventListener("click", (e) => {
+      const openBtn = e.target.closest("[data-open-stage]");
+      if (openBtn) {
+        e.preventDefault();
+        const stageId = openBtn.getAttribute("data-open-stage");
+        this.openStage(stageId);
+        return;
+      }
+
+      const closeBtn = e.target.closest(".stage-modal__close-btn, [data-close-stage]");
+      if (closeBtn) {
+        e.preventDefault();
+        this.closeStage();
+        return;
+      }
+
+      if (this.overlay && (e.target === this.overlay || e.target.id === "stage-modal-container")) {
+        this.closeStage();
+      }
+    });
+
+    window.addEventListener("popstate", (e) => {
+      if (e.state && e.state.stage) {
+        this.showStageDom(e.state.stage);
+      } else if (this.currentStage) {
+        this.closeStageDom();
+      }
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && this.currentStage) {
+        this.closeStage();
+      }
+    });
+
+    const initialHash = window.location.hash.replace("#", "");
+    if (initialHash && document.getElementById(`stage-${initialHash}`)) {
+      setTimeout(() => {
+        this.openStage(initialHash, false);
+      }, 300);
+    }
+  }
+
+  openStage(stageId, pushHistory = true) {
+    if (!this.container || !this.overlay) {
+      this.container = document.getElementById("stage-modal-container");
+      this.overlay = document.getElementById("stage-modal-overlay");
+    }
+
+    const stageEl = document.getElementById(`stage-${stageId}`);
+    if (!stageEl || this.isTransitioning) return;
+
+    this.isTransitioning = true;
+
+    this.lockScroll();
+
+    if (pushHistory) {
+      window.history.pushState({ stage: stageId }, "", `#${stageId}`);
+    }
+
+    this.showStageDom(stageId);
+
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("stage:opened", { detail: { stageId } }));
+      window.dispatchEvent(new Event("resize"));
+      this.isTransitioning = false;
+    }, 280);
+  }
+
+  closeStage(updateHistory = true) {
+    if (!this.currentStage || this.isTransitioning) return;
+    this.isTransitioning = true;
+
+    const closingStageId = this.currentStage;
+
+    window.dispatchEvent(new CustomEvent("stage:closing", { detail: { stageId: closingStageId } }));
+
+    if (updateHistory && window.location.hash) {
+      window.history.pushState(null, "", window.location.pathname + window.location.search);
+    }
+
+    this.closeStageDom();
+
+    this.unlockScroll();
+
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("stage:closed", { detail: { stageId: closingStageId } }));
+      this.isTransitioning = false;
+    }, 280);
+  }
+
+  showStageDom(stageId) {
+    document.querySelectorAll(".stage-modal").forEach(el => {
+      el.classList.remove("stage-modal--active");
+    });
+
+    const targetEl = document.getElementById(`stage-${stageId}`);
+    if (targetEl) {
+      if (this.container) this.container.classList.add("stage-container--active");
+      if (this.overlay) this.overlay.classList.add("stage-overlay--active");
+      targetEl.classList.add("stage-modal--active");
+      this.currentStage = stageId;
+
+      const bodyWrapper = targetEl.querySelector(".stage-modal__body");
+      if (bodyWrapper) bodyWrapper.scrollTop = 0;
+    }
+  }
+
+  closeStageDom() {
+    if (this.container) this.container.classList.remove("stage-container--active");
+    if (this.overlay) this.overlay.classList.remove("stage-overlay--active");
+    document.querySelectorAll(".stage-modal").forEach(el => {
+      el.classList.remove("stage-modal--active");
+    });
+    this.currentStage = null;
+  }
+
+  lockScroll() {
+    this.lockedScrollY = window.scrollY || window.pageYOffset || 0;
+    document.body.classList.add("body--locked");
+    document.body.style.top = `-${this.lockedScrollY}px`;
+  }
+
+  unlockScroll() {
+    document.body.classList.remove("body--locked");
+    document.body.style.top = "";
+    window.scrollTo(0, this.lockedScrollY);
+  }
+}
+
+window.StageManager = new StageManager();
+window.openStage = (id) => window.StageManager.openStage(id);
+window.closeStage = () => window.StageManager.closeStage();
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => window.StageManager.init());
+} else {
+  window.StageManager.init();
+}
