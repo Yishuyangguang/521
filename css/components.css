@@ -1,0 +1,1232 @@
+/**
+ * 恋爱时光轴 & 漫游宇宙 (Love Universe)
+ * 文件名: css/components.css
+ * 升级：实施方案 C (大字号主角名字置顶 + 精巧时间胶囊居中 + 优雅衬线 & 符号点缀)
+ */
+
+.universe-canvas,
+.fireworks-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+.universe-canvas { z-index: 1; }
+.fireworks-canvas { z-index: 99999; }
+
+.btn-universe {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.22s var(--ease-spring);
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0);
+}
+
+.btn-universe--primary {
+  background: linear-gradient(135deg, var(--primary-pink) 0%, #be123c 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 6px 20px rgba(244, 63, 94, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+.btn-universe--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(244, 63, 94, 0.55), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+}
+.btn-universe--primary:active { transform: translateY(1px); }
+
+.btn-universe--accent {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 6px 20px var(--sun-gold-glow), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+}
+
+.btn-universe--secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-main);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* 门禁层 */
+.gatekeeper {
+  position: fixed;
+  inset: 0;
+  z-index: 50000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: radial-gradient(circle at center, #231d45 0%, #070a14 80%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: opacity 0.5s var(--ease-spring), visibility 0.5s;
+}
+
+.gatekeeper__dialog {
+  width: 100%;
+  max-width: 400px;
+  background: var(--space-card);
+  border: 1.5px solid var(--glass-border);
+  border-radius: 26px;
+  padding: 30px 24px;
+  box-shadow: var(--glass-shadow), 0 0 35px rgba(244, 63, 94, 0.2);
+  text-align: center;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.gatekeeper__badge {
+  font-size: 10.5px;
+  font-weight: 900;
+  letter-spacing: 1.8px;
+  color: var(--rose-gold);
+  background: rgba(251, 113, 133, 0.12);
+  border: 1px solid rgba(251, 113, 133, 0.3);
+  padding: 3px 10px;
+  border-radius: 20px;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+.gatekeeper__title {
+  font-size: 20px;
+  font-weight: 900;
+  color: #ffffff;
+  margin-bottom: 14px;
+}
+
+.gatekeeper__question {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.gatekeeper__input-wrap { margin-bottom: 12px; }
+
+.gatekeeper__input {
+  width: 100%;
+  background: rgba(3, 7, 18, 0.75);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 12px 16px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  text-align: center;
+  letter-spacing: 4px;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.6);
+  transition: all 0.2s ease;
+}
+
+.gatekeeper__input:focus {
+  border-color: var(--primary-pink);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.6), 0 0 16px var(--rose-gold-glow);
+}
+
+.gatekeeper__hint {
+  font-size: 11.5px;
+  color: #fbbf24;
+  margin-bottom: 20px;
+  min-height: 18px;
+}
+
+.gatekeeper__btn { width: 100%; padding: 13px 20px; font-size: 15px; }
+
+/* ================= 头部视差区 (方案 C：名字大字号置顶 + 时间胶囊居中) ================= */
+.hero-section {
+  text-align: center;
+  margin-bottom: 36px;
+  padding-top: 10px;
+  contain: layout style;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 名字字符放大并赋予典雅艺术字形 */
+.hero-section__names {
+  font-size: 38px;
+  font-weight: 900;
+  letter-spacing: 2.5px;
+  font-family: "Songti SC", "STSong", "Noto Serif SC", "Source Han Serif SC", -apple-system, serif;
+  background: var(--text-hero-gradient, linear-gradient(135deg, #ffffff 0%, #fecdd3 50%, #fb7185 100%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 10px;
+  text-shadow: var(--text-hero-shadow, 0 0 30px var(--rose-gold-glow));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  transition: all 0.3s ease;
+}
+
+/* 🌟 连接符「&」专属古典衬线倾斜与微光高奢点缀 */
+.name-connector {
+  display: inline-block;
+  font-family: "Playfair Display", "Baskerville", "Georgia", "Songti SC", serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 0.88em;
+  margin: 0 8px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #f43f5e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 6px rgba(245, 158, 11, 0.35));
+  transition: all 0.3s ease;
+}
+
+/* 契约时间胶囊微缩精致居中置于名字与副标题之间 */
+.hero-section__badge {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 2.5px;
+  color: var(--badge-text, var(--sun-gold));
+  background: var(--badge-bg, rgba(245, 158, 11, 0.12));
+  border: 1px solid var(--badge-border, rgba(245, 158, 11, 0.3));
+  padding: 3px 14px;
+  border-radius: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.hero-section__subtitle {
+  font-size: 13.5px;
+  color: var(--text-subtitle, var(--text-muted));
+  font-weight: 600;
+  margin-bottom: 24px;
+  transition: color 0.3s ease;
+}
+
+.love-timer {
+  background: var(--bg-card, var(--space-card));
+  border: 1.5px solid var(--border-card, var(--glass-border));
+  border-radius: 24px;
+  padding: 22px 18px;
+  box-shadow: var(--card-shadow, var(--glass-shadow));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  max-width: 580px;
+  width: 100%;
+  margin: 0 auto;
+  contain: layout style;
+  transition: all 0.3s ease;
+}
+
+.love-timer__title {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-sub, var(--text-muted));
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  transition: color 0.3s ease;
+}
+
+.love-timer__grid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.love-timer__unit {
+  background: var(--timer-unit-bg, rgba(3, 7, 18, 0.65));
+  border: 1px solid var(--timer-unit-border, rgba(255, 255, 255, 0.08));
+  border-radius: 12px;
+  padding: 10px 8px;
+  min-width: 58px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.love-timer__num {
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--timer-num-color, #fde68a);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  line-height: 1.1;
+  text-shadow: 0 0 12px var(--sun-gold-glow);
+  transition: color 0.3s ease;
+}
+
+.love-timer__label {
+  font-size: 10.5px;
+  color: var(--timer-label-color, var(--text-muted));
+  font-weight: 700;
+  margin-top: 2px;
+  transition: color 0.3s ease;
+}
+
+.love-timer__milestone {
+  margin-top: 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--timer-milestone-text, var(--rose-gold));
+  background: var(--timer-milestone-bg, rgba(251, 113, 133, 0.1));
+  border: 1px dashed var(--timer-milestone-border, rgba(251, 113, 133, 0.35));
+  padding: 6px 14px;
+  border-radius: 20px;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.love-timer__milestone-days {
+  font-size: 14px;
+  font-weight: 900;
+  padding: 0 2px;
+}
+
+/* 告白信 */
+.confession-section { margin-bottom: 40px; contain: layout style; width: 100%; }
+
+.confession-card {
+  background: var(--confession-bg, rgba(255, 253, 245, 0.95));
+  border: 1.5px solid var(--confession-border, transparent);
+  border-radius: 24px;
+  padding: 26px 22px;
+  color: var(--confession-text, var(--text-dark));
+  box-shadow: var(--card-shadow, 0 16px 36px rgba(0, 0, 0, 0.4));
+  max-width: 680px;
+  margin: 0 auto;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.confession-card::before {
+  content: "“";
+  position: absolute;
+  top: 10px;
+  left: 18px;
+  font-size: 60px;
+  line-height: 1;
+  color: rgba(244, 63, 94, 0.15);
+  font-family: serif;
+}
+
+.confession-card__title {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--confession-title, #9f1239);
+  text-align: center;
+  margin-bottom: 14px;
+  transition: color 0.3s ease;
+}
+
+.confession-card__body {
+  font-size: 14.5px;
+  line-height: 1.8;
+  color: var(--confession-text, #374151);
+  min-height: 80px;
+  word-break: break-word;
+  position: relative;
+  display: inline;
+  transition: color 0.3s ease;
+}
+
+.typewriter-cursor {
+  display: inline-block;
+  font-weight: 900;
+  color: var(--primary-pink);
+  margin-left: 2px;
+  animation: cursorBlink 0.8s infinite;
+}
+
+.confession-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(244, 63, 94, 0.2);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--confession-footer, #881337);
+  transition: color 0.3s ease;
+}
+
+/* 拍立得时光轴 */
+.timeline-section { margin-bottom: 45px; contain: layout style; width: 100%; }
+
+.timeline-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 640px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.timeline-node {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.timeline-node__time {
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--accent-gold, var(--sun-gold));
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.timeline-node__time::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-gold, var(--sun-gold));
+  box-shadow: 0 0 10px var(--accent-gold-glow, var(--sun-gold-glow));
+}
+
+.polaroid-card {
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
+  cursor: pointer;
+  user-select: none;
+  touch-action: pan-y;
+  contain: layout paint;
+}
+
+.polaroid-card__inner {
+  position: relative;
+  width: 100%;
+  border-radius: 20px;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.polaroid-card__inner--flipped {
+  transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
+}
+
+.polaroid-card__front,
+.polaroid-card__back {
+  width: 100%;
+  border-radius: 20px;
+  background: var(--polaroid-paper);
+  box-shadow: var(--polaroid-shadow);
+  padding: 16px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+.polaroid-card__front { display: flex; flex-direction: column; }
+
+.polaroid-card__photo-box {
+  width: 100%;
+  height: 260px;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  background: #0f172a;
+}
+
+.polaroid-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.polaroid-card:hover .polaroid-card__img { transform: scale(1.02); }
+
+.polaroid-card__tag {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(15, 23, 42, 0.75);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 12px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.polaroid-card__caption { padding-top: 14px; color: var(--text-dark); }
+.polaroid-card__title { font-size: 17px; font-weight: 800; color: #111827; margin-bottom: 4px; }
+.polaroid-card__desc { font-size: 13px; color: #4b5563; line-height: 1.5; margin-bottom: 10px; }
+.polaroid-card__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #9ca3af;
+  border-top: 1px solid #f3f4f6;
+  padding-top: 8px;
+}
+.polaroid-card__hint { color: var(--primary-pink); }
+
+.polaroid-card__back {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg) translateZ(1px);
+  -webkit-transform: rotateY(180deg) translateZ(1px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: #fffdfa;
+  border: 2px dashed #fecdd3;
+}
+
+.polaroid-card__stamp {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  border: 1.5px solid #f43f5e;
+  color: #f43f5e;
+  font-size: 9.5px;
+  font-weight: 900;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transform: rotate(8deg);
+}
+
+.polaroid-card__back-title { font-size: 16px; font-weight: 800; color: #9f1239; margin-bottom: 10px; }
+.polaroid-card__back-text { font-size: 14px; line-height: 1.8; color: #374151; font-style: italic; }
+
+/* 🎙️ 时光轴背面 60 秒专属语音胶囊组件 */
+.polaroid-card__voice-box {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.polaroid-voice-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, rgba(255, 241, 242, 0.95) 0%, rgba(254, 226, 226, 0.9) 100%);
+  border: 1.5px solid rgba(244, 63, 94, 0.35);
+  border-radius: 26px;
+  padding: 7px 15px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.12);
+  max-width: 100%;
+}
+
+.polaroid-voice-pill:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 18px rgba(244, 63, 94, 0.22);
+  border-color: rgba(244, 63, 94, 0.6);
+}
+
+.polaroid-voice-pill.playing {
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+  border-color: #be123c;
+  box-shadow: 0 4px 16px rgba(244, 63, 94, 0.45);
+}
+
+.polaroid-voice-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(244, 63, 94, 0.15);
+  color: #e11d48;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 900;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.polaroid-voice-pill.playing .polaroid-voice-icon {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.polaroid-voice-waves {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 16px;
+}
+
+.polaroid-wave-bar {
+  width: 3px;
+  height: 6px;
+  background: #f43f5e;
+  border-radius: 2px;
+  transition: height 0.2s ease;
+}
+
+.polaroid-voice-pill.playing .polaroid-wave-bar {
+  background: #ffffff;
+  animation: polaroidWaveAnimation 0.9s ease-in-out infinite alternate;
+}
+
+.polaroid-voice-pill.playing .polaroid-wave-bar:nth-child(1) { animation-delay: 0.1s; }
+.polaroid-voice-pill.playing .polaroid-wave-bar:nth-child(2) { animation-delay: 0.3s; }
+.polaroid-voice-pill.playing .polaroid-wave-bar:nth-child(3) { animation-delay: 0.2s; }
+.polaroid-voice-pill.playing .polaroid-wave-bar:nth-child(4) { animation-delay: 0.4s; }
+.polaroid-voice-pill.playing .polaroid-wave-bar:nth-child(5) { animation-delay: 0.15s; }
+
+@keyframes polaroidWaveAnimation {
+  0% { height: 4px; }
+  100% { height: 16px; }
+}
+
+.polaroid-voice-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.polaroid-voice-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: #9f1239;
+  line-height: 1.2;
+}
+
+.polaroid-voice-pill.playing .polaroid-voice-title {
+  color: #ffffff;
+}
+
+.polaroid-voice-duration {
+  font-size: 10px;
+  font-weight: 700;
+  color: #e11d48;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.polaroid-voice-pill.playing .polaroid-voice-duration {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.polaroid-card__back-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #9ca3af;
+  font-weight: 700;
+}
+
+/* 100 件事 */
+.checklist-section { margin-bottom: 45px; contain: layout style; width: 100%; }
+
+.checklist-card {
+  background: var(--bg-card, var(--space-card));
+  border: 1.5px solid var(--border-card, var(--glass-border));
+  border-radius: 24px;
+  padding: 24px 20px;
+  box-shadow: var(--card-shadow, var(--glass-shadow));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  max-width: 680px;
+  margin: 0 auto;
+  contain: layout style;
+  transition: all 0.3s ease;
+}
+
+.checklist-card__progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(3, 7, 18, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.checklist-card__progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--sun-gold), var(--primary-pink));
+  box-shadow: 0 0 10px var(--rose-gold-glow);
+  transition: width 0.4s var(--ease-spring);
+}
+
+.checklist-card__stats {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--text-sub, #fde68a);
+  text-align: right;
+  margin-bottom: 16px;
+  transition: color 0.3s ease;
+}
+
+.checklist-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 6px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.checklist-item {
+  background: var(--drawer-item-bg, rgba(3, 7, 18, 0.5));
+  border: 1px solid var(--border-card, rgba(255, 255, 256, 0.06));
+  border-radius: 12px;
+  padding: 10px 14px;
+  transition: all 0.2s ease;
+}
+
+.checklist-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.checklist-item__label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checklist-item__checkbox { display: none; }
+
+.checklist-item__custom-box {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  border: 1.5px solid var(--rose-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.checklist-item__checkbox:checked + .checklist-item__custom-box {
+  background: var(--primary-pink);
+  border-color: var(--primary-pink);
+}
+
+.checklist-item__checkbox:checked + .checklist-item__custom-box::after {
+  content: "✓";
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.checklist-item__text {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-main);
+  transition: all 0.2s ease;
+}
+
+.checklist-item--checked .checklist-item__text {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+/* 刮刮乐 */
+.scratch-section { margin-bottom: 45px; contain: layout style; width: 100%; }
+
+.scratch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.scratch-card {
+  position: relative;
+  min-height: 180px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(255, 253, 245, 0.95) 0%, rgba(254, 243, 199, 0.95) 100%);
+  border: 1.5px solid rgba(253, 230, 138, 0.6);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+  contain: paint layout;
+}
+
+.scratch-card__content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  color: var(--text-dark);
+  position: relative;
+}
+
+.scratch-card__header { display: flex; align-items: center; gap: 8px; }
+.scratch-card__icon { font-size: 24px; }
+.scratch-card__title { font-size: 16px; font-weight: 900; color: #92400e; }
+.scratch-card__text { font-size: 13.5px; font-weight: 600; color: #451a03; line-height: 1.5; margin: 10px 0; }
+.scratch-card__canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 5; touch-action: none; cursor: grab; }
+
+.scratch-stamp {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-15deg) scale(2);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10;
+  transition: all 0.25s var(--ease-spring);
+}
+
+.scratch-stamp--visible {
+  opacity: 0.9;
+  transform: translate(-50%, -50%) rotate(-15deg) scale(1);
+}
+
+.scratch-stamp__circle {
+  width: 96px;
+  height: 96px;
+  border: 3px dashed var(--stamp-red);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 16px var(--stamp-red-glow), inset 0 0 8px var(--stamp-red-glow);
+  background: rgba(220, 38, 38, 0.08);
+}
+
+.scratch-stamp__status { font-size: 18px; font-weight: 900; color: var(--stamp-red); letter-spacing: 2px; }
+.scratch-stamp__time { font-size: 9.5px; font-weight: 800; color: var(--stamp-red); font-family: ui-monospace, monospace; }
+
+/* 🌟 全局悬浮黑胶唱片机 (层级 55000) */
+.vinyl-player {
+  position: fixed;
+  bottom: max(20px, env(safe-area-inset-bottom, 20px));
+  left: max(16px, env(safe-area-inset-left, 16px));
+  z-index: 55000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: auto;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+.vinyl-player__disc {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: 
+    radial-gradient(circle at center, transparent 28%, rgba(255,255,255,0.06) 29%, transparent 30%),
+    radial-gradient(circle at center, transparent 48%, rgba(255,255,255,0.04) 49%, transparent 50%),
+    radial-gradient(circle at center, #111827 0%, #030712 100%);
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(251, 113, 133, 0.3);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  pointer-events: auto;
+}
+
+.vinyl-player__center-core {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(244, 63, 94, 0.4);
+  pointer-events: none;
+}
+
+.vinyl-player__default-heart {
+  font-size: 13px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.vinyl-player__cover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+  pointer-events: none;
+}
+
+.vinyl-player__needle {
+  position: absolute;
+  top: -10px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fb7185'><path d='M12 2L2 22h20L12 2z'/></svg>") no-repeat center;
+  background-size: contain;
+  transform-origin: top right;
+  transform: rotate(-30deg);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.vinyl-player__needle--play {
+  transform: rotate(0deg);
+}
+
+.vinyl-player__btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--bg-card, rgba(20, 20, 38, 0.75));
+  border: 1px solid var(--border-card, rgba(255, 255, 255, 0.14));
+  color: var(--text-main, #ffffff);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--card-shadow, 0 8px 24px rgba(0, 0, 0, 0.4));
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+  pointer-events: auto;
+  user-select: none;
+}
+
+.vinyl-player__btn:hover {
+  transform: scale(1.1);
+  border-color: var(--accent-gold);
+}
+
+/* 🎵 隐藏式毛玻璃歌曲列表抽屉 (挂载于左下角唱片正上方，最高交互层级 56000) */
+.playlist-drawer {
+  position: fixed;
+  bottom: calc(max(20px, env(safe-area-inset-bottom, 20px)) + 65px);
+  left: max(16px, env(safe-area-inset-left, 16px));
+  width: 310px;
+  max-width: calc(100vw - 32px);
+  max-height: 380px;
+  background: var(--drawer-bg);
+  border: 1.5px solid var(--drawer-border);
+  border-radius: 20px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4), 0 0 20px var(--accent-gold-glow, rgba(245, 158, 11, 0.15));
+  z-index: 56000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(16px) scale(0.95);
+  pointer-events: none;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.playlist-drawer.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.playlist-drawer__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-card, rgba(255, 255, 255, 0.1));
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.playlist-drawer__title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--text-hero, #fde68a);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.playlist-drawer__close {
+  background: transparent;
+  border: none;
+  color: var(--text-sub, #94a3b8);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 6px;
+  line-height: 1;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.playlist-drawer__close:hover {
+  color: var(--text-main, #ffffff);
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.playlist-drawer__list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.playlist-drawer__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: 12px;
+  background: var(--drawer-item-bg);
+  border: 1px solid var(--drawer-item-border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.playlist-drawer__item:hover {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: var(--accent-gold);
+  transform: translateX(3px);
+}
+
+.playlist-drawer__item.active {
+  background: var(--drawer-active-bg);
+  border-color: var(--drawer-active-border);
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.2);
+}
+
+.playlist-drawer__item-info {
+  flex: 1;
+  overflow: hidden;
+  margin-right: 8px;
+}
+
+.playlist-drawer__item-title {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--drawer-item-title);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.playlist-drawer__item.active .playlist-drawer__item-title {
+  color: var(--drawer-active-title);
+}
+
+.playlist-drawer__item-artist {
+  font-size: 11px;
+  color: var(--drawer-item-artist);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.playlist-drawer__item-icon {
+  font-size: 12px;
+  color: var(--accent-gold);
+  flex-shrink: 0;
+}
+
+.playlist-drawer__empty {
+  padding: 24px 12px;
+  text-align: center;
+  color: var(--text-sub);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* 彩蛋与海报 */
+.easter-egg-trigger {
+  position: fixed;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 40000;
+  user-select: none;
+  opacity: 0.8;
+  transition: opacity 0.2s, transform 0.2s;
+  transform: translateZ(0);
+}
+.easter-egg-trigger:hover { opacity: 1; transform: scale(1.2); }
+.easter-egg-trigger--star { top: 30px; right: 25px; }
+.easter-egg-trigger--paw { bottom: max(24px, env(safe-area-inset-bottom, 24px)); right: 25px; }
+
+.egg-modal,
+.poster-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(7, 10, 20, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 60000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.egg-modal__dialog,
+.poster-modal__dialog {
+  background: var(--bg-card, var(--space-card));
+  border: 1.5px solid var(--border-card, var(--glass-border));
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: var(--card-shadow, var(--glass-shadow));
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+}
+
+.egg-modal__body { font-size: 14.5px; line-height: 1.6; color: var(--text-main, #fef3c7); font-weight: 700; margin-bottom: 20px; }
+.poster-modal__tip { font-size: 12px; color: var(--text-sub, var(--text-muted)); margin-top: 10px; }
+.poster-modal__actions { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+
+/* ================= 📱 手机端视口深度优化 (方案 C 紧凑优雅排布) ================= */
+@media (max-width: 640px) {
+  .hero-section {
+    padding-top: max(76px, calc(env(safe-area-inset-top, 0px) + 72px));
+    margin-bottom: 26px;
+  }
+  .hero-section__names {
+    font-size: 28px;
+    letter-spacing: 1.8px;
+    position: relative;
+    z-index: 30;
+    padding: 0 6px;
+    margin-bottom: 8px;
+  }
+  .name-connector {
+    margin: 0 5px;
+    font-size: 0.85em;
+  }
+  .hero-section__badge {
+    font-size: 9.5px;
+    letter-spacing: 2px;
+    padding: 2.5px 11px;
+    margin-bottom: 10px;
+  }
+  .hero-section__subtitle {
+    font-size: 12px;
+    padding: 0 12px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+
+  .perspective-capsule {
+    top: max(10px, env(safe-area-inset-top, 10px));
+    right: 10px;
+    padding: 2.5px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .perspective-btn {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+
+  .easter-egg-trigger--star {
+    top: max(56px, calc(env(safe-area-inset-top, 0px) + 52px)) !important;
+    right: 12px !important;
+  }
+
+  .love-timer {
+    padding: 16px 10px;
+    border-radius: 20px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .love-timer__grid {
+    gap: 5px;
+  }
+  .love-timer__unit {
+    min-width: 48px;
+    padding: 8px 4px;
+    border-radius: 10px;
+  }
+  .love-timer__num {
+    font-size: 19px;
+  }
+  .love-timer__label {
+    font-size: 9.5px;
+  }
+
+  .vinyl-player {
+    bottom: max(16px, env(safe-area-inset-bottom, 16px));
+    left: 12px;
+    gap: 8px;
+  }
+  .vinyl-player__disc {
+    width: 52px;
+    height: 52px;
+  }
+  .vinyl-player__center-core {
+    width: 24px;
+    height: 24px;
+  }
+  .vinyl-player__btn {
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+  }
+
+  .playlist-drawer {
+    left: 12px;
+    bottom: calc(max(16px, env(safe-area-inset-bottom, 16px)) + 58px);
+    width: calc(100vw - 24px);
+    max-width: 320px;
+    max-height: 320px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .phase-switch-bar {
+    margin: 22px 10px 12px 10px;
+    padding: 4px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .phase-tab-btn {
+    padding: 8px 4px;
+    font-size: 12px;
+  }
+}
