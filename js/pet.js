@@ -1,14 +1,14 @@
 /**
  * 众水不灭 · 雅歌之印
  * 文件名: js/pet.js
- * 作用: 恩典灵宠状态管理、5阶进化晋升体系、自然日连胜增幅、12徽章陈列室与全局成就条件拦截引擎
+ * 作用: 恩典灵宠状态管理、5阶进化晋升体系、自然日连胜增幅、12徽章陈列室与全局成就条件拦截引擎 (门禁解锁生命周期协同)
  * 持久化策略: 本地 LocalStorage 深度自愈 + 云端免密双向同步
  */
 
 class GracePetManager {
   constructor(config) {
     this.config = config || window.LOVE_CONFIG || {};
-    this.isEvaluatingBadges = false; // 防递归死锁执行锁
+    this.isEvaluatingBadges = false;
     this.petData = this.loadLocalPetData();
   }
 
@@ -131,7 +131,6 @@ class GracePetManager {
       longestStreak: Number(src.longestStreak) || 0,
       lastInteractionDate: typeof src.lastInteractionDate === "string" ? src.lastInteractionDate : null,
       totalGlowEarned: Number(src.totalGlowEarned) || glow,
-      // 辅助统计指标
       flippedCardsCount: Number(src.flippedCardsCount) || 0,
       playedSongsCount: Number(src.playedSongsCount) || 0,
       foundEggsCount: Number(src.foundEggsCount) || 0,
@@ -150,6 +149,7 @@ class GracePetManager {
     this.injectDOM();
     this.bindEvents();
     this.bindAchievementInterceptors();
+    this.bindUnlockVisibility();
     this.checkAllBadgeUnlocks();
     this.updateUI();
 
@@ -157,7 +157,32 @@ class GracePetManager {
   }
 
   /**
-   * 全局成就条件拦截监听器 (监听各业务子模块广播)
+   * 门禁解锁显隐协同机制 (输入密码进入主界面后显示，密码页保持隐藏)
+   */
+  bindUnlockVisibility() {
+    const showWidget = () => {
+      const widget = document.getElementById("grace-pet-trigger");
+      if (widget) {
+        widget.classList.add("grace-pet-widget--visible");
+      }
+    };
+
+    window.addEventListener("universe:unlocked", showWidget);
+
+    // 若门禁已被跳过、关闭或主容器已处于显示状态，直接展示
+    const gateScreen = document.getElementById("gatekeeper-screen");
+    const mainContainer = document.getElementById("main-container");
+    if (
+      (gateScreen && gateScreen.style.display === "none") ||
+      (mainContainer && !mainContainer.classList.contains("main-container--hidden")) ||
+      (this.config.gatekeeper && this.config.gatekeeper.enabled === false)
+    ) {
+      showWidget();
+    }
+  }
+
+  /**
+   * 全局成就条件拦截监听器
    */
   bindAchievementInterceptors() {
     window.addEventListener("achievement:trigger", (e) => {
@@ -194,25 +219,19 @@ class GracePetManager {
     });
   }
 
-  /**
-   * 校验并自动解锁符合条件的徽章
-   */
   checkAllBadgeUnlocks() {
     if (this.isEvaluatingBadges) return;
     this.isEvaluatingBadges = true;
 
-    // 1. 等级徽章检测
     const tier = GracePetManager.getTierInfo(this.petData.glowEnergy);
     for (let i = 1; i <= tier.level; i++) {
       this.unlockSpecificBadge(`lvl_${i}`, false);
     }
 
-    // 2. 7日连胜检测
     if (this.petData.streakDays >= 7 || this.petData.longestStreak >= 7) {
       this.unlockSpecificBadge("streak_7", false);
     }
 
-    // 3. 舍己十诫检测
     if (this.petData.sacrificeCount >= 10) {
       this.unlockSpecificBadge("sacrifice_10", false);
     }
@@ -220,9 +239,6 @@ class GracePetManager {
     this.isEvaluatingBadges = false;
   }
 
-  /**
-   * 解锁单枚徽章 (幂等性 + 庆贺动效触发)
-   */
   unlockSpecificBadge(badgeId, triggerModal = true) {
     if (!Array.isArray(this.petData.unlockedBadges)) {
       this.petData.unlockedBadges = [];
@@ -233,7 +249,6 @@ class GracePetManager {
     this.petData.unlockedBadges.push(badgeId);
     this.saveLocalPetData();
 
-    // 查找徽章元数据
     const allBadges = (window.PetCelebrationManager && window.PetCelebrationManager.BADGE_DEFINITIONS) || [];
     const badgeMeta = allBadges.find(b => b.id === badgeId);
 
@@ -306,7 +321,6 @@ class GracePetManager {
         const cloudTotal = (cloudData.gratitudeCount || 0) + (cloudData.sacrificeCount || 0);
 
         if (cloudTotal >= localTotal) {
-          // 合并双方已解锁的徽章集合
           const mergedBadges = Array.from(new Set([...(this.petData.unlockedBadges || []), ...(cloudData.unlockedBadges || [])]));
           this.petData = { ...cloudData, unlockedBadges: mergedBadges };
           this.saveLocalPetData();
@@ -322,7 +336,6 @@ class GracePetManager {
 
     const tier = GracePetManager.getTierInfo(this.petData.glowEnergy);
 
-    // 1. 悬浮挂件微标
     const widget = document.createElement("div");
     widget.className = "grace-pet-widget";
     widget.id = "grace-pet-trigger";
@@ -336,7 +349,6 @@ class GracePetManager {
     `;
     document.body.appendChild(widget);
 
-    // 2. 灵宠核心互动弹窗 (含 12 徽章陈列室挂载区)
     const modal = document.createElement("div");
     modal.className = "grace-pet-modal";
     modal.id = "grace-pet-modal";
@@ -384,7 +396,7 @@ class GracePetManager {
           </div>
         </div>
 
-        <!-- 🌟 12 徽章专属荣誉陈列室 -->
+        <!-- 12 徽章专属荣誉陈列室 -->
         <div class="grace-badges-section">
           <div class="grace-badges-header">
             <span class="grace-badges-title">🎖️ 圣约印记 · 12 勋章陈列室</span>
@@ -594,7 +606,6 @@ class GracePetManager {
     if (statSac) statSac.textContent = this.petData.sacrificeCount;
     if (streakTag) streakTag.textContent = `连胜加成 ${bonus.mult}x`;
 
-    // 渲染 12 徽章网格状态
     const allBadges = (window.PetCelebrationManager && window.PetCelebrationManager.BADGE_DEFINITIONS) || [];
     const unlockedList = this.petData.unlockedBadges || [];
 
