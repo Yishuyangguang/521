@@ -12,25 +12,28 @@
   <title>众水不灭 · 我们的恒久印记</title>
   
   <!-- 网站标签页与移动端图标 -->
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=2.0">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=2.0">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2.0">
-  <link rel="manifest" href="manifest.json?v=2.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=2.5">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=2.5">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2.5">
+  <link rel="manifest" href="manifest.json?v=2.5">
+  
+  <!-- 移动端 PWA 标准与 Apple 规范 -->
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="雅歌之印">
 
-  <!-- 🚀 核心样式表预加载与非阻塞链路 -->
-  <link rel="stylesheet" href="css/base.css?v=2.4">
-  <link rel="stylesheet" href="css/components.css?v=2.4">
-  <link rel="stylesheet" href="css/animations.css?v=2.4">
-  <link rel="stylesheet" href="css/themes.css?v=2.4">
-  <link rel="stylesheet" href="css/anniversary.css?v=2.4">
-  <link rel="stylesheet" href="css/icebreaker.css?v=2.4">
-  <link rel="stylesheet" href="css/photo-wall.css?v=2.4">
-  <link rel="stylesheet" href="css/pet.css?v=2.4">
-  <link rel="stylesheet" href="css/pet-badges.css?v=2.4">
-  <link rel="stylesheet" href="css/scratch-card.css?v=2.4">
+  <!-- 🚀 核心样式表预加载与非阻塞链路 (版本升级至 v2.5 强制击穿浏览器缓存) -->
+  <link rel="stylesheet" href="css/base.css?v=2.5">
+  <link rel="stylesheet" href="css/components.css?v=2.5">
+  <link rel="stylesheet" href="css/animations.css?v=2.5">
+  <link rel="stylesheet" href="css/themes.css?v=2.5">
+  <link rel="stylesheet" href="css/anniversary.css?v=2.5">
+  <link rel="stylesheet" href="css/icebreaker.css?v=2.5">
+  <link rel="stylesheet" href="css/photo-wall.css?v=2.5">
+  <link rel="stylesheet" href="css/pet.css?v=2.5">
+  <link rel="stylesheet" href="css/pet-badges.css?v=2.5">
+  <link rel="stylesheet" href="css/scratch-card.css?v=2.5">
   <style>
     .perspective-capsule {
       position: fixed;
@@ -204,7 +207,7 @@
         <h2 class="hub-dock__title">星轨功能中枢 · 契约秘境</h2>
       </div>
       <div class="hub-grid">
-        <div class="hub-btn" data-open-stage="timeline" onclick="window.StageManager.openStage('timeline')">
+        <div class="hub-btn" data-open-stage="timeline" onclick="if(window.StageManager) window.StageManager.openStage('timeline')">
           <div class="hub-btn__glow"></div>
           <span class="hub-btn__icon">🪐</span>
           <div class="hub-btn__info">
@@ -213,7 +216,7 @@
           </div>
         </div>
 
-        <div class="hub-btn" data-open-stage="anniversary" onclick="window.StageManager.openStage('anniversary')">
+        <div class="hub-btn" data-open-stage="anniversary" onclick="if(window.StageManager) window.StageManager.openStage('anniversary')">
           <div class="hub-btn__glow"></div>
           <span class="hub-btn__icon">📅</span>
           <div class="hub-btn__info">
@@ -222,7 +225,7 @@
           </div>
         </div>
 
-        <div class="hub-btn" data-open-stage="icebreaker" onclick="window.StageManager.openStage('icebreaker')">
+        <div class="hub-btn" data-open-stage="icebreaker" onclick="if(window.StageManager) window.StageManager.openStage('icebreaker')">
           <div class="hub-btn__glow"></div>
           <span class="hub-btn__icon">🕊️</span>
           <div class="hub-btn__info">
@@ -231,7 +234,7 @@
           </div>
         </div>
 
-        <div class="hub-btn" data-open-stage="checklist" onclick="window.StageManager.openStage('checklist')">
+        <div class="hub-btn" data-open-stage="checklist" onclick="if(window.StageManager) window.StageManager.openStage('checklist')">
           <div class="hub-btn__glow"></div>
           <span class="hub-btn__icon">📝</span>
           <div class="hub-btn__info">
@@ -240,7 +243,7 @@
           </div>
         </div>
 
-        <div class="hub-btn" data-open-stage="scratch" onclick="window.StageManager.openStage('scratch')">
+        <div class="hub-btn" data-open-stage="scratch" onclick="if(window.StageManager) window.StageManager.openStage('scratch')">
           <div class="hub-btn__glow"></div>
           <span class="hub-btn__icon">🎟️</span>
           <div class="hub-btn__info">
@@ -249,7 +252,7 @@
           </div>
         </div>
 
-        <div class="hub-btn" data-open-stage="poster" onclick="window.StageManager.openStage('poster')">
+        <div class="hub-btn" data-open-stage="poster" onclick="if(window.StageManager) window.StageManager.openStage('poster')">
           <div class="hub-btn__glow"></div>
           <span class="hub-btn__icon">📸</span>
           <div class="hub-btn__info">
@@ -266,7 +269,7 @@
   </main>
 
   <!-- ================= 🎪 全屏沉浸分幕容器 (Stage Modals) ================= -->
-  <div id="stage-modal-overlay" class="stage-overlay" onclick="window.StageManager.closeStage()"></div>
+  <div id="stage-modal-overlay" class="stage-overlay" onclick="if(window.StageManager) window.StageManager.closeStage()"></div>
   <div id="stage-modal-container" class="stage-container">
 
     <!-- 舞台 1: 时光轨迹 · 雅歌印记 -->
@@ -276,7 +279,7 @@
           <span class="stage-modal__icon">🪐</span>
           <h2 class="stage-modal__title">时光轨迹 · 雅歌印记</h2>
         </div>
-        <button class="stage-modal__close-btn" onclick="window.StageManager.closeStage()" title="返回主界面">✕</button>
+        <button class="stage-modal__close-btn" onclick="if(window.StageManager) window.StageManager.closeStage()" title="返回主界面">✕</button>
       </div>
       <div class="stage-modal__body">
         <div class="section-title">
@@ -293,7 +296,7 @@
           <span class="stage-modal__icon">📅</span>
           <h2 class="stage-modal__title">时光刻度 · 恒久倒数</h2>
         </div>
-        <button class="stage-modal__close-btn" onclick="window.StageManager.closeStage()" title="返回主界面">✕</button>
+        <button class="stage-modal__close-btn" onclick="if(window.StageManager) window.StageManager.closeStage()" title="返回主界面">✕</button>
       </div>
       <div class="stage-modal__body">
         <div class="section-title">
@@ -310,7 +313,7 @@
           <span class="stage-modal__icon">🕊️</span>
           <h2 class="stage-modal__title">破冰和解 · 情感信号箱</h2>
         </div>
-        <button class="stage-modal__close-btn" onclick="window.StageManager.closeStage()" title="返回主界面">✕</button>
+        <button class="stage-modal__close-btn" onclick="if(window.StageManager) window.StageManager.closeStage()" title="返回主界面">✕</button>
       </div>
       <div class="stage-modal__body">
         <div class="section-title">
@@ -335,7 +338,7 @@
           <span class="stage-modal__icon">📝</span>
           <h2 class="stage-modal__title" id="checklist-stage-header-title">同行约定 · 待办清单</h2>
         </div>
-        <button class="stage-modal__close-btn" onclick="window.StageManager.closeStage()" title="返回主界面">✕</button>
+        <button class="stage-modal__close-btn" onclick="if(window.StageManager) window.StageManager.closeStage()" title="返回主界面">✕</button>
       </div>
       <div class="stage-modal__body">
         <div class="phase-switch-bar">
@@ -364,7 +367,7 @@
           <span class="stage-modal__icon">🎟️</span>
           <h2 class="stage-modal__title" id="scratch-stage-header-title">舍己与包容特权券</h2>
         </div>
-        <button class="stage-modal__close-btn" onclick="window.StageManager.closeStage()" title="返回主界面">✕</button>
+        <button class="stage-modal__close-btn" onclick="if(window.StageManager) window.StageManager.closeStage()" title="返回主界面">✕</button>
       </div>
       <div class="stage-modal__body">
         <div class="section-title">
@@ -382,7 +385,7 @@
           <span class="stage-modal__icon">📸</span>
           <h2 class="stage-modal__title">导出超清壁纸与数字资产</h2>
         </div>
-        <button class="stage-modal__close-btn" onclick="window.StageManager.closeStage()" title="返回主界面">✕</button>
+        <button class="stage-modal__close-btn" onclick="if(window.StageManager) window.StageManager.closeStage()" title="返回主界面">✕</button>
       </div>
       <div class="stage-modal__body">
         <div class="poster-card" style="display:flex; flex-direction:column; gap:14px; max-width:680px; margin:0 auto;">
@@ -485,22 +488,22 @@
     </div>
   </div>
 
-  <script src="js/config.js?v=2.4"></script>
-  <script src="js/theme-presets.js?v=2.4"></script>
-  <script src="js/stage-content.js?v=2.4"></script>
-  <script src="js/theme-engine.js?v=2.4"></script>
-  <script src="js/anniversary-engine.js?v=2.4"></script>
-  <script src="js/anniversary-tools.js?v=2.4"></script>
-  <script src="js/anniversary.js?v=2.4"></script>
-  <script src="js/icebreaker.js?v=2.4"></script>
-  <script src="js/lifecycle.js?v=2.4"></script>
-  <script src="js/photo-wall.js?v=2.4"></script>
-  <script src="js/effects.js?v=2.4"></script>
-  <script src="js/timeline.js?v=2.4"></script>
-  <script src="js/pet-celebration.js?v=2.4"></script>
-  <script src="js/pet.js?v=2.4"></script>
-  <script src="js/export-eternal.js?v=2.4"></script>
-  <script src="js/core.js?v=2.4"></script>
+  <script src="js/config.js?v=2.5"></script>
+  <script src="js/theme-presets.js?v=2.5"></script>
+  <script src="js/stage-content.js?v=2.5"></script>
+  <script src="js/theme-engine.js?v=2.5"></script>
+  <script src="js/anniversary-engine.js?v=2.5"></script>
+  <script src="js/anniversary-tools.js?v=2.5"></script>
+  <script src="js/anniversary.js?v=2.5"></script>
+  <script src="js/icebreaker.js?v=2.5"></script>
+  <script src="js/lifecycle.js?v=2.5"></script>
+  <script src="js/photo-wall.js?v=2.5"></script>
+  <script src="js/effects.js?v=2.5"></script>
+  <script src="js/timeline.js?v=2.5"></script>
+  <script src="js/pet-celebration.js?v=2.5"></script>
+  <script src="js/pet.js?v=2.5"></script>
+  <script src="js/export-eternal.js?v=2.5"></script>
+  <script src="js/core.js?v=2.5"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       if (window.ThemeEngine) {
@@ -525,4 +528,3 @@
   </script>
 </body>
 </html>
-```[cite: 6]
