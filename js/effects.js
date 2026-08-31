@@ -1,7 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印
  * 文件名: js/effects.js
- * 作用: 动效中枢、高稳定单曲/多曲目播放列表引擎 (广播音乐播放与彩蛋成就)、隐藏列表抽屉与黑胶唱针联动 (支持分幕生命周期 GPU 节能休眠)
+ * 作用: 动效中枢、高稳定单曲/多曲目播放列表引擎 (极简爱心音乐晶体控制、广播音乐播放与彩蛋成就)、隐藏列表抽屉联动 (支持分幕生命周期 GPU 节能休眠)
  */
 
 class EffectsEngine {
@@ -309,29 +309,12 @@ class EffectsEngine {
   }
 
   setVinylVisualPlaying(playing) {
-    const disc = document.getElementById("vinyl-disc");
-    const toggleBtn = document.getElementById("audio-toggle-btn");
-
-    if (disc) {
+    const heartCapsule = document.getElementById("heart-music-capsule");
+    if (heartCapsule) {
       if (playing) {
-        disc.classList.add("vinyl-disc--playing");
+        heartCapsule.classList.add("playing");
       } else {
-        disc.classList.remove("vinyl-disc--playing");
-      }
-    }
-    if (toggleBtn) {
-      toggleBtn.textContent = playing ? "⏸️" : "🎵";
-    }
-    this.setNeedleState(playing);
-  }
-
-  setNeedleState(onDisc) {
-    const needle = document.getElementById("vinyl-needle");
-    if (needle) {
-      if (onDisc) {
-        needle.classList.add("vinyl-needle--play");
-      } else {
-        needle.classList.remove("vinyl-needle--play");
+        heartCapsule.classList.remove("playing");
       }
     }
   }
@@ -339,7 +322,7 @@ class EffectsEngine {
   updateTrackInfoDisplay() {
     const track = this.getCurrentTrack();
     const coverImg = document.getElementById("vinyl-cover");
-    const defaultHeart = document.querySelector(".vinyl-player__default-heart");
+    const defaultHeart = document.querySelector(".heart-music-icon");
 
     if (coverImg) {
       if (track.cover) {
@@ -367,21 +350,49 @@ class EffectsEngine {
   }
 
   initEventListeners() {
-    const disc = document.getElementById("vinyl-disc");
-    const toggleBtn = document.getElementById("audio-toggle-btn");
-    const listBtn = document.getElementById("audio-list-btn");
+    const heartCapsule = document.getElementById("heart-music-capsule");
     const closeDrawerBtn = document.getElementById("playlist-drawer-close");
 
-    if (disc) disc.onclick = () => this.toggleBgm();
-    if (toggleBtn) toggleBtn.onclick = () => this.toggleBgm();
-    
-    if (listBtn) {
-      listBtn.onclick = (e) => {
+    if (heartCapsule) {
+      let pressTimer = null;
+      let isLongPress = false;
+
+      const startPress = () => {
+        isLongPress = false;
+        pressTimer = setTimeout(() => {
+          isLongPress = true;
+          if (navigator.vibrate) navigator.vibrate(30);
+          this.togglePlaylistDrawer();
+        }, 400);
+      };
+
+      const cancelPress = () => {
+        if (pressTimer) {
+          clearTimeout(pressTimer);
+          pressTimer = null;
+        }
+      };
+
+      heartCapsule.addEventListener("mousedown", startPress);
+      heartCapsule.addEventListener("mouseup", cancelPress);
+      heartCapsule.addEventListener("mouseleave", cancelPress);
+      heartCapsule.addEventListener("touchstart", startPress, { passive: true });
+      heartCapsule.addEventListener("touchend", cancelPress);
+      heartCapsule.addEventListener("touchcancel", cancelPress);
+
+      heartCapsule.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (!isLongPress) {
+          this.toggleBgm();
+        }
+      });
+
+      heartCapsule.addEventListener("dblclick", (e) => {
         e.stopPropagation();
         this.togglePlaylistDrawer();
-      };
+      });
     }
-    
+
     if (closeDrawerBtn) {
       closeDrawerBtn.onclick = (e) => {
         e.stopPropagation();
@@ -389,7 +400,6 @@ class EffectsEngine {
       };
     }
 
-    // 点击外部区域自动收起抽屉
     document.addEventListener("click", (e) => {
       const drawer = document.getElementById("playlist-drawer");
       const vinylPlayer = document.getElementById("vinyl-player");
@@ -398,7 +408,6 @@ class EffectsEngine {
       }
     });
 
-    // 🌟 监听全站彩蛋触发按钮，广播彩蛋猎人成就
     const starEgg = document.getElementById("egg-star");
     const pawEgg = document.getElementById("egg-paw");
     if (starEgg) {
