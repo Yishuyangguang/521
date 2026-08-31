@@ -406,18 +406,14 @@
 
   </div>
 
-  <!-- ================= 3. 黑胶唱片控制台 (带歌单列表呼出按钮) ================= -->
+  <!-- ================= 3. 极简半透明悬浮爱心音乐晶体 (单击:播放/暂停 | 长按或双击:专属歌单) ================= -->
   <aside class="vinyl-player" id="vinyl-player">
-    <div class="vinyl-player__needle" id="vinyl-needle"></div>
-    <div class="vinyl-player__disc" id="vinyl-disc" title="点击播放/暂停音乐">
-      <div class="vinyl-player__center-core">
-        <span class="vinyl-player__default-heart">❤️</span>
-        <img id="vinyl-cover" class="vinyl-player__cover" src="" alt="" onerror="this.style.display='none'" onload="this.style.display='block'" decoding="async">
+    <div class="heart-music-capsule" id="heart-music-capsule" title="单击：播放/暂停 | 长按或双击：专属歌单">
+      <div class="heart-music-core">
+        <span class="heart-music-icon">❤️</span>
+        <img id="vinyl-cover" class="heart-music-cover" src="" alt="" onerror="this.style.display='none'" onload="this.style.display='block'" decoding="async">
       </div>
-    </div>
-    <div class="vinyl-player__control" style="display:flex; justify-content:center; align-items:center; gap:6px;">
-      <button class="vinyl-player__btn" id="audio-toggle-btn" title="播放/暂停">🎵</button>
-      <button class="vinyl-player__btn" id="audio-list-btn" title="查看歌曲列表" style="font-size:12.5px; opacity:0.9;">📑</button>
+      <div class="heart-music-pulse"></div>
     </div>
   </aside>
 
