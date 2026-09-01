@@ -1,11 +1,12 @@
-
 /**
  * 众水不灭 · 雅歌之印 (Love Universe SaaS Engine)
  * 文件名: _worker.js
  * 架构: 单源多租户路由、破冰和好信号队列状态机(双向奔赴MUTUAL_HEAL)、多源流式音频转发、严格租户独立鉴权(默认密码521始终可用)、免密灵宠通道、圣洁言语过滤、HMAC 授权验证
+ * 新增: 异步静默垃圾回收引擎 (ctx.waitUntil + Deep Traversal 白名单 + 60分钟免死金牌)
  */
 export default {
-  async fetch(request, env) {
+  // 🌟 核心修改 1：引入 ctx 上下文环境变量，用于调度后台异步任务
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const bucket = env.R2 || env.BUCKET || env.PAN || env.MY_BUCKET || env.FILE_BUCKET;
     const corsHeaders = {
@@ -25,57 +26,39 @@ export default {
       });
     }
 
-    // 多租户隔离机制：自动将 Punycode/英文字符归一化为独立存储目录
+    // 多租户隔离机制
     const rawHost = (url.hostname || "default.local").toLowerCase();
     const tenantDir = rawHost.replace(/[^a-z0-9.-]/g, "_");
     const CONFIG_KEY = `${tenantDir}/config.json`;
     const SIGNALS_KEY = `${tenantDir}/signals.json`;
 
-    // 🔧 管理员密码：环境变量优先，默认 521（始终作为兜底可用）
+    // 🔧 管理员密码兜底
     const ADMIN_PASSWORD = String(env.ADMIN_PASSWORD || env.SECRET_PWD || env.ADMIN_PWD || "521").trim();
     const MASTER_LICENSE_SECRET = String(env.MASTER_LICENSE_SECRET || "SACRED_UNQUENCHABLE_LOVE_2026_KEY").trim();
 
-    /**
-     * 🔧 管理员鉴权（修复版：521 始终作为默认密码可用）
-     *
-     * 鉴权优先级：
-     * 1. 环境变量非521超级密钥（运维直通）
-     * 2. 租户R2自定义密码（如有设置且非空）
-     * 3. 默认密码 521（始终可用，确保首次部署和重置场景可登录）
-     */
     async function verifyAdminAuth(req) {
       const headerAuth = req.headers.get("x-admin-auth") || req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
       const queryAuth = url.searchParams.get("auth");
       const token = (headerAuth || queryAuth || "").trim();
       if (!token) return false;
 
-      // 1. 环境变量超级密钥直通（非521时允许运维访问）
       if (env.ADMIN_PASSWORD && env.ADMIN_PASSWORD !== "521" && token === String(env.ADMIN_PASSWORD).trim()) {
         return true;
       }
 
-      // 2. 检查租户专属 R2 存储中的自定义密码
       if (bucket) {
         try {
           const obj = await bucket.get(CONFIG_KEY);
           if (obj) {
             const cfg = JSON.parse(await obj.text());
-            // 仅当自定义密码被显式设置为非空值时才使用
             if (cfg.adminSecurity && cfg.adminSecurity.password && cfg.adminSecurity.password.trim() !== "") {
-              if (token === String(cfg.adminSecurity.password).trim()) {
-                return true;
-              }
-              // 自定义密码不匹配时，继续往下尝试默认密码（不直接返回false）
+              if (token === String(cfg.adminSecurity.password).trim()) return true;
             }
           }
         } catch (_) {}
       }
 
-      // 3. 🔧 默认初始密码 521 始终可用（无论R2是否有配置）
-      if (token === "521" || token === "admin" || token === ADMIN_PASSWORD) {
-        return true;
-      }
-
+      if (token === "521" || token === "admin" || token === ADMIN_PASSWORD) return true;
       return false;
     }
 
@@ -84,7 +67,6 @@ export default {
       return !profanityRegex.test(contentString);
     }
 
-    // 🌟 阶段安全与伦理边界硬过滤 (服务端强制执行，严禁恋爱期出现同居或私密文案)
     function getStageSafeContent(stage, actionType, userCustomText) {
       const standardDict = {
         dating: {
@@ -129,9 +111,7 @@ export default {
         if (!cleanCode.startsWith("LV-")) return false;
         const enc = new TextEncoder();
         const keyData = enc.encode(MASTER_LICENSE_SECRET);
-        const cryptoKey = await crypto.subtle.importKey(
-          "raw", keyData, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
-        );
+        const cryptoKey = await crypto.subtle.importKey("raw", keyData, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
         const dataToSign = enc.encode(`${domain.toLowerCase()}:SACRED_ETERNAL_LICENSE`);
         const signatureBuffer = await crypto.subtle.sign("HMAC", cryptoKey, dataToSign);
         const signatureArray = Array.from(new Uint8Array(signatureBuffer));
@@ -143,6 +123,59 @@ export default {
         const expectedCode = `LV-${p1}-${p2}-${p3}-${p4}`;
         return cleanCode === expectedCode;
       } catch (_) { return false; }
+    }
+
+    // 🌟 核心引擎：异步静默白名单垃圾回收机制 (Garbage Collection)
+    async function executeSilentGC(activeConfig) {
+      try {
+        // 1. 递归提取 JSON 中所有的活跃多媒体直链，建立白名单
+        const activeUrls = new Set();
+        function extractUrls(node) {
+          if (!node) return;
+          if (typeof node === 'string') {
+            if (node.includes(`/raw/${tenantDir}/assets/`)) activeUrls.add(node);
+          } else if (typeof node === 'object') {
+            for (const key in node) extractUrls(node[key]);
+          }
+        }
+        extractUrls(activeConfig);
+
+        // 2. 扫描 R2 存储空间
+        const prefix = `${tenantDir}/assets/`;
+        let listed = await bucket.list({ prefix });
+        let truncated = listed.truncated;
+        let cursor = listed.cursor;
+
+        do {
+          for (const obj of listed.objects) {
+            const fileUrl = `/raw/${obj.key}`;
+            
+            // 3. 孤儿文件裁决：如果该物理文件不在刚才提取的 JSON 白名单里
+            if (!activeUrls.has(fileUrl)) {
+              // ⚠️ 防暗病：极度关键的时间窗免死金牌
+              // 计算该文件的上传时间距今多少分钟
+              const ageMinutes = (Date.now() - new Date(obj.uploaded).getTime()) / (1000 * 60);
+              
+              // 只删除超过 60 分钟未被 JSON 引用的“孤儿文件”
+              // 这防止了用户正在上传照片（尚未点击“保存”）时，触发保存被误删的悲剧
+              if (ageMinutes > 60) {
+                await bucket.delete(obj.key);
+                console.log(`[Silent GC] 物理销毁孤儿文件: ${obj.key}`);
+              }
+            }
+          }
+          if (truncated) {
+            listed = await bucket.list({ prefix, cursor });
+            truncated = listed.truncated;
+            cursor = listed.cursor;
+          } else {
+            truncated = false;
+          }
+        } while (truncated);
+      } catch (err) {
+        // GC 失败仅静默记录，绝不可抛出异常阻断主线程
+        console.error("[Silent GC Error]", err);
+      }
     }
 
     try {
@@ -171,7 +204,7 @@ export default {
         return jsonResponse({ success: true, custom: false, domain: rawHost, config: null, isAdmin });
       }
 
-      // ==================== 2. 保存并发布配置 ====================
+      // ==================== 2. 保存并发布配置 (挂载自动 GC) ====================
       if (url.pathname === "/api/love/config" && request.method === "POST") {
         if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
         const isAuthed = await verifyAdminAuth(request);
@@ -191,7 +224,15 @@ export default {
             if (oldCfg.petData && !configToSave.petData) configToSave.petData = oldCfg.petData;
           }
         } catch (_) {}
+        
+        // 核心存盘
         await bucket.put(CONFIG_KEY, JSON.stringify(configToSave), { httpMetadata: { contentType: "application/json; charset=utf-8" } });
+        
+        // 🌟 核心修改 2：利用 ctx.waitUntil 将垃圾清理推入后台队列，不阻碍向用户的 200 返回
+        if (ctx && typeof ctx.waitUntil === 'function') {
+          ctx.waitUntil(executeSilentGC(configToSave));
+        }
+
         return jsonResponse({ success: true, domain: rawHost, message: `配置已发布并永久同步至【${rawHost}】独立存储空间` });
       }
 
@@ -356,15 +397,7 @@ export default {
         return jsonResponse({ success: true, message: `✨ 星河契约已鉴证！【${rawHost}】专属高级隐藏福泽已永久解锁。` });
       }
 
-      // ==================== 8. 清理废弃文件 ====================
-      if (url.pathname === "/api/love/cleanup" && request.method === "POST") {
-        if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
-        const isAuthed = await verifyAdminAuth(request); if (!isAuthed) return jsonResponse({ success: false, error: "未授权" }, 401);
-        let deletedCount = 0, freedBytes = 0;
-        const prefix = `${tenantDir}/assets/`; const listed = await bucket.list({ prefix });
-        for (const obj of listed.objects) { const isOlderThan10Min = (Date.now() - new Date(obj.uploaded).getTime()) > 10 * 60 * 1000; if (isOlderThan10Min) { freedBytes += obj.size; deletedCount++; await bucket.delete(obj.key); } }
-        return jsonResponse({ success: true, deletedCount, freedBytes, message: `已清理 ${deletedCount} 个废弃文件，释放 ${(freedBytes / (1024*1024)).toFixed(2)} MB` });
-      }
+      // 🌟 核心修改 3：彻底抹除了危险的且无用的手动 POST /api/love/cleanup 路由
 
       // ==================== 9. 音乐搜索 ====================
       if (url.pathname === "/api/love/music-search" && request.method === "GET") {
