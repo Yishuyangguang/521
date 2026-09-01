@@ -52,7 +52,15 @@
       -webkit-backdrop-filter: blur(16px);
     }
 
-    .brand-logo { display: flex; align-items: center; gap: 12px; }
+    /* 🌟 重构：品牌区垂直排列并挂载路由 */
+    .brand-logo { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      cursor: pointer; 
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .brand-logo:active { transform: scale(0.95); }
     .brand-icon {
       font-size: 28px;
       background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
@@ -62,24 +70,29 @@
       box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25), inset 0 1px 1px #fff;
       line-height: 1;
     }
-    .brand-title { font-size: 20px; font-weight: 800; color: #1f2937; letter-spacing: -0.2px; }
-    .brand-subtitle { font-size: 13px; color: var(--primary); font-weight: 700; margin-left: 4px; }
+    .brand-title { font-size: 20px; font-weight: 800; color: #1f2937; letter-spacing: -0.2px; display: block; line-height: 1.2; }
+    .brand-subtitle { font-size: 13px; color: var(--primary); font-weight: 700; display: block; margin-top: 2px; line-height: 1.2; }
 
     .header-actions { display: flex; align-items: center; gap: 10px; }
 
+    /* 🌟 重构：状态感官变色引擎 */
     .sync-pill {
       display: inline-flex;
       align-items: center;
       gap: 5px;
       font-size: 12px;
-      color: #065f46;
-      background: rgba(236, 253, 245, 0.85);
-      border: 1px solid #a7f3d0;
-      padding: 5px 13px;
-      border-radius: 18px;
+      padding: 6px 14px;
+      border-radius: 20px;
       font-weight: 700;
       box-shadow: inset 0 1px 1px rgba(255,255,255,0.8);
+      border: 1px solid transparent;
+      transition: all 0.3s ease;
+      white-space: nowrap;
     }
+    .sync-pill.status-success { color: #065f46; background: rgba(236, 253, 245, 0.85); border-color: #a7f3d0; }
+    .sync-pill.status-error { color: #9f1239; background: rgba(255, 228, 230, 0.85); border-color: #fecdd3; }
+    .sync-pill.status-offline { color: #4b5563; background: rgba(243, 244, 246, 0.85); border-color: #d1d5db; }
+    .sync-pill.status-syncing { color: #92400e; background: rgba(254, 243, 199, 0.85); border-color: #fde68a; }
 
     .search-box-wrap {
       max-width: 860px;
@@ -149,6 +162,7 @@
       color: var(--text-main);
       transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04), inset 0 1px 1px #fff;
+      white-space: nowrap;
     }
     .btn:hover {
       border-color: var(--primary);
@@ -182,6 +196,7 @@
       color: #92400e;
       transition: all 0.18s;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02), inset 0 1px 1px #fff;
+      white-space: nowrap;
     }
     .tab-btn:hover { background: #fde68a; transform: translateY(-1px); }
     .tab-btn.active {
@@ -398,6 +413,22 @@
       backdrop-filter: blur(10px); z-index: 60000; opacity: 0; pointer-events: none; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .toast-msg.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* 🌟 核心：移动端响应式降级引擎 */
+    @media (max-width: 640px) {
+      .header-actions .text { display: none; } /* 隐藏文字，保留图标 */
+      .sync-pill { padding: 9px 11px; border-radius: 12px; } /* 缩小圆角变为方枕形 */
+      .header-actions .btn { padding: 9px 11px; }
+      
+      /* 强制使用 Grid 系统，保证分类标签绝对对称双列 */
+      .category-tabs-wrap {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        width: 100%;
+        gap: 10px;
+      }
+      .tab-btn { justify-content: center; width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -406,7 +437,8 @@
 
   <div class="container">
     <header class="top-header">
-      <div class="brand-logo">
+      <!-- 🌟 挂载一键返回主页路由 -->
+      <div class="brand-logo" onclick="window.location.href='index.html'" title="返回主界面">
         <div class="brand-icon">🕊️</div>
         <div>
           <span class="brand-title">雅歌之印</span>
@@ -415,8 +447,9 @@
       </div>
 
       <div class="header-actions">
-        <span id="syncStatus" class="sync-pill">☁️ R2 已同步</span>
-        <button id="authBtn" class="btn" onclick="openAuthModal()">🔐 登录解锁</button>
+        <!-- 🌟 挂载状态变色类名与独立隐藏区块 -->
+        <span id="syncStatus" class="sync-pill status-success"><span class="icon">☁️</span><span class="text"> R2 已同步</span></span>
+        <button id="authBtn" class="btn" onclick="openAuthModal()"><span class="icon">🔐</span><span class="text"> 登录解锁</span></button>
       </div>
     </header>
 
@@ -656,9 +689,17 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(AppData));
     }
 
-    /* --- R2 毫秒级直传同步中枢 --- */
+    /* 🌟 重构：引入变色状态引挚的同步函数 */
+    function setSyncStatus(icon, text, statusClass) {
+      const el = document.getElementById("syncStatus");
+      if (el) {
+        el.innerHTML = `<span class="icon">${icon}</span><span class="text"> ${text}</span>`;
+        el.className = `sync-pill ${statusClass}`;
+      }
+    }
+
     async function syncDataToR2() {
-      setSyncStatus("⏳ 直传中...");
+      setSyncStatus("⏳", "直传中...", "status-syncing");
       try {
         const res = await fetch("/api/diary/save", {
           method: "POST",
@@ -671,23 +712,23 @@
         });
 
         if (res.status === 401) {
-          setSyncStatus("⚠️ 请先登录解锁");
+          setSyncStatus("⚠️", "请先登录解锁", "status-error");
           return;
         }
 
         const data = await res.json();
         if (data.success) {
-          setSyncStatus("☁️ R2 已同步");
+          setSyncStatus("☁️", "R2 已同步", "status-success");
         } else {
-          setSyncStatus("⚠️ 同步失败");
+          setSyncStatus("⚠️", "同步失败", "status-error");
         }
       } catch (_) {
-        setSyncStatus("☁️ 本地已存 (离线)");
+        setSyncStatus("☁️", "本地已存 (离线)", "status-offline");
       }
     }
 
     async function initR2Sync() {
-      setSyncStatus("⏳ 连接 R2...");
+      setSyncStatus("⏳", "连接 R2...", "status-syncing");
       try {
         const res = await fetch("/api/diary/data");
         const resData = await res.json();
@@ -695,19 +736,17 @@
         if (resData.success) {
           if (resData.exists && resData.data && resData.data.books) {
             saveLocalData(resData.data);
-            setSyncStatus("☁️ R2 已同步");
+            setSyncStatus("☁️", "R2 已同步", "status-success");
             renderAll();
           } else {
             await syncDataToR2();
           }
+        } else {
+            setSyncStatus("⚠️", "状态未知", "status-error");
         }
       } catch (_) {
-        setSyncStatus("☁️ 离线模式");
+        setSyncStatus("☁️", "离线模式", "status-offline");
       }
-    }
-
-    function setSyncStatus(t) {
-      document.getElementById("syncStatus").innerText = t;
     }
 
     function renderAll() {
@@ -1164,8 +1203,15 @@
       } catch (_) { showToast("连接异常", true); }
     }
 
+    /* 🌟 重构：管理界面按钮的文字分离机制 */
     function updateAdminUI() {
-      document.getElementById("authBtn").innerText = adminToken ? "🔓 已解锁" : "🔐 登录解锁";
+      const authBtn = document.getElementById("authBtn");
+      if (authBtn) {
+        authBtn.innerHTML = adminToken 
+          ? '<span class="icon">🔓</span><span class="text"> 已解锁</span>' 
+          : '<span class="icon">🔐</span><span class="text"> 登录解锁</span>';
+      }
+      
       document.getElementById("addCatBtn").style.display = adminToken ? "inline-flex" : "none";
       document.getElementById("addBookBtn").style.display = adminToken ? "inline-flex" : "none";
       document.getElementById("addNoteBtn").style.display = adminToken ? "inline-flex" : "none";
