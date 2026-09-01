@@ -985,17 +985,6 @@ function renderThemeShowroom() {
 function selectBoyTheme(themeId) { if (!currentConfig.theme) currentConfig.theme = {}; currentConfig.theme.currentThemeBoy = themeId; currentConfig.theme.currentTheme = themeId; renderThemeShowroom(); showToast(`✓ 已选定男生视角主题【${themeId}】`); }
 function selectGirlTheme(themeId) { if (!currentConfig.theme) currentConfig.theme = {}; currentConfig.theme.currentThemeGirl = themeId; renderThemeShowroom(); showToast(`✓ 已选定女生视角主题【${themeId}】`); }
 
-// 清理 R2 孤立文件
-async function cleanOrphanR2Cache() {
-  if (!confirm("⚠️ 确定要清理孤立文件吗？")) return;
-  showToast("⏳ 扫描清理中...");
-  try {
-    const res = await fetch(`/api/love/cleanup?auth=${encodeURIComponent(getAuthToken())}`, { method: "POST", headers: { "x-admin-auth": getAuthToken() }});
-    const data = await res.json();
-    if (data.success) alert(`✨ ${data.message}`); else alert("❌ 清理失败: " + (data.error || "接口异常"));
-  } catch (err) { alert("❌ 请求异常: " + err.message); }
-}
-
 // 时光轴渲染
 function renderTimelineList() {
   const container = document.getElementById("timelineListContainer");
@@ -1258,32 +1247,6 @@ async function saveAllConfigToCloud() {
   } catch (err) {
     alert("❌ 保存失败: " + err.message);
   }
-}
-
-// 导出与导入备份
-function exportBackupJSON() {
-  if (!currentConfig) return;
-  const a = document.createElement("a");
-  a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentConfig, null, 2));
-  a.download = `雅歌契约配置备份_${Date.now()}.json`;
-  a.click();
-}
-
-function importConfigJSON(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (event) => {
-    try {
-      currentConfig = JSON.parse(event.target.result);
-      renderAllForms();
-      showToast("✓ 成功载入");
-    } catch (_) {
-      alert("❌ 格式损坏");
-    }
-  };
-  reader.readAsText(file);
-  e.target.value = "";
 }
 
 function escapeHtml(s) {
