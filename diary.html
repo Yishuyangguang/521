@@ -448,7 +448,7 @@
 
       <div class="header-actions">
         <!-- 🌟 挂载状态变色类名与独立隐藏区块 -->
-        <span id="syncStatus" class="sync-pill status-success"><span class="icon">☁️</span><span class="text"> R2 已同步</span></span>
+        <span id="syncStatus" class="sync-pill status-success"><span class="icon">☁️</span><span class="text"> 云端 已同步</span></span>
         <button id="authBtn" class="btn" onclick="openAuthModal()"><span class="icon">🔐</span><span class="text"> 登录解锁</span></button>
       </div>
     </header>
@@ -608,7 +608,7 @@
         <button class="btn" style="background:#fee2e2; color:#b91c1c; display:none;" id="deleteNoteBtn" onclick="deleteCurrentNote()">🗑️ 删除记录</button>
         <div style="display:flex; gap:8px; margin-left:auto;">
           <button class="btn" onclick="closeNoteModal()">取消</button>
-          <button class="btn btn-gold" onclick="saveNote()">保存并同步 R2</button>
+          <button class="btn btn-gold" onclick="saveNote()">保存并同步 云端</button>
         </div>
       </div>
     </div>
@@ -718,7 +718,7 @@
 
         const data = await res.json();
         if (data.success) {
-          setSyncStatus("☁️", "R2 已同步", "status-success");
+          setSyncStatus("☁️", "云端 已同步", "status-success");
         } else {
           setSyncStatus("⚠️", "同步失败", "status-error");
         }
@@ -728,7 +728,7 @@
     }
 
     async function initR2Sync() {
-      setSyncStatus("⏳", "连接 R2...", "status-syncing");
+      setSyncStatus("⏳", "连接 云端...", "status-syncing");
       try {
         const res = await fetch("/api/diary/data");
         const resData = await res.json();
@@ -736,7 +736,7 @@
         if (resData.success) {
           if (resData.exists && resData.data && resData.data.books) {
             saveLocalData(resData.data);
-            setSyncStatus("☁️", "R2 已同步", "status-success");
+            setSyncStatus("☁️", "云端 已同步", "status-success");
             renderAll();
           } else {
             await syncDataToR2();
@@ -1133,7 +1133,7 @@
       syncDataToR2();
       closeNoteModal();
       renderAccordion();
-      showToast("✓ 日记已保存并直传 R2");
+      showToast("✓ 日记已保存并直传 云端");
     }
 
     function deleteCurrentNote() {
