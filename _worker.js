@@ -1,7 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印 (Love Universe SaaS Engine)
  * 文件名: _worker.js
- * 架构: 异步静默垃圾回收引擎 + 破冰白名单(新增 accompany) + 严格租户独立鉴权
+ * 架构: 异步静默垃圾回收 + 破冰白名单 + 严格租户独立鉴权 + 独立日记应用 API 融合
  */
 export default {
   async fetch(request, env, ctx) {
@@ -63,7 +63,6 @@ export default {
       return !profanityRegex.test(contentString);
     }
 
-    // 🌟 核心拦截层白名单更新：允许 accompany 指令安全通过
     function getStageSafeContent(stage, actionType, userCustomText) {
       const standardDict = {
         dating: {
@@ -244,10 +243,7 @@ export default {
         const actionType = String(body.actionType || "break_ice");
         const customText = String(body.customText || "").trim();
         if (!sanitizeSanctity(customText)) return jsonResponse({ success: false, error: "言语不洁" }, 406);
-        
-        // 此处使用最新的白名单进行过滤
         const safeContent = getStageSafeContent(stage, actionType, customText);
-        
         const now = Date.now();
         let signalData = { activeSignal: null, history: [] };
         try { const obj = await bucket.get(SIGNALS_KEY); if (obj) signalData = JSON.parse(await obj.text()); } catch (_) {}
@@ -316,7 +312,7 @@ export default {
       if (url.pathname === "/api/love/signal/clear" && request.method === "POST") {
         if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
         const isAuthed = await verifyAdminAuth(request); if (!isAuthed) return jsonResponse({ success: false, error: "未授权" }, 401);
-        let signalData = { activeSignal: null, history: [] }; try { const obj = await bucket.get(SIGNALS_KEY); if (obj) signalData = JSON.parse(await text()); } catch (_) {}
+        let signalData = { activeSignal: null, history: [] }; try { const obj = await bucket.get(SIGNALS_KEY); if (obj) signalData = JSON.parse(await obj.text()); } catch (_) {}
         signalData.activeSignal = null;
         await bucket.put(SIGNALS_KEY, JSON.stringify(signalData, null, 2), { httpMetadata: { contentType: "application/json; charset=utf-8" } });
         return jsonResponse({ success: true, message: "已重置信号状态" });
@@ -442,6 +438,62 @@ export default {
         return Response.redirect(targetAudioUrl, 302);
       }
 
+      // ==================== 12. 独立日记应用路由 (专属私密存储) ====================
+      const DIARY_KEY = `${tenantDir}/diary.json`;
+
+      // 🔐 日记专属验证：利用主系统的 admin 密码体系做鉴权
+      if (url.pathname === "/api/auth/login" && request.method === "POST") {
+        let reqData; 
+        try { reqData = await request.json(); } catch (_) { return jsonResponse({ success: false }, 400); }
+        
+        const inputPwd = String(reqData?.password || "").trim();
+        // 伪造一个包含 token 的请求头去复用主验证函数
+        const mockReq = { headers: new Headers({ "x-admin-auth": inputPwd }) };
+        const isValid = await verifyAdminAuth(mockReq);
+        
+        if (isValid) {
+          return jsonResponse({ success: true, token: inputPwd }); // 密码验证通过，返回 token 放入前端缓存
+        }
+        return jsonResponse({ success: false, error: "管理密码错误" }, 401);
+      }
+
+      // 📄 读取日记数据
+      if (url.pathname === "/api/diary/data" && request.method === "GET") {
+        let parsedData = null;
+        if (bucket) {
+          try {
+            const obj = await bucket.get(DIARY_KEY);
+            if (obj) parsedData = JSON.parse(await obj.text());
+          } catch (_) {}
+        }
+        return jsonResponse({ success: true, exists: !!parsedData, data: parsedData });
+      }
+
+      // 💾 保存日记数据
+      if (url.pathname === "/api/diary/save" && request.method === "POST") {
+        if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
+        
+        const isAuthed = await verifyAdminAuth(request);
+        if (!isAuthed) return jsonResponse({ success: false, error: "管理口令错误或未授权" }, 401);
+
+        let reqData; 
+        try { reqData = await request.json(); } catch (_) { return jsonResponse({ success: false }, 400); }
+
+        const payload = {
+          updatedAt: new Date().toISOString(),
+          categories: reqData.categories || [],
+          books: reqData.books || [],
+          notes: reqData.notes || []
+        };
+
+        await bucket.put(DIARY_KEY, JSON.stringify(payload), { 
+          httpMetadata: { contentType: "application/json; charset=utf-8" } 
+        });
+
+        return jsonResponse({ success: true, message: "日记已安全同步至云端" });
+      }
+
+      // ==================== 13. 静态文件代理输出 ====================
       if (url.pathname.startsWith("/raw/")) {
         if (!bucket) return new Response("Bucket Not Found", { status: 500 });
         const key = decodeURIComponent(url.pathname.replace(/^\/raw\//, ""));
