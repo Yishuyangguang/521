@@ -33,11 +33,8 @@
         </div>
       </div>
       <div class="admin-header-actions">
-        <button class="btn-tool" style="background: rgba(239, 68, 68, 0.15); color:#fca5a5; border-color: rgba(239, 68, 68, 0.3);" onclick="cleanOrphanR2Cache()">🧹 清理无用缓存</button>
+        <!-- 🌟 已物理隔离删除了“清理缓存”、“导出备份”与“导入配置”按钮 -->
         <a href="index.html" target="_blank" class="btn-tool">👁️ 预览主页</a>
-        <button class="btn-tool" onclick="exportBackupJSON()">📦 备份配置</button>
-        <button class="btn-tool" onclick="document.getElementById('importFileInput').click()">📥 导入配置</button>
-        <input type="file" id="importFileInput" style="display:none;" accept=".json" onchange="importConfigJSON(event)">
         <button class="btn-save-main" onclick="saveAllConfigToCloud()">💾 立即发布生效</button>
       </div>
     </header>
