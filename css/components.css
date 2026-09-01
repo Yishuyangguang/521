@@ -158,6 +158,7 @@
   align-items: center;
 }
 
+/* 🌟 修改：注入防选中、强交互反馈安全样式，安全作为隐秘入口 */
 .hero-section__names {
   font-size: 38px;
   font-weight: 900;
@@ -175,6 +176,17 @@
   justify-content: center;
   flex-wrap: nowrap;
   transition: all 0.3s ease;
+  
+  /* 专属防暗病隔离样式 */
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hero-section__names:active {
+  transform: scale(0.96);
+  opacity: 0.85;
 }
 
 .name-connector {
