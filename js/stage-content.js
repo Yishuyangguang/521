@@ -7,7 +7,7 @@
  */
 
 window.STAGE_CONTENT = {
-  // ================= 🌿 1. 恋爱期 (Dating Phase) =================
+  // ================= ❤️ 1. 恋爱期 (Dating Phase) =================
   dating: {
     title: "恋爱期待办清单",
     subtitle: "在尊重与接纳中了解彼此，坚守圣洁",
@@ -107,7 +107,7 @@ window.STAGE_CONTENT = {
   // ================= 💍 2. 订婚期 (Engaged Phase) =================
   engaged: {
     title: "订婚期待办清单",
-    subtitle: "为一生一世的盟约做好准备，在磨合中学会舍己与妥协",
+    subtitle: "为一生一世的盟约做好准备，在磨合中学会舍己",
     scratchTitle: "订婚期 · 舍己与包容特权券",
     checklist: [
       { id: "e_1", title: "[誓言宣告] 举行一次庄重的承诺谈话，确认彼此愿意在未来不论贫穷、疾病、顺境、逆境，都共同坚守、不离不弃。", completed: false },
