@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>雅歌之印 · 我们的日记</title>
+
+  <!-- 🌟 浪漫专属图标 (鸽子) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕊️</text></svg>">
+
+  <style>
+    :root {
+      --primary: #f59e0b;
+      --primary-hover: #d97706;
+      --primary-dark: #b45309;
+      --bg-gradient: radial-gradient(circle at 10% 20%, #fffdf0 0%, #fef3c7 45%, #fde68a 100%);
+      --glass-bg: rgba(255, 255, 255, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.88);
+      --glass-shadow: 0 16px 36px -6px rgba(245, 158, 11, 0.16), 0 4px 12px rgba(0, 0, 0, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.95);
+      --text-main: #1f2937;
+      --text-sub: #6b7280;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(245, 158, 11, 0.35); border-radius: 6px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(245, 158, 11, 0.65); }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      color: var(--text-main);
+      padding: 16px 14px 60px;
+    }
+
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 18px;
+      margin-bottom: 18px;
+      background: rgba(255, 255, 255, 0.65);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      box-shadow: var(--glass-shadow);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .brand-logo { display: flex; align-items: center; gap: 12px; }
+    .brand-icon {
+      font-size: 28px;
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 14px;
+      padding: 5px 9px;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25), inset 0 1px 1px #fff;
+      line-height: 1;
+    }
+    .brand-title { font-size: 20px; font-weight: 800; color: #1f2937; letter-spacing: -0.2px; }
+    .brand-subtitle { font-size: 13px; color: var(--primary); font-weight: 700; margin-left: 4px; }
+
+    .header-actions { display: flex; align-items: center; gap: 10px; }
+
+    .sync-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: #065f46;
+      background: rgba(236, 253, 245, 0.85);
+      border: 1px solid #a7f3d0;
+      padding: 5px 13px;
+      border-radius: 18px;
+      font-weight: 700;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.8);
+    }
+
+    .search-box-wrap {
+      max-width: 860px;
+      margin: 0 auto 18px;
+      position: relative;
+    }
+    .search-input {
+      width: 100%;
+      padding: 13px 20px 13px 48px;
+      border: 1.5px solid rgba(255, 255, 255, 0.9);
+      border-radius: 30px;
+      font-size: 14.5px;
+      background: rgba(255, 255, 255, 0.78);
+      outline: none;
+      box-shadow: 0 8px 24px rgba(245, 158, 11, 0.12), inset 0 2px 4px rgba(0, 0, 0, 0.02);
+      backdrop-filter: blur(14px);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .search-input:focus {
+      border-color: var(--primary);
+      background: #ffffff;
+      box-shadow: 0 10px 28px rgba(245, 158, 11, 0.22), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+      transform: translateY(-1px);
+    }
+    .search-icon {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 17px;
+      color: #f59e0b;
+    }
+
+    .main-panel {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 20px 22px;
+      box-shadow: var(--glass-shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 16px;
+      margin-bottom: 18px;
+      border-bottom: 1px dashed rgba(245, 158, 11, 0.35);
+    }
+
+    .category-tabs-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 15px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      background: linear-gradient(145deg, #ffffff 0%, #fef3c7 100%);
+      color: var(--text-main);
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04), inset 0 1px 1px #fff;
+    }
+    .btn:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(245, 158, 11, 0.18), inset 0 1px 1px #fff;
+    }
+    .btn:active { transform: translateY(1px); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06); }
+
+    .btn-gold {
+      background: linear-gradient(145deg, #f59e0b 0%, #d97706 100%);
+      color: #ffffff;
+      border: 1px solid rgba(253, 230, 138, 0.6);
+      box-shadow: 0 6px 16px rgba(245, 158, 11, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+    }
+    .btn-gold:hover {
+      background: linear-gradient(145deg, #fbbf24 0%, #b45309 100%);
+      box-shadow: 0 8px 20px rgba(245, 158, 11, 0.42), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+    }
+
+    .tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      background: rgba(254, 243, 199, 0.6);
+      color: #92400e;
+      transition: all 0.18s;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02), inset 0 1px 1px #fff;
+    }
+    .tab-btn:hover { background: #fde68a; transform: translateY(-1px); }
+    .tab-btn.active {
+      background: linear-gradient(145deg, #f59e0b 0%, #d97706 100%);
+      color: #ffffff;
+      border-color: rgba(253, 230, 138, 0.8);
+      box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.45);
+    }
+
+    .tab-edit-dot { font-size: 11px; opacity: 0.7; padding: 2px; margin-left: 3px; }
+    .tab-edit-dot:hover { opacity: 1; transform: scale(1.2); }
+
+    .action-group { display: flex; align-items: center; gap: 8px; }
+
+    .book-accordion { display: flex; flex-direction: column; gap: 14px; }
+
+    .book-card {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(253, 230, 138, 0.9);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 6px 18px rgba(245, 158, 11, 0.08), inset 0 1px 1px #fff;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .book-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 10px 24px rgba(245, 158, 11, 0.16), inset 0 1px 1px #fff;
+    }
+
+    .book-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 13px 18px;
+      background: linear-gradient(145deg, rgba(254, 243, 199, 0.55) 0%, rgba(253, 230, 138, 0.35) 100%);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .book-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15.5px;
+      font-weight: 800;
+      color: #78350f;
+    }
+
+    .mini-icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 1px solid #fde68a;
+      font-size: 12px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      transition: all 0.15s;
+    }
+    .mini-icon-btn:hover { background: #fef3c7; transform: scale(1.15); }
+
+    .arrow-icon { font-size: 12px; color: var(--primary); transition: transform 0.22s ease; }
+    .arrow-icon.collapsed { transform: rotate(-90deg); }
+
+    .notes-list { padding: 8px 12px 12px; display: flex; flex-direction: column; gap: 7px; }
+    .notes-list.hidden { display: none; }
+
+    .note-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(253, 230, 138, 0.5);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    }
+    .note-item:hover {
+      background: #fffbeb;
+      border-color: var(--primary);
+      transform: translateX(3px) translateY(-1px);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);
+    }
+
+    .note-title-left { display: flex; align-items: center; gap: 8px; font-size: 14.5px; font-weight: 700; color: #1f2937; flex: 1; }
+    .note-meta-right { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--text-sub); }
+
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20000;
+      padding: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease;
+    }
+    .modal-backdrop.active { opacity: 1; pointer-events: auto; }
+
+    .modal-window {
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 780px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.25), inset 0 1px 1px #fff;
+      overflow: hidden;
+      animation: modal3D 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modal3D {
+      from { opacity: 0; transform: scale(0.92) translateY(20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 22px;
+      background: linear-gradient(145deg, #fffbeb 0%, #fef3c7 100%);
+      border-bottom: 1px solid rgba(253, 230, 138, 0.8);
+    }
+    .modal-title { font-size: 17px; font-weight: 800; color: #78350f; }
+
+    .modal-body { padding: 18px 22px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 12px; }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: 13px; font-weight: 700; color: #374151; }
+    .form-input, .form-select {
+      padding: 10px 14px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 14px;
+      outline: none;
+      font-family: inherit;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+      transition: all 0.18s;
+    }
+    .form-input:focus, .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3.5px rgba(245, 158, 11, 0.18), inset 0 1px 2px rgba(0, 0, 0, 0.02);
+      background: #ffffff;
+    }
+
+    .rich-editor-box {
+      min-height: 290px;
+      max-height: 480px;
+      overflow-y: auto;
+      padding: 14px 16px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 15px;
+      line-height: 1.85;
+      outline: none;
+      background: #ffffff;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);
+      color: #1f2937;
+      word-break: break-word;
+    }
+    .rich-editor-box:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3.5px rgba(245, 158, 11, 0.18), inset 0 1px 2px rgba(0, 0, 0, 0.02);
+    }
+    .rich-editor-box img { max-width: 100%; height: auto; border-radius: 8px; margin: 8px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: inline-block; }
+
+    .modal-footer { padding: 13px 22px; border-top: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; background: #fafafa; }
+
+    .fullscreen-reader {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
+      background: #fffdf7; z-index: 50000; display: none; flex-direction: column; overflow: hidden;
+    }
+    .fullscreen-reader.active { display: flex; }
+
+    .fs-header-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 24px calc(12px + env(safe-area-inset-top));
+      background: rgba(255, 253, 247, 0.95);
+      border-bottom: 1px dashed rgba(245, 158, 11, 0.35);
+      backdrop-filter: blur(12px);
+      flex-shrink: 0; position: relative; z-index: 50001; pointer-events: auto !important;
+    }
+
+    .fs-content-container { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 26px 22px calc(40px + env(safe-area-inset-bottom)); position: relative; z-index: 50000; }
+    .fs-article-wrap { max-width: 860px; margin: 0 auto; }
+
+    .fs-title { font-size: 27px; font-weight: 800; color: #111827; line-height: 1.4; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 2px solid #fde68a; }
+    .fs-meta { font-size: 13.5px; color: var(--text-sub); display: flex; gap: 16px; margin-bottom: 24px; }
+    .fs-text-body { font-size: 17.5px; line-height: 2.0; letter-spacing: 0.5px; color: #374151; word-break: break-word; }
+    .fs-text-body img { max-width: 100%; height: auto; border-radius: 10px; margin: 12px 0; box-shadow: 0 6px 18px rgba(0,0,0,0.08); display: block; }
+    .fs-text-body table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    .fs-text-body table, .fs-text-body th, .fs-text-body td { border: 1px solid #fde68a; padding: 8px 12px; }
+
+    .fs-text-body.font-small { font-size: 15px; }
+    .fs-text-body.font-normal { font-size: 17.5px; }
+    .fs-text-body.font-large { font-size: 21px; }
+
+    .toast-msg {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-20px);
+      background: rgba(31, 41, 55, 0.94); color: #fff; padding: 10px 24px; border-radius: 30px;
+      font-size: 13.5px; font-weight: 700; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px); z-index: 60000; opacity: 0; pointer-events: none; transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .toast-msg.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+  <div id="toastMsg" class="toast-msg">✓ 操作成功</div>
+
+  <div class="container">
+    <header class="top-header">
+      <div class="brand-logo">
+        <div class="brand-icon">🕊️</div>
+        <div>
+          <span class="brand-title">雅歌之印</span>
+          <span class="brand-subtitle">我们的日记</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <span id="syncStatus" class="sync-pill">☁️ R2 已同步</span>
+        <button id="authBtn" class="btn" onclick="openAuthModal()">🔐 登录解锁</button>
+      </div>
+    </header>
+
+    <div class="search-box-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" class="search-input" placeholder="极速搜索日记标题或美好记忆关键字..." oninput="handleSearch()" />
+    </div>
+
+    <div class="main-panel">
+      <div class="toolbar">
+        <div class="category-tabs-wrap" id="categoryTabsContainer"></div>
+
+        <div class="action-group" id="adminActionGroup">
+          <button class="btn" id="addCatBtn" style="display:none;" onclick="openCategoryModal()">➕ 新增分类</button>
+          <button class="btn btn-gold" id="addBookBtn" style="display:none;" onclick="openBookModal()">+ 新建日记本</button>
+          <button class="btn btn-gold" id="addNoteBtn" style="display:none;" onclick="openNoteModal()">+ 写新日记</button>
+        </div>
+      </div>
+
+      <div id="bookAccordion" class="book-accordion"></div>
+    </div>
+  </div>
+
+  <!-- 全屏沉浸阅读器 -->
+  <div id="fullscreenReader" class="fullscreen-reader">
+    <div class="fs-header-bar">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:20px;">🕊️</span>
+        <span style="font-weight:800; color:#78350f; font-size:15px;">雅歌之印 · 沉浸回忆</span>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div style="display:flex; background:rgba(254, 243, 199, 0.85); border-radius:12px; padding:2px; border:1px solid #fde68a;">
+          <button class="btn" style="padding:2px 8px; font-size:11px;" onclick="setFontSize('small')">A-</button>
+          <button class="btn" style="padding:2px 8px; font-size:11px;" onclick="setFontSize('normal')">标准</button>
+          <button class="btn" style="padding:2px 8px; font-size:11px;" onclick="setFontSize('large')">A+</button>
+        </div>
+        <button class="btn btn-gold" id="fsEditBtn" onclick="editFromFullscreen()">✏️ 编辑</button>
+        <button class="btn" id="fsExitBtn" onclick="exitFullscreen()">✕ 退出全屏</button>
+      </div>
+    </div>
+
+    <div class="fs-content-container">
+      <div class="fs-article-wrap">
+        <div class="fs-title" id="fsTitle"></div>
+        <div class="fs-meta">
+          <span id="fsBookTag">📖 2026年记事</span>
+          <span id="fsDateTag">2026/8/1</span>
+        </div>
+        <div class="fs-text-body font-normal" id="fsContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 分类模块管理 -->
+  <div id="categoryModalBackdrop" class="modal-backdrop">
+    <div class="modal-window" style="max-width: 440px;">
+      <div class="modal-header">
+        <span class="modal-title" id="categoryModalTitle">新增分类模块</span>
+        <button class="mini-icon-btn" onclick="closeCategoryModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editCategoryId" />
+        <div class="form-group">
+          <label class="form-label">模块图标 (Emoji 或字符)</label>
+          <input type="text" id="categoryIconInput" class="form-input" placeholder="例如：📝、✨、✈️" maxlength="4" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">模块名称</label>
+          <input type="text" id="categoryNameInput" class="form-input" placeholder="例如：日常点滴、重要时刻" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" style="background:#fee2e2; color:#b91c1c; display:none;" id="deleteCategoryBtn" onclick="deleteCurrentCategory()">🗑️ 删除模块</button>
+        <div style="display:flex; gap:8px; margin-left:auto;">
+          <button class="btn" onclick="closeCategoryModal()">取消</button>
+          <button class="btn btn-gold" onclick="saveCategory()">保存模块</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 书卷管理 -->
+  <div id="bookModalBackdrop" class="modal-backdrop">
+    <div class="modal-window" style="max-width: 440px;">
+      <div class="modal-header">
+        <span class="modal-title" id="bookModalTitle">新增日记本</span>
+        <button class="mini-icon-btn" onclick="closeBookModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editBookId" />
+        <div class="form-group">
+          <label class="form-label">所属分类</label>
+          <select id="bookCategorySelect" class="form-select"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">日记本名称</label>
+          <input type="text" id="bookNameInput" class="form-input" placeholder="例如：2026年日记" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" style="background:#fee2e2; color:#b91c1c; display:none;" id="deleteBookBtn" onclick="deleteCurrentBook()">🗑️ 删除日记本</button>
+        <div style="display:flex; gap:8px; margin-left:auto;">
+          <button class="btn" onclick="closeBookModal()">取消</button>
+          <button class="btn btn-gold" onclick="saveBook()">保存日记本</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 新建/编辑日记 -->
+  <div id="noteModalBackdrop" class="modal-backdrop">
+    <div class="modal-window">
+      <div class="modal-header">
+        <span class="modal-title" id="noteModalTitle">写新日记</span>
+        <button class="mini-icon-btn" onclick="closeNoteModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editNoteId" />
+        
+        <div style="display:grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label class="form-label">1. 所属分类</label>
+            <select id="noteCategorySelect" class="form-select" onchange="handleNoteCategoryChange()"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">2. 所属日记本</label>
+            <select id="noteBookSelect" class="form-select"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">记录日期</label>
+            <input type="text" id="noteDateInput" class="form-input" />
+          </div>
+        </div>
+
+        <div id="quickNewBookWrap" style="background:rgba(254, 243, 199, 0.45); border:1px dashed #fde68a; border-radius:12px; padding:8px 12px; display:flex; align-items:center; gap:8px; font-size:12.5px;">
+          <span>💡 没找到日记本？在此快速新建：</span>
+          <input type="text" id="quickNewBookInput" class="form-input" placeholder="输入名称（如：婚后手记）" style="padding:4px 8px; font-size:12.5px; flex:1;" />
+          <button type="button" class="btn btn-gold" style="padding:4px 10px; font-size:12px;" onclick="quickAddBookInModal()">立即建本</button>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">日记标题</label>
+          <input type="text" id="noteTitleInput" class="form-input" placeholder="例如：今天我们一起去看了海" />
+        </div>
+
+        <div class="form-group">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label class="form-label">日记正文（支持图文混排与图片直接粘贴）</label>
+            <span style="font-size:11.5px; color:#92400e;">💡 支持直接粘贴网页图文或截图</span>
+          </div>
+          <div id="noteContentInput" class="rich-editor-box" contenteditable="true"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" style="background:#fee2e2; color:#b91c1c; display:none;" id="deleteNoteBtn" onclick="deleteCurrentNote()">🗑️ 删除记录</button>
+        <div style="display:flex; gap:8px; margin-left:auto;">
+          <button class="btn" onclick="closeNoteModal()">取消</button>
+          <button class="btn btn-gold" onclick="saveNote()">保存并同步 R2</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 统一鉴权控制中心 (复用全站管理密码) -->
+  <div id="authModalBackdrop" class="modal-backdrop">
+    <div class="modal-window" style="max-width: 440px;">
+      <div class="modal-header">
+        <span class="modal-title">🔐 身份验证</span>
+        <button class="mini-icon-btn" onclick="closeAuthModal()">✕</button>
+      </div>
+
+      <div class="modal-body" id="authLoginBody">
+        <div class="form-group">
+          <label class="form-label">管理员口令 (同全站设置密码)</label>
+          <input type="password" id="loginPwdInput" class="form-input" placeholder="输入口令以解锁写日记权限..." onkeydown="if(event.key==='Enter') submitLogin();" />
+        </div>
+      </div>
+
+      <div class="modal-footer" id="authLoginFooter">
+        <button class="btn" onclick="closeAuthModal()">取消</button>
+        <button class="btn btn-gold" onclick="submitLogin()">登录解锁</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "LOVE_DIARY_LOCAL_CACHE";
+    const AUTH_KEY = "LOVE_DIARY_TOKEN";
+
+    let adminToken = sessionStorage.getItem(AUTH_KEY) || "";
+    let activeCategoryId = "cat_daily";
+    let activeReadingNoteId = null;
+
+    const FALLBACK_CATEGORIES = [
+      { id: "cat_daily", name: "日常点滴", icon: "📝" },
+      { id: "cat_moment", name: "重要时刻", icon: "✨" },
+      { id: "cat_travel", name: "旅行随笔", icon: "✈️" }
+    ];
+
+    const DEFAULT_DATA = {
+      categories: FALLBACK_CATEGORIES,
+      books: [
+        { id: "b_2026", name: "2026年记事", categoryId: "cat_daily", collapsed: false }
+      ],
+      notes: [
+        { id: "n_1", bookId: "b_2026", title: "初见你的那一刻", date: "2024/5/20", content: "<p>那天阳光正好，逆着光走过来的那一刻，我就知道生命因你而完整。</p>" },
+        { id: "n_2", bookId: "b_2026", title: "今天一起做了一顿晚饭", date: "2026/8/1", content: "<p>虽然菜有点咸，但是一起在厨房忙碌的感觉真的很踏实。</p>" }
+      ]
+    };
+
+    function sanitizeData(raw) {
+      if (!raw || typeof raw !== "object") raw = {};
+      let categories = (Array.isArray(raw.categories) && raw.categories.length > 0) ? raw.categories : FALLBACK_CATEGORIES;
+      let books = Array.isArray(raw.books) ? raw.books : DEFAULT_DATA.books;
+      books.forEach(b => {
+        if (!b.categoryId) {
+          b.categoryId = (b.category === 'old' ? 'cat_daily' : b.category === 'topic' ? 'cat_travel' : 'cat_moment');
+        }
+      });
+      let notes = Array.isArray(raw.notes) ? raw.notes : DEFAULT_DATA.notes;
+      return { categories, books, notes };
+    }
+
+    let AppData = loadLocalData();
+
+    function loadLocalData() {
+      try {
+        const cache = localStorage.getItem(STORAGE_KEY);
+        if (cache) return sanitizeData(JSON.parse(cache));
+      } catch (_) {}
+      return sanitizeData(DEFAULT_DATA);
+    }
+
+    function saveLocalData(data) {
+      AppData = sanitizeData(data);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(AppData));
+    }
+
+    /* --- R2 毫秒级直传同步中枢 --- */
+    async function syncDataToR2() {
+      setSyncStatus("⏳ 直传中...");
+      try {
+        const res = await fetch("/api/diary/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-admin-auth": adminToken },
+          body: JSON.stringify({
+            categories: AppData.categories,
+            books: AppData.books,
+            notes: AppData.notes
+          })
+        });
+
+        if (res.status === 401) {
+          setSyncStatus("⚠️ 请先登录解锁");
+          return;
+        }
+
+        const data = await res.json();
+        if (data.success) {
+          setSyncStatus("☁️ R2 已同步");
+        } else {
+          setSyncStatus("⚠️ 同步失败");
+        }
+      } catch (_) {
+        setSyncStatus("☁️ 本地已存 (离线)");
+      }
+    }
+
+    async function initR2Sync() {
+      setSyncStatus("⏳ 连接 R2...");
+      try {
+        const res = await fetch("/api/diary/data");
+        const resData = await res.json();
+
+        if (resData.success) {
+          if (resData.exists && resData.data && resData.data.books) {
+            saveLocalData(resData.data);
+            setSyncStatus("☁️ R2 已同步");
+            renderAll();
+          } else {
+            await syncDataToR2();
+          }
+        }
+      } catch (_) {
+        setSyncStatus("☁️ 离线模式");
+      }
+    }
+
+    function setSyncStatus(t) {
+      document.getElementById("syncStatus").innerText = t;
+    }
+
+    function renderAll() {
+      renderCategoryTabs();
+      renderAccordion();
+      updateAdminUI();
+    }
+
+    function renderCategoryTabs() {
+      const container = document.getElementById("categoryTabsContainer");
+      container.innerHTML = "";
+
+      if (!AppData.categories || AppData.categories.length === 0) AppData.categories = FALLBACK_CATEGORIES;
+      if (!AppData.categories.some(c => c.id === activeCategoryId)) activeCategoryId = AppData.categories[0].id;
+
+      AppData.categories.forEach(cat => {
+        const btn = document.createElement("button");
+        const isActive = (cat.id === activeCategoryId);
+        btn.className = `tab-btn ${isActive ? 'active' : ''}`;
+        
+        btn.innerHTML = `
+          <span>${cat.icon || '📖'} ${escapeHtml(cat.name)}</span>
+          ${adminToken ? `<span class="tab-edit-dot" onclick="event.stopPropagation(); editCategory('${cat.id}')" title="编辑/删除分类">✏️</span>` : ''}
+        `;
+        btn.onclick = () => switchCategory(cat.id);
+        container.appendChild(btn);
+      });
+    }
+
+    function switchCategory(catId) {
+      activeCategoryId = catId;
+      renderCategoryTabs();
+      renderAccordion();
+    }
+
+    function renderAccordion(searchKeyword = "") {
+      const container = document.getElementById("bookAccordion");
+      container.innerHTML = "";
+
+      const filteredBooks = (AppData.books || []).filter(b => b.categoryId === activeCategoryId);
+
+      if (filteredBooks.length === 0 && !searchKeyword) {
+        container.innerHTML = `<div style="text-align:center; padding:36px 0; color:#9ca3af; font-size:13.5px;">当前分类下暂无日记本，点击右上角「+ 新建日记本」或「+ 写新日记」创建。</div>`;
+        return;
+      }
+
+      const booksToRender = searchKeyword ? (AppData.books || []) : filteredBooks;
+
+      booksToRender.forEach(book => {
+        let notes = (AppData.notes || []).filter(n => n.bookId === book.id);
+
+        if (searchKeyword) {
+          const kw = searchKeyword.toLowerCase();
+          notes = notes.filter(n => n.title.toLowerCase().includes(kw) || (n.content && n.content.toLowerCase().includes(kw)));
+          if (notes.length === 0 && !book.name.toLowerCase().includes(kw)) return;
+        }
+
+        const card = document.createElement("div");
+        card.className = "book-card";
+        const isCollapsed = book.collapsed && !searchKeyword;
+
+        card.innerHTML = `
+          <div class="book-header" onclick="toggleBookCollapse('${book.id}')">
+            <div class="book-title-wrap">
+              <span>📖 ${escapeHtml(book.name)}</span>
+              ${adminToken ? `<span class="mini-icon-btn" onclick="event.stopPropagation(); editBook('${book.id}')" title="编辑/删除日记本">✏️</span>` : ''}
+            </div>
+            <span class="arrow-icon ${isCollapsed ? 'collapsed' : ''}">▼</span>
+          </div>
+          <div class="notes-list ${isCollapsed ? 'hidden' : ''}" id="notes_${book.id}">
+            ${notes.length === 0 ? '<div style="padding:10px; color:#9ca3af; font-size:13px; text-align:center;">暂无记录</div>' : ''}
+          </div>
+        `;
+
+        const listEl = card.querySelector(`#notes_${book.id}`);
+
+        notes.forEach(note => {
+          const item = document.createElement("div");
+          item.className = "note-item";
+          item.onclick = () => openFullscreen(note.id);
+
+          item.innerHTML = `
+            <div class="note-title-left">
+              <span>📄</span>
+              <span>${escapeHtml(note.title)}</span>
+              ${adminToken ? `<span class="mini-icon-btn" onclick="event.stopPropagation(); editNote('${note.id}')" title="编辑/删除日记">✏️</span>` : ''}
+            </div>
+            <div class="note-meta-right">
+              <span>${note.date || '2026/8/1'}</span>
+            </div>
+          `;
+          listEl.appendChild(item);
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+    function toggleBookCollapse(bookId) {
+      const b = (AppData.books || []).find(x => x.id === bookId);
+      if (b) {
+        b.collapsed = !b.collapsed;
+        saveLocalData(AppData);
+        renderAccordion(document.getElementById("searchInput").value.trim());
+      }
+    }
+
+    function handleSearch() {
+      const kw = document.getElementById("searchInput").value.trim();
+      renderAccordion(kw);
+    }
+
+    function openFullscreen(noteId) {
+      const note = (AppData.notes || []).find(n => n.id === noteId);
+      if (!note) return;
+
+      activeReadingNoteId = noteId;
+      const book = (AppData.books || []).find(b => b.id === note.bookId);
+
+      document.getElementById("fsTitle").innerText = note.title;
+      document.getElementById("fsBookTag").innerText = `📖 ${book ? book.name : '日记'}`;
+      document.getElementById("fsDateTag").innerText = note.date || '2026/8/1';
+      document.getElementById("fsContent").innerHTML = note.content || "（暂无正文内容）";
+
+      document.getElementById("fsEditBtn").style.display = adminToken ? "inline-flex" : "none";
+      document.getElementById("fullscreenReader").classList.add("active");
+    }
+
+    function exitFullscreen() { document.getElementById("fullscreenReader").classList.remove("active"); }
+
+    function setFontSize(size) {
+      const el = document.getElementById("fsContent");
+      el.classList.remove("font-small", "font-normal", "font-large");
+      el.classList.add(`font-${size}`);
+    }
+
+    function editFromFullscreen() {
+      exitFullscreen();
+      if (activeReadingNoteId) editNote(activeReadingNoteId);
+    }
+
+    function openCategoryModal(catId = null) {
+      const modal = document.getElementById("categoryModalBackdrop");
+      const delBtn = document.getElementById("deleteCategoryBtn");
+
+      if (catId) {
+        const c = AppData.categories.find(x => x.id === catId);
+        document.getElementById("editCategoryId").value = c.id;
+        document.getElementById("categoryIconInput").value = c.icon || "📖";
+        document.getElementById("categoryNameInput").value = c.name;
+        document.getElementById("categoryModalTitle").innerText = "编辑分类";
+        delBtn.style.display = "inline-flex";
+      } else {
+        document.getElementById("editCategoryId").value = "";
+        document.getElementById("categoryIconInput").value = "📖";
+        document.getElementById("categoryNameInput").value = "";
+        document.getElementById("categoryModalTitle").innerText = "新增分类";
+        delBtn.style.display = "none";
+      }
+      modal.classList.add("active");
+    }
+
+    function closeCategoryModal() { document.getElementById("categoryModalBackdrop").classList.remove("active"); }
+    function editCategory(id) { openCategoryModal(id); }
+
+    function saveCategory() {
+      const id = document.getElementById("editCategoryId").value;
+      const icon = document.getElementById("categoryIconInput").value.trim() || "📖";
+      const name = document.getElementById("categoryNameInput").value.trim();
+
+      if (!name) { showToast("请输入名称", true); return; }
+
+      if (id) {
+        const cat = AppData.categories.find(c => c.id === id);
+        if (cat) { cat.name = name; cat.icon = icon; }
+      } else {
+        const newId = "cat_" + Date.now();
+        AppData.categories.push({ id: newId, name, icon });
+        activeCategoryId = newId;
+      }
+
+      saveLocalData(AppData);
+      syncDataToR2();
+      closeCategoryModal();
+      renderAll();
+      showToast("✓ 分类已保存");
+    }
+
+    function deleteCurrentCategory() {
+      const id = document.getElementById("editCategoryId").value;
+      if (!id) return;
+      const cat = AppData.categories.find(c => c.id === id);
+      const bookCount = AppData.books.filter(b => b.categoryId === id).length;
+      if (!confirm(`⚠️ 确定要删除【${cat ? cat.name : ''}】吗？\n该分类下共有 ${bookCount} 本日记本，删除将一并清空！`)) return;
+
+      const booksToDelete = AppData.books.filter(b => b.categoryId === id).map(b => b.id);
+      AppData.categories = AppData.categories.filter(c => c.id !== id);
+      AppData.books = AppData.books.filter(b => b.categoryId !== id);
+      AppData.notes = AppData.notes.filter(n => !booksToDelete.includes(n.bookId));
+
+      if (activeCategoryId === id) activeCategoryId = AppData.categories.length > 0 ? AppData.categories[0].id : "";
+
+      saveLocalData(AppData);
+      syncDataToR2();
+      closeCategoryModal();
+      renderAll();
+      showToast("✓ 分类及关联数据已清空");
+    }
+
+    function openBookModal(bookId = null) {
+      const modal = document.getElementById("bookModalBackdrop");
+      const delBtn = document.getElementById("deleteBookBtn");
+      const sel = document.getElementById("bookCategorySelect");
+
+      sel.innerHTML = "";
+      AppData.categories.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c.id;
+        opt.innerText = `${c.icon || ''} ${c.name}`;
+        sel.appendChild(opt);
+      });
+
+      if (bookId) {
+        const b = AppData.books.find(x => x.id === bookId);
+        document.getElementById("editBookId").value = b.id;
+        document.getElementById("bookNameInput").value = b.name;
+        sel.value = b.categoryId || activeCategoryId;
+        document.getElementById("bookModalTitle").innerText = "编辑日记本";
+        delBtn.style.display = "inline-flex";
+      } else {
+        document.getElementById("editBookId").value = "";
+        document.getElementById("bookNameInput").value = "";
+        sel.value = activeCategoryId;
+        document.getElementById("bookModalTitle").innerText = "新增日记本";
+        delBtn.style.display = "none";
+      }
+      modal.classList.add("active");
+    }
+
+    function closeBookModal() { document.getElementById("bookModalBackdrop").classList.remove("active"); }
+    function editBook(id) { openBookModal(id); }
+
+    function saveBook() {
+      const id = document.getElementById("editBookId").value;
+      const name = document.getElementById("bookNameInput").value.trim();
+      const categoryId = document.getElementById("bookCategorySelect").value;
+      if (!name) { showToast("名称不能为空", true); return; }
+
+      if (id) {
+        const b = AppData.books.find(x => x.id === id);
+        if (b) { b.name = name; b.categoryId = categoryId; }
+      } else {
+        AppData.books.push({ id: "b_" + Date.now(), name, categoryId, collapsed: false });
+      }
+
+      saveLocalData(AppData);
+      syncDataToR2();
+      closeBookModal();
+      activeCategoryId = categoryId;
+      renderAll();
+      showToast("✓ 日记本已保存并同步");
+    }
+
+    function deleteCurrentBook() {
+      const id = document.getElementById("editBookId").value;
+      if (!id) return;
+      const b = AppData.books.find(x => x.id === id);
+      const count = AppData.notes.filter(n => n.bookId === id).length;
+      if (!confirm(`⚠️ 确定要删除【${b ? b.name : ''}】吗？\n该本内共有 ${count} 篇日记，将被彻底清空！`)) return;
+
+      AppData.books = AppData.books.filter(x => x.id !== id);
+      AppData.notes = AppData.notes.filter(n => n.bookId !== id);
+
+      saveLocalData(AppData);
+      syncDataToR2();
+      closeBookModal();
+      renderAll();
+      showToast("✓ 彻底删除");
+    }
+
+    function populateNoteModalDropdowns(selectedCatId, targetBookId = null) {
+      const catSel = document.getElementById("noteCategorySelect");
+      const bookSel = document.getElementById("noteBookSelect");
+
+      catSel.innerHTML = "";
+      AppData.categories.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c.id;
+        opt.innerText = `${c.icon || ''} ${c.name}`;
+        catSel.appendChild(opt);
+      });
+      catSel.value = selectedCatId;
+
+      bookSel.innerHTML = "";
+      const filteredBooks = AppData.books.filter(b => b.categoryId === selectedCatId);
+
+      if (filteredBooks.length === 0) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.innerText = "（当前分类暂无日记本）";
+        bookSel.appendChild(opt);
+      } else {
+        filteredBooks.forEach(b => {
+          const opt = document.createElement("option");
+          opt.value = b.id;
+          opt.innerText = b.name;
+          bookSel.appendChild(opt);
+        });
+        if (targetBookId && filteredBooks.some(b => b.id === targetBookId)) bookSel.value = targetBookId;
+        else bookSel.value = filteredBooks[0].id;
+      }
+    }
+
+    function handleNoteCategoryChange() {
+      const catId = document.getElementById("noteCategorySelect").value;
+      populateNoteModalDropdowns(catId);
+    }
+
+    function quickAddBookInModal() {
+      const input = document.getElementById("quickNewBookInput");
+      const name = input.value.trim();
+      const catId = document.getElementById("noteCategorySelect").value;
+      if (!name) { showToast("请输入名称", true); return; }
+      const newBook = { id: "b_" + Date.now(), name, categoryId: catId, collapsed: false };
+      AppData.books.push(newBook);
+      saveLocalData(AppData);
+      syncDataToR2();
+      input.value = "";
+      populateNoteModalDropdowns(catId, newBook.id);
+      renderAll();
+      showToast(`✓ 已建本【${name}】`);
+    }
+
+    function openNoteModal(noteId = null) {
+      const modal = document.getElementById("noteModalBackdrop");
+      const delBtn = document.getElementById("deleteNoteBtn");
+      const editor = document.getElementById("noteContentInput");
+
+      if (noteId) {
+        const n = AppData.notes.find(x => x.id === noteId);
+        const parentBook = AppData.books.find(b => b.id === n.bookId);
+        const catId = parentBook ? parentBook.categoryId : activeCategoryId;
+
+        document.getElementById("editNoteId").value = n.id;
+        populateNoteModalDropdowns(catId, n.bookId);
+        document.getElementById("noteDateInput").value = n.date || "2026/8/1";
+        document.getElementById("noteTitleInput").value = n.title;
+        editor.innerHTML = n.content || "";
+        document.getElementById("noteModalTitle").innerText = "编辑日记";
+        delBtn.style.display = "inline-flex";
+      } else {
+        document.getElementById("editNoteId").value = "";
+        populateNoteModalDropdowns(activeCategoryId);
+        document.getElementById("noteDateInput").value = new Date().toISOString().split("T")[0].replace(/-/g, "/");
+        document.getElementById("noteTitleInput").value = "";
+        editor.innerHTML = "";
+        document.getElementById("noteModalTitle").innerText = "写新日记";
+        delBtn.style.display = "none";
+      }
+      modal.classList.add("active");
+    }
+
+    function closeNoteModal() { document.getElementById("noteModalBackdrop").classList.remove("active"); }
+    function editNote(id) { openNoteModal(id); }
+
+    function saveNote() {
+      const id = document.getElementById("editNoteId").value;
+      const bookId = document.getElementById("noteBookSelect").value;
+      const date = document.getElementById("noteDateInput").value.trim();
+      const title = document.getElementById("noteTitleInput").value.trim();
+      const content = document.getElementById("noteContentInput").innerHTML;
+
+      if (!bookId) { showToast("请先选择或新建日记本", true); return; }
+      if (!title) { showToast("请输入日记标题", true); return; }
+
+      if (id) {
+        const n = AppData.notes.find(x => x.id === id);
+        if (n) { n.bookId = bookId; n.date = date; n.title = title; n.content = content; }
+      } else {
+        AppData.notes.unshift({ id: "n_" + Date.now(), bookId, date: date || "2026/8/1", title, content });
+      }
+
+      saveLocalData(AppData);
+      syncDataToR2();
+      closeNoteModal();
+      renderAccordion();
+      showToast("✓ 日记已保存并直传 R2");
+    }
+
+    function deleteCurrentNote() {
+      const id = document.getElementById("editNoteId").value;
+      if (!id) return;
+      if (!confirm("确定要删除这篇日记吗？")) return;
+      AppData.notes = AppData.notes.filter(n => n.id !== id);
+      saveLocalData(AppData);
+      syncDataToR2();
+      closeNoteModal();
+      renderAccordion();
+      showToast("✓ 删除成功");
+    }
+
+    document.getElementById("noteContentInput").addEventListener("paste", function(e) {
+      const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+      for (let index in items) {
+        const item = items[index];
+        if (item.kind === 'file' && item.type.indexOf('image/') !== -1) {
+          e.preventDefault();
+          const blob = item.getAsFile();
+          const reader = new FileReader();
+          reader.onload = function(event) { document.execCommand("insertImage", false, event.target.result); };
+          reader.readAsDataURL(blob);
+          return;
+        }
+      }
+    });
+
+    /* --- 管理中心 --- */
+    function openAuthModal() {
+      if (adminToken) {
+        if(confirm("当前已是解锁状态，是否要退出？")) {
+          adminToken = "";
+          sessionStorage.removeItem(AUTH_KEY);
+          updateAdminUI();
+          showToast("已退出管理");
+        }
+      } else {
+        document.getElementById("loginPwdInput").value = "";
+        document.getElementById("authModalBackdrop").classList.add("active");
+      }
+    }
+
+    function closeAuthModal() { document.getElementById("authModalBackdrop").classList.remove("active"); }
+
+    async function submitLogin() {
+      const pwd = document.getElementById("loginPwdInput").value;
+      if (!pwd) return;
+
+      try {
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: pwd })
+        });
+        const data = await res.json();
+        if (data.success) {
+          adminToken = data.token;
+          sessionStorage.setItem(AUTH_KEY, adminToken);
+          updateAdminUI();
+          closeAuthModal();
+          showToast("✓ 权限已解锁");
+        } else {
+          showToast(data.error || "口令错误", true);
+        }
+      } catch (_) { showToast("连接异常", true); }
+    }
+
+    function updateAdminUI() {
+      document.getElementById("authBtn").innerText = adminToken ? "🔓 已解锁" : "🔐 登录解锁";
+      document.getElementById("addCatBtn").style.display = adminToken ? "inline-flex" : "none";
+      document.getElementById("addBookBtn").style.display = adminToken ? "inline-flex" : "none";
+      document.getElementById("addNoteBtn").style.display = adminToken ? "inline-flex" : "none";
+      renderCategoryTabs();
+      renderAccordion();
+    }
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        exitFullscreen(); closeCategoryModal(); closeBookModal(); closeNoteModal(); closeAuthModal();
+      }
+    });
+
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById("toastMsg");
+      toast.innerText = msg;
+      toast.style.background = isError ? "rgba(220, 38, 38, 0.94)" : "rgba(31, 41, 55, 0.94)";
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    function escapeHtml(str) { return (str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+    renderAll();
+    initR2Sync();
+  </script>
+</body>
+</html>
