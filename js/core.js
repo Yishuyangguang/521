@@ -107,9 +107,14 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
+  // 🌟 新增：挂载旁路解锁事件监听，供前端引擎层触发免密跳过
+  window.addEventListener('gatekeeper:bypass', () => {
+    unlockMainUniverse(true);
+  });
+
   initGatekeeperUI();
   syncCloudData();
-  initAdminPortalTrigger(); // 🌟 挂载专属控制台事件拦截器
+  initAdminPortalTrigger(); 
 
   function initGatekeeperUI() {
     const gateCfg = config.gatekeeper || {};
@@ -142,12 +147,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // 🌟 独立挂载的后台控制台彩蛋触发器 (零污染原架构)
   function initAdminPortalTrigger() {
     if (!dom.heroNames) return;
     
     dom.heroNames.addEventListener('click', async (e) => {
-      // 物理切断冒泡，防误触底部的其他组件事件
       e.preventDefault();
       e.stopPropagation();
       
@@ -165,13 +168,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (result.success && result.isAdmin) {
           location.href = "admin.html";
         } else if (pwd.trim() === "521") {
-          // 本地开发或离线兜底
           location.href = "admin.html";
         } else {
           alert("❌ 密钥验证失败，您无权访问控制台。");
         }
       } catch (_) {
-        // 网络请求被墙或跨域失败情况下的防白屏兜底
         if (pwd.trim() === "521") {
           location.href = "admin.html";
         } else {
@@ -321,14 +322,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (config.meta.siteTitle) document.title = config.meta.siteTitle;
     }
 
-    if (window.ThemeEngine) {
-      window.ThemeEngine.init();
-    }
-
-    if (window.StageManager) {
-      window.StageManager.init();
-    }
-
+    if (window.ThemeEngine) window.ThemeEngine.init();
+    if (window.StageManager) window.StageManager.init();
     if (window.PhotoWallManager) {
       const photoWall = new window.PhotoWallManager(config);
       photoWall.init();
@@ -336,12 +331,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     initLicenseActivationTrigger();
 
-    if (config.gatekeeper && config.gatekeeper.enabled === false) {
-      unlockMainUniverse(false);
-    }
+    // 🌟 核心拦截重构：在这里我们仅仅同步数据，【严禁】在此处强制销毁门禁和树。
+    // 如果 config.gatekeeper.enabled === false，我们会在前台的 #rose-click-overlay 点击事件中读取它并直接跳转。
+    // 这样完美保留了“无论门禁开关，必须先看动画并点击一下”的设计哲学。
   }
 
-  // 🌟 修改：剥离旧有门禁的控制台验证后门，纯粹保留主页解锁逻辑
   async function verifyPassword(inputVal) {
     if (!inputVal) return;
 
@@ -368,7 +362,6 @@ document.addEventListener("DOMContentLoaded", () => {
         triggerPasswordError();
       }
     } catch (_) {
-      // 网络降级状态下，仅验证主页的通用密码（移除原有的 521 控制台跳转兜底）
       if (inputVal === "240520") {
         unlockMainUniverse(true);
       } else {
@@ -441,27 +434,36 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 50);
     }
 
-    if (window.StageManager) {
-      window.StageManager.init();
-    }
-
+    if (window.StageManager) window.StageManager.init();
     if (window.LifecycleEngine) {
       const lifecycleMgr = new window.LifecycleEngine(config);
       lifecycleMgr.init();
     }
-
     if (window.TimelineManager) {
       const timelineMgr = new window.TimelineManager(config);
       timelineMgr.init();
     }
 
-    // 🌟 广播时空解锁事件 (驱动右下角灵宠平滑淡入呈现)
+    // 🌟 广播时空解锁事件 (驱动右下角灵宠平滑淡入呈现，并让繁花树引擎感知销毁释放内存)
     window.dispatchEvent(new CustomEvent("universe:unlocked"));
 
     startTypewriter();
 
+    // 🌟 严格修复 BGM 自动播放导致的 Autoplay 报错问题
     if (config.audio && config.audio.bgmAutoPlay !== false && window.Effects) {
-      window.Effects.playBgm();
+      try {
+        window.Effects.playBgm();
+      } catch (e) {
+        // 如果依然被浏览器拦截，挂载一次隐形的全局重试监听
+        console.warn("BGM 自动播放被系统阻断，挂载降级用户交互恢复器...");
+        const fallbackPlay = () => {
+          try { window.Effects.playBgm(); } catch (err) {}
+          document.removeEventListener('click', fallbackPlay);
+          document.removeEventListener('touchstart', fallbackPlay);
+        };
+        document.addEventListener('click', fallbackPlay, { once: true });
+        document.addEventListener('touchstart', fallbackPlay, { once: true });
+      }
     }
   }
 
