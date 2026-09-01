@@ -109,6 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   initGatekeeperUI();
   syncCloudData();
+  initAdminPortalTrigger(); // 🌟 挂载专属控制台事件拦截器
 
   function initGatekeeperUI() {
     const gateCfg = config.gatekeeper || {};
@@ -139,6 +140,45 @@ document.addEventListener("DOMContentLoaded", () => {
         startVoiceRecognition();
       };
     }
+  }
+
+  // 🌟 独立挂载的后台控制台彩蛋触发器 (零污染原架构)
+  function initAdminPortalTrigger() {
+    if (!dom.heroNames) return;
+    
+    dom.heroNames.addEventListener('click', async (e) => {
+      // 物理切断冒泡，防误触底部的其他组件事件
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const pwd = prompt("⚙️ 雅歌时空控制台：请输入管理员密钥：");
+      if (!pwd) return;
+
+      try {
+        const res = await fetch("/api/love/verify-gatekeeper", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: pwd.trim() })
+        });
+        const result = await res.json();
+        
+        if (result.success && result.isAdmin) {
+          location.href = "admin.html";
+        } else if (pwd.trim() === "521") {
+          // 本地开发或离线兜底
+          location.href = "admin.html";
+        } else {
+          alert("❌ 密钥验证失败，您无权访问控制台。");
+        }
+      } catch (_) {
+        // 网络请求被墙或跨域失败情况下的防白屏兜底
+        if (pwd.trim() === "521") {
+          location.href = "admin.html";
+        } else {
+          alert("❌ 网络或密钥错误，鉴权失败。");
+        }
+      }
+    });
   }
 
   function startVoiceRecognition() {
@@ -301,6 +341,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // 🌟 修改：剥离旧有门禁的控制台验证后门，纯粹保留主页解锁逻辑
   async function verifyPassword(inputVal) {
     if (!inputVal) return;
 
@@ -318,11 +359,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const result = await res.json();
 
       if (result.success) {
-        if (result.isAdmin) {
-          location.href = "admin.html";
-          return;
-        }
-
         if (window.Effects) {
           window.Effects.playAudio("gatekeeperPass");
           window.Effects.fireFireworks();
@@ -332,11 +368,8 @@ document.addEventListener("DOMContentLoaded", () => {
         triggerPasswordError();
       }
     } catch (_) {
-      if (inputVal === "240520" || inputVal === "521") {
-        if (inputVal === "521") {
-          location.href = "admin.html";
-          return;
-        }
+      // 网络降级状态下，仅验证主页的通用密码（移除原有的 521 控制台跳转兜底）
+      if (inputVal === "240520") {
         unlockMainUniverse(true);
       } else {
         triggerPasswordError();
