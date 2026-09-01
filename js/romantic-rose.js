@@ -1,7 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印
  * 文件名: js/romantic-rose.js
- * 作用: 门禁背景专属 3D 粒子玫瑰与极客代码渲染引擎 (物理隔离，零污染)
+ * 作用: 门禁专属 3D 粒子代码引擎 (完全复刻图2: 钻石/泪滴状粒子云与代码滚动)
  */
 
 class RomanticRoseEngine {
@@ -16,12 +16,12 @@ class RomanticRoseEngine {
     this.animationFrameId = null;
     this.isRendering = false;
     
-    // 3D 粒子相关
+    // 3D 粒子
     this.particles = [];
     this.angleY = 0;
     this.fov = 300;
     
-    // 代码滚动相关
+    // 代码滚动 (复刻图2中的 Python 代码)
     this.codeLines = [];
     this.codeOffset = 0;
     this.pythonSnippets = [
@@ -33,17 +33,18 @@ class RomanticRoseEngine {
       "for x, y in self.parameters.points:",
       "    x, y = self.calc_position(x, y, ratio)",
       "    size = random.randint(1, 3)",
-      "    all_points.append((x, y, size))",
+      "    canvas.pack()",
+      "    draw(root, canvas, rose)",
       "def render(self, render_canvas, render_frame):",
       "    for x, y, size in self.parameters.all_points[render_frame]:",
-      "        render_canvas.create_rectangle(x, y, x + size, y + size, fill=COLOR)",
+      "        if size == 2:",
+      "            render_canvas.create_rectangle(x, y, x + size, y + size)",
       "if __name__ == '__main__':",
       "    root = Tk()",
       "    root.title('Crystal Rose')",
       "    canvas = Canvas(root, bg='black')",
       "    canvas.pack()",
-      "    rose = CrystalRose()",
-      "    draw(root, canvas, rose)",
+      "    rose = Heart()",
       "    root.mainloop()"
     ];
 
@@ -63,18 +64,17 @@ class RomanticRoseEngine {
       window.addEventListener('resize', this.resizeHandler);
       this.resize();
       
-      this.generateRoseParticles();
+      this.generateTeardropParticles(); // 使用专为图2推演的数学模型
       
-      // 初始化代码滚动行
-      for (let i = 0; i < 40; i++) {
+      for (let i = 0; i < 45; i++) {
         this.codeLines.push({
           text: this.pythonSnippets[Math.floor(Math.random() * this.pythonSnippets.length)],
-          opacity: Math.random() * 0.5 + 0.2
+          opacity: Math.random() * 0.4 + 0.1
         });
       }
 
       this.isRendering = true;
-      this.container.style.opacity = '0.85'; // 优雅淡入
+      this.container.style.opacity = '1';
       this.render();
 
     } catch (e) {
@@ -87,57 +87,53 @@ class RomanticRoseEngine {
     try {
       const dpr = window.devicePixelRatio || 1;
       
-      // 处理代码层画布
       const codeRect = this.codeCanvas.parentElement.getBoundingClientRect();
       this.codeCanvas.width = codeRect.width * dpr;
       this.codeCanvas.height = codeRect.height * dpr;
       this.codeCtx.scale(dpr, dpr);
 
-      // 处理粒子层画布
       const particleRect = this.particleCanvas.parentElement.getBoundingClientRect();
       this.particleCanvas.width = particleRect.width * dpr;
       this.particleCanvas.height = particleRect.height * dpr;
       this.particleCtx.scale(dpr, dpr);
 
-      // 动态调整视角深度以适配移动端
-      this.fov = particleRect.width < 500 ? 200 : 350;
-    } catch (e) {
-      // 捕获异常，确保不阻塞主线程
-    }
+      // 移动端动态调整景深
+      this.fov = particleRect.width < 500 ? 180 : 350;
+    } catch (e) {}
   }
 
-  generateRoseParticles() {
+  generateTeardropParticles() {
     this.particles = [];
-    const particleCount = 4500; // 在性能与视觉中取平衡
+    const particleCount = 6500; // 高密度粒子云
 
-    // 核心算法：参数化 3D 玫瑰曲面生成
     for (let i = 0; i < particleCount; i++) {
-      const u = Math.random() * 24; // 卷曲层数
-      const v = Math.random();
+      // Y轴: 1 为顶部尖端, -1 为底部圆盘
+      const y = Math.random() * 2 - 1;
       
-      // 花瓣公式
-      const r = 100 * (1 - v) * (1 + 0.3 * Math.sin(u * 2));
-      const x = r * Math.cos(u) * Math.sin(v * Math.PI);
-      const z = r * Math.sin(u) * Math.sin(v * Math.PI);
-      const y = -140 * v + 60; // 从下往上的纵深
+      // 核心公式：推演出的泪滴/钻石体积曲面 (R_max 随着 y 变化)
+      const maxR = (1 - y) * Math.sqrt(1 + y) * 75;
+      
+      // 让粒子集中在外壳与核心 (图2的特征)
+      const r = maxR * (Math.random() > 0.3 ? Math.pow(Math.random(), 0.3) : Math.pow(Math.random(), 1.5));
+      
+      const theta = Math.random() * Math.PI * 2;
+      const x = r * Math.cos(theta);
+      const z = r * Math.sin(theta);
 
-      // 添加混沌噪声，使其更有“粒子感”
-      const noiseX = (Math.random() - 0.5) * 8;
-      const noiseY = (Math.random() - 0.5) * 8;
-      const noiseZ = (Math.random() - 0.5) * 8;
-
-      // 花瓣颜色分布：外层偏粉白，内层深红
-      const colorRatio = v;
+      // 匹配图2的红紫色调梯度
       let color;
-      if (colorRatio > 0.7) color = '#fecdd3';
-      else if (colorRatio > 0.4) color = '#fb7185';
-      else if (colorRatio > 0.2) color = '#e11d48';
-      else color = '#9f1239';
+      if (y > 0.6) color = '#fbcfe8';       // 顶部粉白
+      else if (y > 0.1) color = '#f43f5e';  // 中上亮红
+      else if (y > -0.5) color = '#be123c'; // 中下深红
+      else color = '#881337';               // 底部暗红
+
+      // 加入混沌噪点增加极客感
+      const noise = () => (Math.random() - 0.5) * 3;
 
       this.particles.push({
-        x: x + noiseX,
-        y: y + noiseY,
-        z: z + noiseZ,
+        x: x + noise(),
+        y: -y * 110, // Y轴反转放大映射到屏幕
+        z: z + noise(),
         size: Math.random() * 1.5 + 0.5,
         color: color
       });
@@ -146,14 +142,10 @@ class RomanticRoseEngine {
 
   render() {
     if (!this.isRendering) return;
-
     try {
       this.drawCode();
       this.drawRose();
-    } catch (e) {
-      console.warn("[RoseEngine] 渲染帧抛出异常:", e);
-    }
-
+    } catch (e) {}
     this.animationFrameId = requestAnimationFrame(() => this.render());
   }
 
@@ -162,19 +154,18 @@ class RomanticRoseEngine {
     const h = this.codeCanvas.height / (window.devicePixelRatio || 1);
     
     this.codeCtx.clearRect(0, 0, w, h);
-    
-    this.codeCtx.font = '12px ui-monospace, SFMono-Regular, Menlo, monospace';
+    this.codeCtx.font = '13px ui-monospace, SFMono-Regular, Menlo, monospace';
     this.codeCtx.textAlign = 'left';
     
-    const lineHeight = 20;
-    this.codeOffset -= 0.5; // 向上滚动速度
+    const lineHeight = 22;
+    this.codeOffset -= 0.6; 
     
     if (this.codeOffset < -lineHeight) {
       this.codeOffset = 0;
       this.codeLines.shift();
       this.codeLines.push({
         text: this.pythonSnippets[Math.floor(Math.random() * this.pythonSnippets.length)],
-        opacity: Math.random() * 0.5 + 0.2
+        opacity: Math.random() * 0.4 + 0.1
       });
     }
 
@@ -183,7 +174,8 @@ class RomanticRoseEngine {
       const y = i * lineHeight + this.codeOffset;
       
       if (y > 0 && y < h + lineHeight) {
-        this.codeCtx.fillStyle = `rgba(244, 63, 94, ${line.opacity})`; // 浪漫粉色代码
+        // 图2中代码为暗红色系
+        this.codeCtx.fillStyle = `rgba(190, 18, 60, ${line.opacity})`; 
         this.codeCtx.fillText(line.text, 20, y);
       }
     }
@@ -193,29 +185,25 @@ class RomanticRoseEngine {
     const w = this.particleCanvas.width / (window.devicePixelRatio || 1);
     const h = this.particleCanvas.height / (window.devicePixelRatio || 1);
     const centerX = w / 2;
-    const centerY = h / 2 + 20; // 略微偏下，留出空间
+    const centerY = h / 2 + 10; 
 
     this.particleCtx.clearRect(0, 0, w, h);
 
-    this.angleY += 0.006; // 匀速自转
+    this.angleY += 0.007; // 匀速旋转
     const cosY = Math.cos(this.angleY);
     const sinY = Math.sin(this.angleY);
 
-    // 计算透视投影与排序 (Z-buffer)
     const projected = [];
     for (let i = 0; i < this.particles.length; i++) {
       const p = this.particles[i];
       
-      // 绕 Y 轴旋转
       const rotX = p.x * cosY - p.z * sinY;
       const rotZ = p.x * sinY + p.z * cosY;
       
-      // 3D 投影至 2D 屏幕
       const scale = this.fov / (this.fov + rotZ);
       const screenX = centerX + rotX * scale;
       const screenY = centerY + p.y * scale;
       
-      // 仅渲染视口内的粒子以节约性能
       if (screenX > -50 && screenX < w + 50 && screenY > -50 && screenY < h + 50) {
         projected.push({
           x: screenX,
@@ -227,10 +215,9 @@ class RomanticRoseEngine {
       }
     }
 
-    // 从远到近排序（画家算法），保证 3D 纵深感
+    // 画家算法排序 (Z-buffer)
     projected.sort((a, b) => b.z - a.z);
 
-    // 批量渲染粒子
     for (let i = 0; i < projected.length; i++) {
       const p = projected[i];
       this.particleCtx.fillStyle = p.color;
@@ -240,9 +227,7 @@ class RomanticRoseEngine {
 
   destroy() {
     this.isRendering = false;
-    if (this.animationFrameId) {
-      cancelAnimationFrame(this.animationFrameId);
-    }
+    if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
     window.removeEventListener('resize', this.resizeHandler);
     
     if (this.container) this.container.style.opacity = '0';
@@ -251,9 +236,7 @@ class RomanticRoseEngine {
     
     this.particles = [];
     this.codeLines = [];
-    console.log("[RoseEngine] 粒子引擎已物理销毁，释放内存。");
   }
 }
 
-// 自动挂载至全局对象，等待生命周期调度
 window.RomanticRoseEngine = RomanticRoseEngine;
