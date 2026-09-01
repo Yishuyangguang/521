@@ -1,21 +1,20 @@
 /**
  * 众水不灭 · 雅歌之印
  * 文件名: css/photo-wall.css
- * 作用: 全景流式视差照片墙样式 (开启 GPU 硬件加速与渲染边界隔离，彻底杜绝滚动穿透与卡顿)
+ * 作用: 全景流式视差照片墙样式 (开启 GPU 硬件加速与渲染边界物理隔离，彻底杜绝滚动撑长)
  */
 
 .parallax-photo-wall {
-  position: absolute;
-  top: 0;
-  left: 0;
+  /* 🌟 核心拦截机制：彻底固定容器大小，切断内部元素撑开 body 的可能 */
+  position: fixed;
+  inset: 0;
   width: 100%;
-  max-width: 100%;
-  min-height: 100%;
-  height: auto;
+  height: 100vh;
+  height: 100dvh; /* 适配移动端安全视口 */
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
-  contain: layout paint; /* 隔绝内部元素对主文档流的重排影响 */
+  contain: strict; /* 开启最高级别浏览器内存优化隔离 */
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
 }
@@ -75,7 +74,7 @@
   letter-spacing: 0.5px;
 }
 
-/* ================= 2. 其他流式倾斜视差照片墙 (Regular Photo Wall) ================= */
+/* ================= 2. 呼吸池流式视差照片墙 (Regular Photo Wall) ================= */
 .wall-polaroid-item {
   position: absolute;
   width: 120px;
@@ -83,11 +82,12 @@
   padding: 8px 8px 22px 8px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
   border-radius: 4px;
-  opacity: 0.85;
-  will-change: transform;
+  opacity: 0; /* 初始由 JS 控制淡入 */
+  will-change: transform, opacity;
   pointer-events: none; /* 悬浮背景图不拦截手势，释放全屏极速惯性滚动 */
   contain: paint layout;
-  transition: opacity 0.3s ease;
+  /* 🌟 核心：为呼吸算法注入绝美的 CSS 平滑缓动 */
+  transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .wall-polaroid-inner {
@@ -120,7 +120,6 @@
   .wall-polaroid-item {
     width: 145px;
     padding: 10px 10px 26px 10px;
-    opacity: 0.9;
   }
   .wall-polaroid-inner {
     height: 130px;
@@ -145,7 +144,6 @@
   .wall-polaroid-item {
     width: 78px;
     padding: 4px 4px 12px 4px;
-    opacity: 0.75;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
   .wall-polaroid-inner {
