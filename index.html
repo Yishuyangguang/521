@@ -190,10 +190,10 @@
       </div>
     </div>
 
-    <!-- 🌟 新增：全屏透明事件捕获层，阻挡一切，点击后消失并唤醒密码框 -->
-    <div id="rose-click-overlay" style="position: absolute; inset: 0; z-index: 5; cursor: pointer;" title="点击唤醒契约验证"></div>
+    <!-- 🌟 新增：全屏透明事件捕获层，阻挡一切，点击后消失并触发分发 -->
+    <div id="rose-click-overlay" style="position: absolute; inset: 0; z-index: 5; cursor: pointer;" title="点击唤醒专属时空"></div>
 
-    <!-- 🌟 升级：隐藏的输入框，只有当用户欣赏完动画，点击屏幕后才展现 -->
+    <!-- 🌟 升级：隐藏的输入框，根据后台配置决定是否展现 -->
     <div class="gatekeeper__dialog gatekeeper__dialog--hidden" id="gatekeeper-dialog" style="position: relative; z-index: 10;">
       <div class="gatekeeper__header">
         <div class="gatekeeper__badge">SACRED ARCHIVE</div>
@@ -542,27 +542,42 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       
-      // 🌟 新增：独立启动与卸载流体引擎
+      // 🌟 独立启动流体引擎
       if (window.RomanticRoseEngine) {
         window.roseEngineInstance = new window.RomanticRoseEngine();
         window.roseEngineInstance.init();
         
-        // 当验证成功解锁宇宙时，物理销毁引擎释放显存
+        // 解锁后物理销毁引擎
         window.addEventListener("universe:unlocked", () => {
           if (window.roseEngineInstance) window.roseEngineInstance.destroy();
         });
       }
 
-      // 🌟 新增：点击屏幕任意处，唤醒密码输入框
+      // 🌟 核心路由拦截：点击透明层后的智能分发
       const roseOverlay = document.getElementById('rose-click-overlay');
       const gatekeeperDialog = document.getElementById('gatekeeper-dialog');
+      
       if (roseOverlay && gatekeeperDialog) {
         roseOverlay.addEventListener('click', () => {
-          roseOverlay.style.display = 'none'; // 销毁点击拦截层
-          gatekeeperDialog.classList.remove('gatekeeper__dialog--hidden'); // 唤醒输入框动画
+          roseOverlay.style.display = 'none'; // 立即销毁点击拦截层，释放下方焦点
+          
+          // 实时读取最新的配置状态（兼容本地配置与云端异步下发配置）
+          const config = window.LOVE_CONFIG || {};
+          // 默认门禁为开启状态，除非明确配置了 enabled: false
+          const isGatekeeperEnabled = config.gatekeeper ? config.gatekeeper.enabled !== false : true;
+          
+          if (isGatekeeperEnabled) {
+            // 后台开启了门禁：平滑展现密码框，等待用户输入
+            gatekeeperDialog.classList.remove('gatekeeper__dialog--hidden'); 
+          } else {
+            // 后台关闭了门禁：派发物理跳级事件，直接解锁主宇宙
+            // ⚠️ 重点：此派发在 click 事件的同步调用栈中，完美继承了用户的物理点击凭证，确保 BGM 可自动播放！
+            window.dispatchEvent(new Event('gatekeeper:bypass'));
+          }
         });
       }
 
+      // 🌟 初始化其他业务模块
       if (window.ThemeEngine) window.ThemeEngine.init();
       if (window.StageManager) window.StageManager.init();
       if (window.AnniversaryManager && window.LOVE_CONFIG) {
