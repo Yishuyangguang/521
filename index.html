@@ -114,14 +114,14 @@
       transform: scale(1.02);
     }
 
-    /* 🌟 新增：门禁粒子玫瑰引擎容器专属样式 (安全边界) */
+    /* 🌟 新增：生命之树与溪水粒子引擎专属容器 (防坍塌边界锁) */
     .romantic-rose-container {
-      position: absolute;
+      position: fixed; /* 使用 fixed 脱离文档流，彻底防止被虚拟键盘影响高度 */
       inset: 0;
       z-index: 0; 
       display: flex;
       flex-direction: row;
-      pointer-events: none; 
+      pointer-events: none; /* 防止遮挡下层点击 */
       opacity: 0;
       transition: opacity 1.5s ease-in;
     }
@@ -138,16 +138,16 @@
       height: 100%;
       display: block;
     }
-    /* 🌟 新增：保证手机端能完整显示，改为上下排布 */
+    /* 响应式多端流转：手机端降级为上下分屏 */
     @media (max-width: 768px) {
       .romantic-rose-container {
         flex-direction: column;
       }
-      .romantic-canvas-wrap:nth-child(1) { flex: 0.4; } /* 顶部40%留给代码 */
-      .romantic-canvas-wrap:nth-child(2) { flex: 0.6; } /* 底部60%留给玫瑰 */
+      .romantic-canvas-wrap:nth-child(1) { flex: 0.35; } /* 顶部留给代码 */
+      .romantic-canvas-wrap:nth-child(2) { flex: 0.65; } /* 底部大面积留给繁花树 */
     }
 
-    /* 🌟 核心拦截逻辑：弹窗初始隐藏并缩小 */
+    /* 🌟 核心拦截逻辑：弹窗初始隐藏，被事件捕获层罩住 */
     .gatekeeper__dialog {
       transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
@@ -160,10 +160,8 @@
 </head>
 <body class="universe-body">
 
-  <!-- 🖼️ 独立硬件加速全视口固定背景层 -->
   <div id="universe-bg-layer" class="universe-bg-layer"></div>
 
-  <!-- 顶部非侵入微光通知胶囊横幅 -->
   <div id="icebreaker-banner" class="icebreaker-banner">
     <span class="icebreaker-banner__icon">🕊️</span>
     <span id="icebreaker-banner-text" class="icebreaker-banner__text">收到对方递来的一封信笺...</span>
@@ -182,7 +180,7 @@
   <!-- 🔒 门禁关卡 -->
   <section id="gatekeeper-screen" class="gatekeeper">
     
-    <!-- 🌟 新增：粒子玫瑰代码特效层 -->
+    <!-- 🌟 新增：繁花树与溪水 3D 渲染层 -->
     <div class="romantic-rose-container" id="romantic-rose-container">
       <div class="romantic-canvas-wrap">
         <canvas id="rose-code-canvas"></canvas>
@@ -192,10 +190,10 @@
       </div>
     </div>
 
-    <!-- 🌟 新增：全屏透明事件捕获层，点击后消失并唤醒密码框 -->
+    <!-- 🌟 新增：全屏透明事件捕获层，阻挡一切，点击后消失并唤醒密码框 -->
     <div id="rose-click-overlay" style="position: absolute; inset: 0; z-index: 5; cursor: pointer;" title="点击唤醒契约验证"></div>
 
-    <!-- 🌟 修改：加入 gatekeeper__dialog--hidden 使得弹窗在初次进入时隐藏 -->
+    <!-- 🌟 升级：隐藏的输入框，只有当用户欣赏完动画，点击屏幕后才展现 -->
     <div class="gatekeeper__dialog gatekeeper__dialog--hidden" id="gatekeeper-dialog" style="position: relative; z-index: 10;">
       <div class="gatekeeper__header">
         <div class="gatekeeper__badge">SACRED ARCHIVE</div>
@@ -220,7 +218,6 @@
 
   <!-- 🌌 主屏幕中枢 (Home Hub) -->
   <main id="main-container" class="main-container main-container--hidden">
-    <!-- 头部主角与同行时间守护 -->
     <header class="hero-section">
       <h1 class="hero-section__names" id="hero-names">张小阳 <span class="name-connector">&</span> 李小光</h1>
       <div class="hero-section__badge">THE ETERNAL SEAL</div>
@@ -237,7 +234,6 @@
       </div>
     </header>
 
-    <!-- 主页告白真情手迹 -->
     <section class="confession-section">
       <div class="confession-card">
         <h3 class="confession-card__title" id="letter-title">致我生命中的唯一</h3>
@@ -320,11 +316,9 @@
     </footer>
   </main>
 
-  <!-- ================= 🎪 全屏沉浸分幕容器 (Stage Modals) ================= -->
   <div id="stage-modal-overlay" class="stage-overlay" onclick="if(window.StageManager) window.StageManager.closeStage()"></div>
   <div id="stage-modal-container" class="stage-container">
 
-    <!-- 舞台 1: 时光轨迹 · 雅歌印记 -->
     <section id="stage-timeline" class="stage-modal">
       <div class="stage-modal__header">
         <div class="stage-modal__title-box">
@@ -341,7 +335,6 @@
       </div>
     </section>
 
-    <!-- 舞台 2: 时光刻度 · 恒久倒数 -->
     <section id="stage-anniversary" class="stage-modal">
       <div class="stage-modal__header">
         <div class="stage-modal__title-box">
@@ -358,7 +351,6 @@
       </div>
     </section>
 
-    <!-- 舞台 3: 破冰和解 · 情感信号箱 -->
     <section id="stage-icebreaker" class="stage-modal">
       <div class="stage-modal__header">
         <div class="stage-modal__title-box">
@@ -383,7 +375,6 @@
       </div>
     </section>
 
-    <!-- 舞台 4: 同行约定 · 待办清单 -->
     <section id="stage-checklist" class="stage-modal">
       <div class="stage-modal__header">
         <div class="stage-modal__title-box">
@@ -412,7 +403,6 @@
       </div>
     </section>
 
-    <!-- 舞台 5: 舍己包容 · 特权刮刮乐 -->
     <section id="stage-scratch" class="stage-modal">
       <div class="stage-modal__header">
         <div class="stage-modal__title-box">
@@ -430,7 +420,6 @@
       </div>
     </section>
 
-    <!-- 舞台 6: 永存资产 · 导出海报 -->
     <section id="stage-poster" class="stage-modal">
       <div class="stage-modal__header">
         <div class="stage-modal__title-box">
@@ -458,7 +447,6 @@
 
   </div>
 
-  <!-- ================= 3. 极简半透明悬浮爱心音乐晶体 ================= -->
   <aside class="vinyl-player" id="vinyl-player">
     <div class="heart-music-capsule" id="heart-music-capsule" title="单击：播放/暂停 | 长按或双击：专属歌单">
       <div class="heart-music-core">
@@ -469,7 +457,6 @@
     </div>
   </aside>
 
-  <!-- 🎵 隐藏式歌曲列表弹出抽屉 -->
   <div class="playlist-drawer" id="playlist-drawer">
     <div class="playlist-drawer__header">
       <div class="playlist-drawer__title"><span>🎵 专属背景音乐列表</span></div>
@@ -488,7 +475,6 @@
     </div>
   </div>
 
-  <!-- 全站大纪念海报预览弹窗 -->
   <div class="poster-modal" id="poster-modal">
     <div class="poster-modal__dialog">
       <div class="poster-modal__preview-box" id="poster-preview-box"></div>
@@ -500,7 +486,6 @@
     </div>
   </div>
 
-  <!-- 单卡 300DPI 拍立得海报预览弹窗 -->
   <div class="poster-modal" id="single-poster-modal" style="display:none;">
     <div class="poster-modal__dialog">
       <div class="poster-modal__preview-box" id="single-poster-preview-box"></div>
@@ -512,7 +497,6 @@
     </div>
   </div>
 
-  <!-- 沉浸式全屏和解空间覆盖层 -->
   <div id="icebreaker-modal" class="icebreaker-modal">
     <div class="icebreaker-modal__dialog">
       <div id="icebreaker-modal-badge" class="icebreaker-modal__badge">SACRED COVENANT</div>
@@ -524,7 +508,6 @@
     </div>
   </div>
 
-  <!-- 🌟 破冰和好 300DPI 拍立得海报预览弹窗 -->
   <div class="poster-modal" id="icebreaker-poster-modal" style="display:none;">
     <div class="poster-modal__dialog">
       <div class="poster-modal__preview-box" id="icebreaker-poster-preview-box"></div>
@@ -538,7 +521,7 @@
 
   <script src="js/config.js?v=2.5"></script>
   
-  <!-- 🌟 独立引入：粒子玫瑰模块 -->
+  <!-- 🌟 独立引入：粒子流体引擎 (繁花生命之树与溪水) -->
   <script src="js/romantic-rose.js?v=2.5"></script>
   
   <script src="js/theme-presets.js?v=2.5"></script>
@@ -559,7 +542,7 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       
-      // 🌟 新增：独立启动与卸载粒子引擎
+      // 🌟 新增：独立启动与卸载流体引擎
       if (window.RomanticRoseEngine) {
         window.roseEngineInstance = new window.RomanticRoseEngine();
         window.roseEngineInstance.init();
