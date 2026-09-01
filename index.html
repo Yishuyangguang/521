@@ -116,6 +116,37 @@
       box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
       transform: scale(1.02);
     }
+
+    /* 🌟 新增：门禁粒子玫瑰引擎容器专属样式 (安全边界) */
+    .romantic-rose-container {
+      position: absolute;
+      inset: 0;
+      z-index: 0; /* 放置于门禁弹窗下方，背景图上方 */
+      display: flex;
+      flex-direction: row;
+      pointer-events: none; /* 彻底防御鼠标事件劫持，保证密码框可点 */
+      opacity: 0;
+      transition: opacity 1.5s ease-in;
+    }
+    .romantic-canvas-wrap {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+    .romantic-canvas-wrap canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    /* 响应式多端流转：手机端由左右分屏降级为上下分屏 */
+    @media (max-width: 768px) {
+      .romantic-rose-container {
+        flex-direction: column;
+      }
+    }
   </style>
 </head>
 <body class="universe-body">
@@ -141,7 +172,19 @@
 
   <!-- 🔒 门禁关卡 -->
   <section id="gatekeeper-screen" class="gatekeeper">
-    <div class="gatekeeper__dialog">
+    
+    <!-- 🌟 新增：粒子玫瑰代码特效层 (物理隔离区) -->
+    <div class="romantic-rose-container" id="romantic-rose-container">
+      <div class="romantic-canvas-wrap">
+        <canvas id="rose-code-canvas"></canvas>
+      </div>
+      <div class="romantic-canvas-wrap">
+        <canvas id="rose-particle-canvas"></canvas>
+      </div>
+    </div>
+
+    <!-- 🌟 升级：弹窗主体确保 z-index 更高，避免被动画层遮挡无法点击 -->
+    <div class="gatekeeper__dialog" style="position: relative; z-index: 10;">
       <div class="gatekeeper__header">
         <div class="gatekeeper__badge">SACRED ARCHIVE</div>
         <h2 class="gatekeeper__title" id="gatekeeper-title">🔒 验证恒久契约</h2>
@@ -482,6 +525,10 @@
   </div>
 
   <script src="js/config.js?v=2.5"></script>
+  
+  <!-- 🌟 新增引入：粒子玫瑰模块 (必须放在前排确保早期执行) -->
+  <script src="js/romantic-rose.js?v=2.5"></script>
+  
   <script src="js/theme-presets.js?v=2.5"></script>
   <script src="js/stage-content.js?v=2.5"></script>
   <script src="js/theme-engine.js?v=2.5"></script>
@@ -499,6 +546,18 @@
   <script src="js/core.js?v=2.5"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      
+      // 🌟 新增：独立启动与卸载粒子引擎 (零侵入式闭环管理)
+      if (window.RomanticRoseEngine) {
+        window.roseEngineInstance = new window.RomanticRoseEngine();
+        window.roseEngineInstance.init();
+        
+        // 挂载原版核心生命周期监听，一旦解锁，物理销毁引擎释放内存
+        window.addEventListener("universe:unlocked", () => {
+          if (window.roseEngineInstance) window.roseEngineInstance.destroy();
+        });
+      }
+
       if (window.ThemeEngine) {
         window.ThemeEngine.init();
       }
