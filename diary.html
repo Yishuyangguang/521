@@ -484,7 +484,8 @@
           <button class="btn" style="padding:2px 8px; font-size:11px;" onclick="setFontSize('large')">A+</button>
         </div>
         <button class="btn btn-gold" id="fsEditBtn" onclick="editFromFullscreen()">✏️ 编辑</button>
-        <button class="btn" id="fsExitBtn" onclick="exitFullscreen()">✕ 退出全屏</button>
+        <!-- 🌟 修复底层拦截漏洞：改为独立函数 closeFullscreenReader -->
+        <button class="btn" id="fsExitBtn" onclick="closeFullscreenReader()">✕ 退出全屏</button>
       </div>
     </div>
 
@@ -519,6 +520,7 @@
         </div>
       </div>
       <div class="modal-footer">
+        <!-- 保留底层按钮功能作为冗余，由前台直击按钮取代 -->
         <button class="btn" style="background:#fee2e2; color:#b91c1c; display:none;" id="deleteCategoryBtn" onclick="deleteCurrentCategory()">🗑️ 删除模块</button>
         <div style="display:flex; gap:8px; margin-left:auto;">
           <button class="btn" onclick="closeCategoryModal()">取消</button>
@@ -547,6 +549,7 @@
         </div>
       </div>
       <div class="modal-footer">
+        <!-- 保留底层按钮功能作为冗余 -->
         <button class="btn" style="background:#fee2e2; color:#b91c1c; display:none;" id="deleteBookBtn" onclick="deleteCurrentBook()">🗑️ 删除日记本</button>
         <div style="display:flex; gap:8px; margin-left:auto;">
           <button class="btn" onclick="closeBookModal()">取消</button>
@@ -598,6 +601,7 @@
         </div>
       </div>
       <div class="modal-footer">
+        <!-- 保留底层按钮功能作为冗余 -->
         <button class="btn" style="background:#fee2e2; color:#b91c1c; display:none;" id="deleteNoteBtn" onclick="deleteCurrentNote()">🗑️ 删除记录</button>
         <div style="display:flex; gap:8px; margin-left:auto;">
           <button class="btn" onclick="closeNoteModal()">取消</button>
@@ -760,9 +764,13 @@
         const isActive = (cat.id === activeCategoryId);
         btn.className = `tab-btn ${isActive ? 'active' : ''}`;
         
+        // 🌟 核心：外置直击删除快捷键
         btn.innerHTML = `
           <span>${cat.icon || '📖'} ${escapeHtml(cat.name)}</span>
-          ${adminToken ? `<span class="tab-edit-dot" onclick="event.stopPropagation(); editCategory('${cat.id}')" title="编辑/删除分类">✏️</span>` : ''}
+          ${adminToken ? `
+            <span class="tab-edit-dot" onclick="event.stopPropagation(); editCategory('${cat.id}')" title="编辑分类">✏️</span>
+            <span class="tab-edit-dot" onclick="event.stopPropagation(); deleteCategoryPrompt('${cat.id}')" title="删除分类">🗑️</span>
+          ` : ''}
         `;
         btn.onclick = () => switchCategory(cat.id);
         container.appendChild(btn);
@@ -801,11 +809,15 @@
         card.className = "book-card";
         const isCollapsed = book.collapsed && !searchKeyword;
 
+        // 🌟 核心：为日记本增加外置直击删除功能
         card.innerHTML = `
           <div class="book-header" onclick="toggleBookCollapse('${book.id}')">
             <div class="book-title-wrap">
               <span>📖 ${escapeHtml(book.name)}</span>
-              ${adminToken ? `<span class="mini-icon-btn" onclick="event.stopPropagation(); editBook('${book.id}')" title="编辑/删除日记本">✏️</span>` : ''}
+              ${adminToken ? `
+                <span class="mini-icon-btn" onclick="event.stopPropagation(); editBook('${book.id}')" title="编辑日记本">✏️</span>
+                <span class="mini-icon-btn" style="color:#ef4444; border-color:#fecaca;" onclick="event.stopPropagation(); deleteBookPrompt('${book.id}')" title="删除日记本">🗑️</span>
+              ` : ''}
             </div>
             <span class="arrow-icon ${isCollapsed ? 'collapsed' : ''}">▼</span>
           </div>
@@ -821,11 +833,15 @@
           item.className = "note-item";
           item.onclick = () => openFullscreen(note.id);
 
+          // 🌟 核心：为单篇日记增加外置直击删除功能
           item.innerHTML = `
             <div class="note-title-left">
               <span>📄</span>
               <span>${escapeHtml(note.title)}</span>
-              ${adminToken ? `<span class="mini-icon-btn" onclick="event.stopPropagation(); editNote('${note.id}')" title="编辑/删除日记">✏️</span>` : ''}
+              ${adminToken ? `
+                <span class="mini-icon-btn" onclick="event.stopPropagation(); editNote('${note.id}')" title="编辑日记">✏️</span>
+                <span class="mini-icon-btn" style="color:#ef4444; border-color:#fecaca;" onclick="event.stopPropagation(); deleteNotePrompt('${note.id}')" title="删除日记">🗑️</span>
+              ` : ''}
             </div>
             <div class="note-meta-right">
               <span>${note.date || '2026/8/1'}</span>
@@ -868,7 +884,10 @@
       document.getElementById("fullscreenReader").classList.add("active");
     }
 
-    function exitFullscreen() { document.getElementById("fullscreenReader").classList.remove("active"); }
+    /* 🌟 重构：替换冲突的内置原生全局变量名称，修复全屏无法退出的 BUG */
+    function closeFullscreenReader() { 
+      document.getElementById("fullscreenReader").classList.remove("active"); 
+    }
 
     function setFontSize(size) {
       const el = document.getElementById("fsContent");
@@ -877,7 +896,7 @@
     }
 
     function editFromFullscreen() {
-      exitFullscreen();
+      closeFullscreenReader();
       if (activeReadingNoteId) editNote(activeReadingNoteId);
     }
 
@@ -928,8 +947,8 @@
       showToast("✓ 分类已保存");
     }
 
-    function deleteCurrentCategory() {
-      const id = document.getElementById("editCategoryId").value;
+    /* 🌟 核心：分离出独立的直击删除引擎 */
+    function deleteCategoryPrompt(id) {
       if (!id) return;
       const cat = AppData.categories.find(c => c.id === id);
       const bookCount = AppData.books.filter(b => b.categoryId === id).length;
@@ -944,9 +963,13 @@
 
       saveLocalData(AppData);
       syncDataToR2();
-      closeCategoryModal();
+      if (document.getElementById("editCategoryId").value === id) closeCategoryModal();
       renderAll();
       showToast("✓ 分类及关联数据已清空");
+    }
+    
+    function deleteCurrentCategory() {
+      deleteCategoryPrompt(document.getElementById("editCategoryId").value);
     }
 
     function openBookModal(bookId = null) {
@@ -1003,8 +1026,8 @@
       showToast("✓ 日记本已保存并同步");
     }
 
-    function deleteCurrentBook() {
-      const id = document.getElementById("editBookId").value;
+    /* 🌟 核心：分离出独立的直击删除引擎 */
+    function deleteBookPrompt(id) {
       if (!id) return;
       const b = AppData.books.find(x => x.id === id);
       const count = AppData.notes.filter(n => n.bookId === id).length;
@@ -1015,9 +1038,13 @@
 
       saveLocalData(AppData);
       syncDataToR2();
-      closeBookModal();
+      if (document.getElementById("editBookId").value === id) closeBookModal();
       renderAll();
-      showToast("✓ 彻底删除");
+      showToast("✓ 日记本彻底删除");
+    }
+    
+    function deleteCurrentBook() {
+      deleteBookPrompt(document.getElementById("editBookId").value);
     }
 
     function populateNoteModalDropdowns(selectedCatId, targetBookId = null) {
@@ -1129,16 +1156,20 @@
       showToast("✓ 日记已保存并直传云端");
     }
 
-    function deleteCurrentNote() {
-      const id = document.getElementById("editNoteId").value;
+    /* 🌟 核心：分离出独立的直击删除引擎 */
+    function deleteNotePrompt(id) {
       if (!id) return;
-      if (!confirm("确定要删除这篇日记吗？")) return;
+      if (!confirm("确定要彻底删除这篇日记吗？")) return;
       AppData.notes = AppData.notes.filter(n => n.id !== id);
       saveLocalData(AppData);
       syncDataToR2();
-      closeNoteModal();
+      if (document.getElementById("editNoteId").value === id) closeNoteModal();
       renderAccordion();
-      showToast("✓ 删除成功");
+      showToast("✓ 日记删除成功");
+    }
+    
+    function deleteCurrentNote() {
+      deleteNotePrompt(document.getElementById("editNoteId").value);
     }
 
     /* --- 管理中心 --- */
@@ -1199,7 +1230,7 @@
 
     window.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
-        exitFullscreen(); closeCategoryModal(); closeBookModal(); closeNoteModal(); closeAuthModal();
+        closeFullscreenReader(); closeCategoryModal(); closeBookModal(); closeNoteModal(); closeAuthModal();
       }
     });
 
