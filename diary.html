@@ -321,6 +321,26 @@
       to { opacity: 1; transform: scale(1) translateY(0); }
     }
 
+    /* 🌟 新增：全屏沉浸式编辑引擎 (Immersive Editor) */
+    .modal-window--immersive {
+      height: 88vh;
+      max-width: 900px;
+    }
+    .modal-window--immersive .modal-body {
+      display: flex;
+      flex-direction: column;
+    }
+    .form-group-editor {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .form-group-editor .rich-editor-box {
+      flex: 1;
+      max-height: none; 
+    }
+
     .modal-header {
       display: flex;
       justify-content: space-between;
@@ -410,13 +430,46 @@
     }
     .toast-msg.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+    /* 🌟 重构：防暗病独立栅格容器 */
+    .note-meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 1fr;
+      gap: 10px;
+    }
+    .quick-add-wrap {
+      background: rgba(254, 243, 199, 0.45);
+      border: 1px dashed #fde68a;
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    .quick-add-wrap span {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12.5px;
+      color: #92400e;
+      font-weight: 700;
+    }
+    .quick-add-inputs {
+      display: flex;
+      gap: 8px;
+    }
+    .quick-add-inputs input {
+      padding: 8px 12px;
+      font-size: 13px;
+      flex: 1;
+    }
+    .quick-add-inputs button {
+      padding: 6px 14px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
     /* 🌟 核心：移动端响应式降级引擎 */
     @media (max-width: 640px) {
-      .header-actions .text { display: none; } /* 隐藏文字，保留图标 */
-      .sync-pill { padding: 9px 11px; border-radius: 12px; } /* 缩小圆角变为方枕形 */
+      .header-actions .text { display: none; }
+      .sync-pill { padding: 9px 11px; border-radius: 12px; }
       .header-actions .btn { padding: 9px 11px; }
       
-      /* 强制使用 Grid 系统，保证分类标签绝对对称双列 */
       .category-tabs-wrap {
         display: grid !important;
         grid-template-columns: 1fr 1fr;
@@ -424,6 +477,26 @@
         gap: 10px;
       }
       .tab-btn { justify-content: center; width: 100%; }
+
+      /* 🌟 隐藏全屏阅读器顶部的冗长文字 */
+      .fs-brand-text { display: none !important; }
+
+      /* 🌟 将日记表单属性栏由 3 列强制改为 1 列垂直排列，彻底解决内容溢出 */
+      .note-meta-grid { 
+        grid-template-columns: 1fr !important; 
+        gap: 12px;
+      }
+
+      /* 🌟 手机端实现真正的物理全屏沉浸编辑 (防边界暗病) */
+      .modal-window.modal-window--immersive {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        max-width: 100%;
+        max-height: 100%;
+        height: 100%;
+        border-radius: 0;
+        border: none;
+      }
     }
   </style>
 </head>
@@ -433,7 +506,6 @@
 
   <div class="container">
     <header class="top-header">
-      <!-- 🌟 挂载一键返回主页路由 -->
       <div class="brand-logo" onclick="window.location.href='index.html'" title="返回主界面">
         <div class="brand-icon">🕊️</div>
         <div>
@@ -443,7 +515,6 @@
       </div>
 
       <div class="header-actions">
-        <!-- 🌟 挂载状态变色类名与独立隐藏区块 -->
         <span id="syncStatus" class="sync-pill status-success"><span class="icon">☁️</span><span class="text"> 云端已同步</span></span>
         <button id="authBtn" class="btn" onclick="openAuthModal()"><span class="icon">🔐</span><span class="text"> 登录解锁</span></button>
       </div>
@@ -474,7 +545,7 @@
     <div class="fs-header-bar">
       <div style="display:flex; align-items:center; gap:8px;">
         <span style="font-size:20px;">🕊️</span>
-        <span style="font-weight:800; color:#78350f; font-size:15px;">雅歌之印 · 沉浸回忆</span>
+        <span class="fs-brand-text" style="font-weight:800; color:#78350f; font-size:15px;">雅歌之印 · 沉浸回忆</span>
       </div>
 
       <div style="display:flex; align-items:center; gap:10px;">
@@ -484,7 +555,6 @@
           <button class="btn" style="padding:2px 8px; font-size:11px;" onclick="setFontSize('large')">A+</button>
         </div>
         <button class="btn btn-gold" id="fsEditBtn" onclick="editFromFullscreen()">✏️ 编辑</button>
-        <!-- 🌟 修复底层拦截漏洞：改为独立函数 closeFullscreenReader -->
         <button class="btn" id="fsExitBtn" onclick="closeFullscreenReader()">✕ 退出全屏</button>
       </div>
     </div>
@@ -520,7 +590,6 @@
         </div>
       </div>
       <div class="modal-footer">
-        <!-- 保留底层按钮功能作为冗余，由前台直击按钮取代 -->
         <button class="btn" style="background:#fee2e2; color:#b91c1c; display:none;" id="deleteCategoryBtn" onclick="deleteCurrentCategory()">🗑️ 删除模块</button>
         <div style="display:flex; gap:8px; margin-left:auto;">
           <button class="btn" onclick="closeCategoryModal()">取消</button>
@@ -549,11 +618,10 @@
         </div>
       </div>
       <div class="modal-footer">
-        <!-- 保留底层按钮功能作为冗余 -->
         <button class="btn" style="background:#fee2e2; color:#b91c1c; display:none;" id="deleteBookBtn" onclick="deleteCurrentBook()">🗑️ 删除日记本</button>
         <div style="display:flex; gap:8px; margin-left:auto;">
           <button class="btn" onclick="closeBookModal()">取消</button>
-          <button class="btn btn-gold" onclick="saveBook()">保存日记本</button>
+          <button class="btn btn-gold" onclick="save日记本">保存日记本</button>
         </div>
       </div>
     </div>
@@ -561,7 +629,7 @@
 
   <!-- 新建/编辑日记 -->
   <div id="noteModalBackdrop" class="modal-backdrop">
-    <div class="modal-window">
+    <div class="modal-window modal-window--immersive">
       <div class="modal-header">
         <span class="modal-title" id="noteModalTitle">写新日记</span>
         <button class="mini-icon-btn" onclick="closeNoteModal()">✕</button>
@@ -569,7 +637,8 @@
       <div class="modal-body">
         <input type="hidden" id="editNoteId" />
         
-        <div style="display:grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 10px;">
+        <!-- 🌟 替换掉内联样式，启用独立 CSS 栅格 -->
+        <div class="note-meta-grid">
           <div class="form-group">
             <label class="form-label">1. 所属分类</label>
             <select id="noteCategorySelect" class="form-select" onchange="handleNoteCategoryChange()"></select>
@@ -584,10 +653,13 @@
           </div>
         </div>
 
-        <div id="quickNewBookWrap" style="background:rgba(254, 243, 199, 0.45); border:1px dashed #fde68a; border-radius:12px; padding:8px 12px; display:flex; align-items:center; gap:8px; font-size:12.5px;">
+        <!-- 🌟 修复手机端挤压导致竖排的问题 -->
+        <div class="quick-add-wrap" id="quickNewBookWrap">
           <span>💡 没找到日记本？在此快速新建：</span>
-          <input type="text" id="quickNewBookInput" class="form-input" placeholder="输入名称（如：婚后手记）" style="padding:4px 8px; font-size:12.5px; flex:1;" />
-          <button type="button" class="btn btn-gold" style="padding:4px 10px; font-size:12px;" onclick="quickAddBookInModal()">立即建本</button>
+          <div class="quick-add-inputs">
+            <input type="text" id="quickNewBookInput" class="form-input" placeholder="输入名称（如：婚后手记）" />
+            <button type="button" class="btn btn-gold" onclick="quickAddBookInModal()">立即建本</button>
+          </div>
         </div>
 
         <div class="form-group">
@@ -595,13 +667,12 @@
           <input type="text" id="noteTitleInput" class="form-input" placeholder="例如：今天我们一起去看了海" />
         </div>
 
-        <div class="form-group">
+        <div class="form-group form-group-editor">
           <label class="form-label">日记正文</label>
           <div id="noteContentInput" class="rich-editor-box" contenteditable="true"></div>
         </div>
       </div>
       <div class="modal-footer">
-        <!-- 保留底层按钮功能作为冗余 -->
         <button class="btn" style="background:#fee2e2; color:#b91c1c; display:none;" id="deleteNoteBtn" onclick="deleteCurrentNote()">🗑️ 删除记录</button>
         <div style="display:flex; gap:8px; margin-left:auto;">
           <button class="btn" onclick="closeNoteModal()">取消</button>
@@ -686,7 +757,6 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(AppData));
     }
 
-    /* 🌟 重构：引入变色状态引挚的同步函数 */
     function setSyncStatus(icon, text, statusClass) {
       const el = document.getElementById("syncStatus");
       if (el) {
@@ -764,7 +834,6 @@
         const isActive = (cat.id === activeCategoryId);
         btn.className = `tab-btn ${isActive ? 'active' : ''}`;
         
-        // 🌟 核心：外置直击删除快捷键
         btn.innerHTML = `
           <span>${cat.icon || '📖'} ${escapeHtml(cat.name)}</span>
           ${adminToken ? `
@@ -809,7 +878,6 @@
         card.className = "book-card";
         const isCollapsed = book.collapsed && !searchKeyword;
 
-        // 🌟 核心：为日记本增加外置直击删除功能
         card.innerHTML = `
           <div class="book-header" onclick="toggleBookCollapse('${book.id}')">
             <div class="book-title-wrap">
@@ -833,7 +901,6 @@
           item.className = "note-item";
           item.onclick = () => openFullscreen(note.id);
 
-          // 🌟 核心：为单篇日记增加外置直击删除功能
           item.innerHTML = `
             <div class="note-title-left">
               <span>📄</span>
@@ -884,7 +951,6 @@
       document.getElementById("fullscreenReader").classList.add("active");
     }
 
-    /* 🌟 重构：替换冲突的内置原生全局变量名称，修复全屏无法退出的 BUG */
     function closeFullscreenReader() { 
       document.getElementById("fullscreenReader").classList.remove("active"); 
     }
@@ -947,7 +1013,6 @@
       showToast("✓ 分类已保存");
     }
 
-    /* 🌟 核心：分离出独立的直击删除引擎 */
     function deleteCategoryPrompt(id) {
       if (!id) return;
       const cat = AppData.categories.find(c => c.id === id);
@@ -1026,7 +1091,6 @@
       showToast("✓ 日记本已保存并同步");
     }
 
-    /* 🌟 核心：分离出独立的直击删除引擎 */
     function deleteBookPrompt(id) {
       if (!id) return;
       const b = AppData.books.find(x => x.id === id);
@@ -1156,7 +1220,6 @@
       showToast("✓ 日记已保存并直传云端");
     }
 
-    /* 🌟 核心：分离出独立的直击删除引擎 */
     function deleteNotePrompt(id) {
       if (!id) return;
       if (!confirm("确定要彻底删除这篇日记吗？")) return;
@@ -1172,7 +1235,6 @@
       deleteNotePrompt(document.getElementById("editNoteId").value);
     }
 
-    /* --- 管理中心 --- */
     function openAuthModal() {
       if (adminToken) {
         if(confirm("当前已是解锁状态，是否要退出？")) {
@@ -1212,7 +1274,6 @@
       } catch (_) { showToast("连接异常", true); }
     }
 
-    /* 🌟 重构：管理界面按钮的文字分离机制 */
     function updateAdminUI() {
       const authBtn = document.getElementById("authBtn");
       if (authBtn) {
