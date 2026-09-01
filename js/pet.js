@@ -3,6 +3,7 @@
  * 文件名: js/pet.js
  * 作用: 恩典灵宠状态管理、5阶进化晋升体系、自然日连胜增幅、12徽章陈列室与全局成就条件拦截引擎 (门禁解锁生命周期协同)
  * 持久化策略: 本地 LocalStorage 深度自愈 + 云端免密双向同步
+ * 升级：重新梳理 UI 结构（将操作区置于勋章区之上），注入底层渲染拦截以修改名称
  */
 
 class GracePetManager {
@@ -20,7 +21,7 @@ class GracePetManager {
     if (energy >= 1000) {
       return {
         level: 5,
-        title: "永恒之爱圣徒",
+        title: "和平使者", // 🌟 已修改：原为 永恒之爱圣徒/永恒圣徒
         icon: "👑🕊️",
         stageName: "神性形态",
         badgeColor: "#f43f5e",
@@ -67,7 +68,7 @@ class GracePetManager {
     }
     return {
       level: 1,
-      title: "初信雏鸽",
+      title: "小小雏鸽", // 🌟 已修改：原为 初信雏鸽
       icon: "🐣",
       stageName: "雏鸽形态",
       badgeColor: "#f59e0b",
@@ -352,6 +353,8 @@ class GracePetManager {
     const modal = document.createElement("div");
     modal.className = "grace-pet-modal";
     modal.id = "grace-pet-modal";
+    
+    // 🌟 核心修改 1：在此处进行 UI 结构调换。将操作区与日志区，提至 12 勋章陈列室的前方
     modal.innerHTML = `
       <div class="grace-pet-dialog">
         <button class="grace-pet-dialog-close" id="grace-pet-close-btn" title="关闭">✕</button>
@@ -396,15 +399,7 @@ class GracePetManager {
           </div>
         </div>
 
-        <!-- 12 徽章专属荣誉陈列室 -->
-        <div class="grace-badges-section">
-          <div class="grace-badges-header">
-            <span class="grace-badges-title">🎖️ 圣约印记 · 12 勋章陈列室</span>
-            <span class="grace-badges-count" id="grace-badges-unlocked-count">已解锁 0 / 12</span>
-          </div>
-          <div class="grace-badge-grid" id="grace-badge-grid-container"></div>
-        </div>
-
+        <!-- 🌟 位置已上调：操作区与记录区移至此处 -->
         <div class="grace-action-section">
           <div class="grace-action-title">
             <span>💧 献上今日感恩之露</span>
@@ -416,7 +411,17 @@ class GracePetManager {
         </div>
 
         <div style="font-size:12px; font-weight:800; color:#94a3b8; margin-bottom:8px;">📜 近期感恩与包容足迹：</div>
-        <div class="grace-log-list" id="grace-log-container"></div>
+        <div class="grace-log-list" id="grace-log-container" style="margin-bottom: 24px;"></div>
+
+        <!-- 🌟 位置已下调：12 徽章专属荣誉陈列室移至最底端 -->
+        <div class="grace-badges-section">
+          <div class="grace-badges-header">
+            <span class="grace-badges-title">🎖️ 圣约印记 · 12 勋章陈列室</span>
+            <span class="grace-badges-count" id="grace-badges-unlocked-count">已解锁 0 / 12</span>
+          </div>
+          <div class="grace-badge-grid" id="grace-badge-grid-container"></div>
+        </div>
+
       </div>
     `;
     document.body.appendChild(modal);
@@ -616,10 +621,16 @@ class GracePetManager {
     if (badgeContainer) {
       badgeContainer.innerHTML = allBadges.map(badge => {
         const isUnlocked = unlockedList.includes(badge.id);
+        
+        // 🌟 核心修改 2：前端表现层渲染拦截器 (精准劫持原设定字典的名称，无侵入修改)
+        let displayName = badge.name;
+        if (displayName === "初信雏鸽") displayName = "小小雏鸽";
+        if (displayName === "永恒之爱圣徒" || displayName === "永恒圣徒") displayName = "和平使者";
+
         return `
-          <div class="grace-badge-card ${isUnlocked ? 'unlocked' : 'locked'}" title="${badge.name}: ${badge.desc}" onclick="window.Effects && window.Effects.showMiniToast('${badge.icon} 【${badge.name}】: ${badge.desc}')">
+          <div class="grace-badge-card ${isUnlocked ? 'unlocked' : 'locked'}" title="${displayName}: ${badge.desc}" onclick="window.Effects && window.Effects.showMiniToast('${badge.icon} 【${displayName}】: ${badge.desc}')">
             <span class="grace-badge-icon">${badge.icon}</span>
-            <span class="grace-badge-name">${badge.name}</span>
+            <span class="grace-badge-name">${displayName}</span>
             <span class="grace-badge-desc-tip">${isUnlocked ? '✓ 已获得' : '未解锁'}</span>
           </div>
         `;
