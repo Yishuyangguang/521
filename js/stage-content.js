@@ -10,7 +10,7 @@ window.STAGE_CONTENT = {
   // ================= 🌿 1. 恋爱期 (Dating Phase) =================
   dating: {
     title: "恋爱期待办清单",
-    subtitle: "在尊重与接纳中了解彼此，坚守圣洁、克制与纯粹",
+    subtitle: "在尊重与接纳中了解彼此，坚守圣洁",
     scratchTitle: "恋爱期 · 舍己与包容特权券",
     checklist: [
       { id: "d_1", title: "[边界守护] 共同制定一个双方都感到安全、舒适的“身体接触与独处界线”，并用克制和尊重共同守护它。", completed: false },
