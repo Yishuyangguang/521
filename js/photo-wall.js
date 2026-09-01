@@ -1,13 +1,13 @@
 /**
  * 众水不灭 · 雅歌之印 (Love Universe)
  * 文件名: js/photo-wall.js
- * 架构重构: 「智能截断 + 记忆呼吸轮换」算法、1号头像独立固定保护、高性能视差驱动
+ * 架构重构: 「智能截断 + 记忆呼吸轮换」算法 + 2D Bounding Box 空间防重叠引擎
  */
 
 class PhotoWallManager {
   constructor(config) {
     this.config = config || window.LOVE_CONFIG || {};
-    this.itemsData = []; // 当前活跃在屏幕上的 DOM 节点数据
+    this.itemsData = []; // 当前活跃在屏幕上的 DOM 节点数据 (含物理盒子坐标)
     this.photoPool = []; // 待展示的内存照片池
     this.ticking = false;
     this.lastScrollY = -1;
@@ -51,7 +51,7 @@ class PhotoWallManager {
       container.appendChild(avatarItem);
     }
 
-    // ================= 2. 智能截断与初始渲染 =================
+    // ================= 2. 智能截断与初始防碰撞渲染 =================
     this.photoPool = photoNodes.slice(1);
     
     if (this.photoPool.length > 0) {
@@ -93,44 +93,127 @@ class PhotoWallManager {
   }
 
   /**
-   * 生成单张飘浮照片的 DOM 并分配安全坐标 (严格避开屏幕中心)
+   * 🌟 核心算法 1：矩形碰撞检测 (AABB Collision Detection)
+   * 判断两个坐标盒是否重叠，附加 padding 确保安全呼吸距离
+   */
+  checkCollision(box1, box2, padding) {
+    return !(
+      box1.x + box1.w + padding < box2.x || // 盒1在盒2左侧很远
+      box1.x > box2.x + box2.w + padding || // 盒1在盒2右侧很远
+      box1.y + box1.h + padding < box2.y || // 盒1在盒2上方很远
+      box1.y > box2.y + box2.h + padding    // 盒1在盒2下方很远
+    );
+  }
+
+  /**
+   * 🌟 核心算法 2：安全坐标推演引擎
+   * 循环探测安全空间，自动避开 1号头像 与 现有活跃照片
+   */
+  getSafePosition(isMobile, excludingData = null) {
+    const screenW = window.innerWidth;
+    const screenH = window.innerHeight;
+    
+    // 照片的物理体积近似估算
+    const itemW = isMobile ? 85 : 155;
+    const itemH = isMobile ? 110 : 180;
+    const safePadding = isMobile ? 35 : 70; // 强制留白的呼吸安全距离
+
+    // 定义 1 号头像专属的绝对禁飞区 (根据响应式大概预估边界)
+    const avatarBox = {
+      x: isMobile ? 10 : 36,
+      y: isMobile ? 10 : 32,
+      w: isMobile ? 80 : 140,
+      h: isMobile ? 100 : 150
+    };
+
+    let attempts = 0;
+    const maxAttempts = 60; // 兜底降级锁：探测60次找不到空地则强制放行，避免死循环假死
+    let candidate = null;
+
+    while (attempts < maxAttempts) {
+      const isLeft = Math.random() > 0.5;
+      let percentX = 0;
+      let absX = 0;
+
+      // X轴：划定左右走廊区间，避开屏幕中间文本区
+      if (isMobile) {
+        percentX = Math.random() * 6 - 1; // -1% ~ 5%
+      } else {
+        percentX = Math.random() * 12 + 2; // 2% ~ 14%
+      }
+      
+      if (isLeft) {
+        absX = (percentX / 100) * screenW;
+      } else {
+        absX = screenW - itemW - ((percentX / 100) * screenW);
+      }
+
+      // Y轴：纵向散布区间限制 (视口高度的 15% ~ 85%)
+      const absY = screenH * (0.15 + Math.random() * 0.7);
+
+      candidate = {
+        isLeft: isLeft,
+        percentX: percentX,
+        x: absX,
+        y: absY,
+        w: itemW,
+        h: itemH
+      };
+
+      let isColliding = false;
+
+      // 1. 排查固定头像禁飞区
+      if (this.checkCollision(candidate, avatarBox, safePadding)) {
+        isColliding = true;
+      }
+
+      // 2. 排查当前活跃照片池
+      if (!isColliding) {
+        for (let i = 0; i < this.itemsData.length; i++) {
+          const data = this.itemsData[i];
+          if (excludingData && data === excludingData) continue; // 呼吸替换时无视自己正在被替换的坑位
+          
+          if (this.checkCollision(candidate, data.box, safePadding)) {
+            isColliding = true;
+            break;
+          }
+        }
+      }
+
+      // 若未碰撞，完美通过检测
+      if (!isColliding) {
+        break;
+      }
+      attempts++;
+    }
+
+    return candidate;
+  }
+
+  /**
+   * 生成单张飘浮照片的 DOM 并分配经检测的安全坐标
    */
   createAndAppendPolaroid(container, node, idx) {
     const isMobile = window.innerWidth <= 640;
     const item = document.createElement("div");
     item.className = "wall-polaroid-item";
 
-    // 坐标推演分配：划分为左右两道走廊，彻底避开中间正文区
-    const isLeft = Math.random() > 0.5;
-    
-    // X轴安全限制
-    if (isMobile) {
-      if (isLeft) {
-        item.style.left = `${Math.random() * 8 - 2}%`; // -2% ~ 6%
-        item.style.right = "auto";
-      } else {
-        item.style.right = `${Math.random() * 8 - 2}%`; // -2% ~ 6%
-        item.style.left = "auto";
-      }
-    } else {
-      if (isLeft) {
-        item.style.left = `${Math.random() * 12 + 2}%`; // 2% ~ 14%
-        item.style.right = "auto";
-      } else {
-        item.style.right = `${Math.random() * 12 + 2}%`; // 2% ~ 14%
-        item.style.left = "auto";
-      }
-    }
-
-    // Y轴安全限制：仅在当前视口高度的 10% ~ 80% 内随机生成，绝对不撑开外围
-    const topRange = window.innerHeight * (0.1 + Math.random() * 0.7);
+    // 通过寻路引擎拿到安全三维坐标体系
+    const pos = this.getSafePosition(isMobile);
     const baseRot = (Math.random() - 0.5) * (isMobile ? 12 : 22);
-    // 左侧向下飘速稍慢，右侧稍快，形成交错视差
-    const speed = isLeft ? -(0.02 + Math.random() * 0.02) : -(0.04 + Math.random() * 0.02);
+    const speed = pos.isLeft ? -(0.02 + Math.random() * 0.02) : -(0.04 + Math.random() * 0.02);
 
-    item.style.top = `${topRange}px`;
+    item.style.top = `${pos.y}px`;
+    if (pos.isLeft) {
+      item.style.left = `${pos.percentX}%`;
+      item.style.right = "auto";
+    } else {
+      item.style.right = `${pos.percentX}%`;
+      item.style.left = "auto";
+    }
+    
     item.style.transform = `translate3d(0, 0, 0) rotate(${baseRot}deg)`;
-    item.style.opacity = isMobile ? '0.75' : '0.85'; // 初始透明度
+    item.style.opacity = isMobile ? '0.75' : '0.85';
 
     item.innerHTML = `
       <div class="wall-polaroid-inner">
@@ -140,91 +223,86 @@ class PhotoWallManager {
 
     container.appendChild(item);
 
+    // 将物理边界存入注册表
     this.itemsData.push({
       element: item,
-      node: node, // 记录当前承载的数据
-      baseTop: topRange,
+      node: node,
+      baseTop: pos.y,
       baseRot: baseRot,
       speed: speed,
-      isAnimating: false // 呼吸锁
+      isAnimating: false,
+      box: { x: pos.x, y: pos.y, w: pos.w, h: pos.h }
     });
   }
 
   /**
    * 记忆呼吸轮换算法 (Breathing Carousel)
-   * 随机挑选屏幕上一张照片隐去，更换内存池中的新照片后，在新的随机位置亮起。
+   * 隐退时更新坐标，依然经过严格的空间防碰撞检测
    */
   startBreathingCarousel() {
     const isMobile = window.innerWidth <= 640;
 
     this.breathingTimer = setInterval(() => {
-      // 在当前渲染节点中随机挑一个“幸运儿”
       const slotIndex = Math.floor(Math.random() * this.itemsData.length);
       const slot = this.itemsData[slotIndex];
 
-      // 防并发锁：如果正在隐现，跳过
+      // 防并发锁
       if (slot.isAnimating) return;
       slot.isAnimating = true;
 
-      // 1. 缓缓隐去 (Fade Out)
+      // 1. 缓缓隐去
       slot.element.style.opacity = '0';
 
-      // 等待 CSS 的 1.2 秒渐隐动画结束
+      // 2. DOM 退场期间更换资源与重算安全坐标
       setTimeout(() => {
-        // 2. 从内存池里找一张屏幕上没在展示的照片
-        let nextNode = slot.node; // 兜底
+        let nextNode = slot.node;
         if (this.photoPool.length > this.itemsData.length) {
-          // 计算差集，找到在池子里但没在屏幕上的照片
           const inactivePool = this.photoPool.filter(p => !this.itemsData.some(a => a.node === p));
           if (inactivePool.length > 0) {
             nextNode = inactivePool[Math.floor(Math.random() * inactivePool.length)];
           }
         }
 
-        // 3. 重新分配空间坐标 (避开中心)
-        const isLeft = Math.random() > 0.5;
-        const topRange = window.innerHeight * (0.1 + Math.random() * 0.7);
+        // 调用寻路引擎查找全新避让坐标，同时排除当前 slot 原有的碰撞体积干扰
+        const pos = this.getSafePosition(isMobile, slot);
         const rot = (Math.random() - 0.5) * (isMobile ? 12 : 22);
 
         slot.node = nextNode;
-        slot.baseTop = topRange;
+        slot.baseTop = pos.y;
         slot.baseRot = rot;
-        slot.speed = isLeft ? -(0.02 + Math.random() * 0.02) : -(0.04 + Math.random() * 0.02);
+        slot.speed = pos.isLeft ? -(0.02 + Math.random() * 0.02) : -(0.04 + Math.random() * 0.02);
+        // 更新内存里的碰撞盒体积
+        slot.box = { x: pos.x, y: pos.y, w: pos.w, h: pos.h };
 
-        // 应用新坐标
-        if (isMobile) {
-          slot.element.style.left = isLeft ? `${Math.random() * 8 - 2}%` : 'auto';
-          slot.element.style.right = isLeft ? 'auto' : `${Math.random() * 8 - 2}%`;
+        if (pos.isLeft) {
+          slot.element.style.left = `${pos.percentX}%`;
+          slot.element.style.right = 'auto';
         } else {
-          slot.element.style.left = isLeft ? `${Math.random() * 12 + 2}%` : 'auto';
-          slot.element.style.right = isLeft ? 'auto' : `${Math.random() * 12 + 2}%`;
+          slot.element.style.right = `${pos.percentX}%`;
+          slot.element.style.left = 'auto';
         }
         slot.element.style.top = `${slot.baseTop}px`;
 
-        // 更换照片源码
         const img = slot.element.querySelector('img');
         if (img) img.src = nextNode.frontImg;
 
-        // 根据当前滑动距离，立即校准 Y 轴视差偏移量，避免闪烁跳跃
         const scrollY = window.scrollY || window.pageYOffset || 0;
         const offsetY = Math.round(scrollY * slot.speed);
         slot.element.style.transform = `translate3d(0, ${offsetY}px, 0) rotate(${slot.baseRot}deg)`;
 
-        // 4. 缓缓亮起 (Fade In)
+        // 3. 缓缓亮起
         setTimeout(() => {
           slot.element.style.opacity = isMobile ? '0.75' : '0.85';
-          
-          // 动画结束后解锁
           setTimeout(() => { slot.isAnimating = false; }, 1200);
-        }, 100); // 留出 100ms 保证 DOM 属性被浏览器确认
+        }, 100);
 
-      }, 1200); // 对应 CSS 的 1.2s opacity transition
+      }, 1200); 
 
-    }, 4500); // 每隔 4.5 秒发起一次呼吸轮换
+    }, 4500);
   }
 
   /**
-   * 执行负向视差浮动位移 (纯 3D 矩阵计算，不触发 Reflow 重排)
+   * 视差物理计算矩阵
    */
   updateParallax(force = false) {
     const scrollY = window.scrollY || window.pageYOffset || 0;
