@@ -1,11 +1,9 @@
 /**
  * 众水不灭 · 雅歌之印 (Love Universe SaaS Engine)
  * 文件名: _worker.js
- * 架构: 单源多租户路由、破冰和好信号队列状态机(双向奔赴MUTUAL_HEAL)、多源流式音频转发、严格租户独立鉴权(默认密码521始终可用)、免密灵宠通道、圣洁言语过滤、HMAC 授权验证
- * 新增: 异步静默垃圾回收引擎 (ctx.waitUntil + Deep Traversal 白名单 + 60分钟免死金牌)
+ * 架构: 异步静默垃圾回收引擎 + 破冰白名单(新增 accompany) + 严格租户独立鉴权
  */
 export default {
-  // 🌟 核心修改 1：引入 ctx 上下文环境变量，用于调度后台异步任务
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const bucket = env.R2 || env.BUCKET || env.PAN || env.MY_BUCKET || env.FILE_BUCKET;
@@ -26,13 +24,11 @@ export default {
       });
     }
 
-    // 多租户隔离机制
     const rawHost = (url.hostname || "default.local").toLowerCase();
     const tenantDir = rawHost.replace(/[^a-z0-9.-]/g, "_");
     const CONFIG_KEY = `${tenantDir}/config.json`;
     const SIGNALS_KEY = `${tenantDir}/signals.json`;
 
-    // 🔧 管理员密码兜底
     const ADMIN_PASSWORD = String(env.ADMIN_PASSWORD || env.SECRET_PWD || env.ADMIN_PWD || "521").trim();
     const MASTER_LICENSE_SECRET = String(env.MASTER_LICENSE_SECRET || "SACRED_UNQUENCHABLE_LOVE_2026_KEY").trim();
 
@@ -67,6 +63,7 @@ export default {
       return !profanityRegex.test(contentString);
     }
 
+    // 🌟 核心拦截层白名单更新：允许 accompany 指令安全通过
     function getStageSafeContent(stage, actionType, userCustomText) {
       const standardDict = {
         dating: {
@@ -74,26 +71,30 @@ export default {
           break_ice: "今天天气很好，我们不吵了好不好？待会儿一起去散散步。",
           apology: "刚才是我态度不好、太急躁了，对不起，我愿意安静听你的感受。",
           miss_you: "即使有分歧，我心里依然全是你，想念你的笑容。",
-          warm_hug: "隔空送你一朵云朵拥抱和一杯热可可，不要再生气啦。"
+          warm_hug: "隔空送你一朵云朵拥抱和一杯热可可，不要再生气啦。",
+          accompany: "不论你的压力有多大，我都会跟你一起面对，你还有我。"
         },
         engaged: {
           calm_down: "筹备有些心力交瘁，我们先冷静下来，喝杯咖啡，别伤了彼此的初心。",
           break_ice: "比起眼前的分歧，我们的约定更珍贵。今晚开个视频对齐想法好吗？",
           apology: "我对不起你，刚才把现实的焦虑迁怒到了你身上，我向你道歉。",
           miss_you: "我们是一体的，无论面对多大挑战，我都坚定选择与你同行。",
-          warm_hug: "再多繁杂的事情我们一起扛，别怕，有我在你身边。"
+          warm_hug: "再多繁杂的事情我们一起扛，别怕，有我在你身边。",
+          accompany: "不论你的压力有多大，我都会跟你一起面对，你还有我。"
         },
         married: {
           calm_down: "我先在书房安静一会儿，不可含怒到日落，待会儿就出来抱你。",
           break_ice: "家是讲爱的地方不是讲理的地方。厨房有切好的水果和温水，我们谈谈心。",
           apology: "在这个家里你才是最重要的，我放下我的固执，对不起，过来抱一下。",
           miss_you: "柴米油盐是你，风花雪月也是你，执子之手，与子偕老。",
-          warm_hug: "风雨再大，这里永远是你的避风港，我一直在。"
+          warm_hug: "风雨再大，这里永远是你的避风港，我一直在。",
+          accompany: "不论你的压力有多大，我都会跟你一起面对，你还有我。"
         }
       };
       const validStage = ["dating", "engaged", "married"].includes(stage) ? stage : "dating";
-      const validAction = ["calm_down", "break_ice", "apology", "miss_you", "warm_hug"].includes(actionType) ? actionType : "break_ice";
+      const validAction = ["calm_down", "break_ice", "apology", "miss_you", "warm_hug", "accompany"].includes(actionType) ? actionType : "break_ice";
       const fallback = standardDict[validStage][validAction];
+      
       if (userCustomText && typeof userCustomText === "string" && userCustomText.trim().length > 0) {
         const text = userCustomText.trim().slice(0, 150);
         if (validStage === "dating") {
@@ -125,10 +126,8 @@ export default {
       } catch (_) { return false; }
     }
 
-    // 🌟 核心引擎：异步静默白名单垃圾回收机制 (Garbage Collection)
     async function executeSilentGC(activeConfig) {
       try {
-        // 1. 递归提取 JSON 中所有的活跃多媒体直链，建立白名单
         const activeUrls = new Set();
         function extractUrls(node) {
           if (!node) return;
@@ -140,7 +139,6 @@ export default {
         }
         extractUrls(activeConfig);
 
-        // 2. 扫描 R2 存储空间
         const prefix = `${tenantDir}/assets/`;
         let listed = await bucket.list({ prefix });
         let truncated = listed.truncated;
@@ -149,15 +147,8 @@ export default {
         do {
           for (const obj of listed.objects) {
             const fileUrl = `/raw/${obj.key}`;
-            
-            // 3. 孤儿文件裁决：如果该物理文件不在刚才提取的 JSON 白名单里
             if (!activeUrls.has(fileUrl)) {
-              // ⚠️ 防暗病：极度关键的时间窗免死金牌
-              // 计算该文件的上传时间距今多少分钟
               const ageMinutes = (Date.now() - new Date(obj.uploaded).getTime()) / (1000 * 60);
-              
-              // 只删除超过 60 分钟未被 JSON 引用的“孤儿文件”
-              // 这防止了用户正在上传照片（尚未点击“保存”）时，触发保存被误删的悲剧
               if (ageMinutes > 60) {
                 await bucket.delete(obj.key);
                 console.log(`[Silent GC] 物理销毁孤儿文件: ${obj.key}`);
@@ -173,13 +164,11 @@ export default {
           }
         } while (truncated);
       } catch (err) {
-        // GC 失败仅静默记录，绝不可抛出异常阻断主线程
         console.error("[Silent GC Error]", err);
       }
     }
 
     try {
-      // ==================== 1. 获取全站配置 ====================
       if (url.pathname === "/api/love/config" && request.method === "GET") {
         if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
         const isAdmin = await verifyAdminAuth(request);
@@ -204,7 +193,6 @@ export default {
         return jsonResponse({ success: true, custom: false, domain: rawHost, config: null, isAdmin });
       }
 
-      // ==================== 2. 保存并发布配置 (挂载自动 GC) ====================
       if (url.pathname === "/api/love/config" && request.method === "POST") {
         if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
         const isAuthed = await verifyAdminAuth(request);
@@ -225,18 +213,15 @@ export default {
           }
         } catch (_) {}
         
-        // 核心存盘
         await bucket.put(CONFIG_KEY, JSON.stringify(configToSave), { httpMetadata: { contentType: "application/json; charset=utf-8" } });
         
-        // 🌟 核心修改 2：利用 ctx.waitUntil 将垃圾清理推入后台队列，不阻碍向用户的 200 返回
         if (ctx && typeof ctx.waitUntil === 'function') {
           ctx.waitUntil(executeSilentGC(configToSave));
         }
 
-        return jsonResponse({ success: true, domain: rawHost, message: `配置已发布并永久同步至【${rawHost}】独立存储空间` });
+        return jsonResponse({ success: true, domain: rawHost, message: `配置已发布并永久同步至独立存储空间` });
       }
 
-      // ==================== 3. 破冰信号箱状态机 ====================
       if (url.pathname === "/api/love/signal" && request.method === "GET") {
         if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
         let signalData = { activeSignal: null, history: [] };
@@ -259,7 +244,10 @@ export default {
         const actionType = String(body.actionType || "break_ice");
         const customText = String(body.customText || "").trim();
         if (!sanitizeSanctity(customText)) return jsonResponse({ success: false, error: "言语不洁" }, 406);
+        
+        // 此处使用最新的白名单进行过滤
         const safeContent = getStageSafeContent(stage, actionType, customText);
+        
         const now = Date.now();
         let signalData = { activeSignal: null, history: [] };
         try { const obj = await bucket.get(SIGNALS_KEY); if (obj) signalData = JSON.parse(await obj.text()); } catch (_) {}
@@ -270,8 +258,8 @@ export default {
             return jsonResponse({ success: false, code: "IN_COOLDOWN", remainingSeconds: Math.ceil((currentSig.cooldownUntil - now) / 1000) }, 429);
           }
           const isFromOtherSide = currentSig.senderGender !== senderGender;
-          const isCurrentPeaceAction = ["break_ice", "apology", "miss_you", "warm_hug"].includes(actionType);
-          const isPrevPeaceAction = ["break_ice", "apology", "miss_you", "warm_hug"].includes(currentSig.actionType);
+          const isCurrentPeaceAction = ["break_ice", "apology", "miss_you", "warm_hug", "accompany"].includes(actionType);
+          const isPrevPeaceAction = ["break_ice", "apology", "miss_you", "warm_hug", "accompany"].includes(currentSig.actionType);
           const isWithinWindow = (now - currentSig.createdAt) < 5 * 60 * 1000;
           if (isFromOtherSide && isCurrentPeaceAction && isPrevPeaceAction && isWithinWindow) {
             currentSig.status = "mutual_resolved"; currentSig.resolvedAt = now; currentSig.summary = "你们在同一刻想到了彼此，双向奔赴，爱永不止息！";
@@ -328,13 +316,12 @@ export default {
       if (url.pathname === "/api/love/signal/clear" && request.method === "POST") {
         if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
         const isAuthed = await verifyAdminAuth(request); if (!isAuthed) return jsonResponse({ success: false, error: "未授权" }, 401);
-        let signalData = { activeSignal: null, history: [] }; try { const obj = await bucket.get(SIGNALS_KEY); if (obj) signalData = JSON.parse(await obj.text()); } catch (_) {}
+        let signalData = { activeSignal: null, history: [] }; try { const obj = await bucket.get(SIGNALS_KEY); if (obj) signalData = JSON.parse(await text()); } catch (_) {}
         signalData.activeSignal = null;
         await bucket.put(SIGNALS_KEY, JSON.stringify(signalData, null, 2), { httpMetadata: { contentType: "application/json; charset=utf-8" } });
         return jsonResponse({ success: true, message: "已重置信号状态" });
       }
 
-      // ==================== 4. 文件上传 ====================
       if (url.pathname === "/api/love/upload" && request.method === "POST") {
         if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
         const isAuthed = await verifyAdminAuth(request); if (!isAuthed) return jsonResponse({ success: false, error: "未授权" }, 401);
@@ -346,7 +333,6 @@ export default {
         return jsonResponse({ success: true, url: `/raw/${r2Key}` });
       }
 
-      // ==================== 5. 灵宠通道 ====================
       if (url.pathname === "/api/love/pet") {
         if (!bucket) return jsonResponse({ success: false, error: "未绑定存储空间" }, 500);
         if (request.method === "GET") {
@@ -364,7 +350,6 @@ export default {
         }
       }
 
-      // ==================== 6. 门禁校验 ====================
       if (url.pathname === "/api/love/verify-gatekeeper" && request.method === "POST") {
         let reqData = {}; try { reqData = await request.json(); } catch (_) {}
         const inputPwd = String(reqData.password || "").trim().toLowerCase();
@@ -384,7 +369,6 @@ export default {
         return jsonResponse({ success: false, message: "口令错误" }, 403);
       }
 
-      // ==================== 7. 授权兑换 ====================
       if (url.pathname === "/api/love/verify-license" && request.method === "POST") {
         if (!bucket) return jsonResponse({ success: false, error: "存储服务不可用" }, 500);
         let reqData = {}; try { reqData = await request.json(); } catch (_) {}
@@ -397,9 +381,6 @@ export default {
         return jsonResponse({ success: true, message: `✨ 星河契约已鉴证！【${rawHost}】专属高级隐藏福泽已永久解锁。` });
       }
 
-      // 🌟 核心修改 3：彻底抹除了危险的且无用的手动 POST /api/love/cleanup 路由
-
-      // ==================== 9. 音乐搜索 ====================
       if (url.pathname === "/api/love/music-search" && request.method === "GET") {
         const keyword = (url.searchParams.get("keyword") || "").trim(); const songs = []; const seen = new Set();
         if (keyword) {
@@ -411,7 +392,6 @@ export default {
         return jsonResponse({ success: true, songs });
       }
 
-      // ==================== 10. 音频流代理 ====================
       if (url.pathname === "/api/love/music-stream" && request.method === "GET") {
         const hash = url.searchParams.get("hash"); const albumId = url.searchParams.get("album_id") || "0";
         const title = url.searchParams.get("title") || ""; const artist = url.searchParams.get("artist") || "";
@@ -462,7 +442,6 @@ export default {
         return Response.redirect(targetAudioUrl, 302);
       }
 
-      // ==================== 11. 静态文件输出 ====================
       if (url.pathname.startsWith("/raw/")) {
         if (!bucket) return new Response("Bucket Not Found", { status: 500 });
         const key = decodeURIComponent(url.pathname.replace(/^\/raw\//, ""));
