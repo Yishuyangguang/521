@@ -1,7 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印 (Love Universe)
  * 文件名: js/icebreaker.js
- * 作用: 破冰与情感信号箱客户端主控 (广播破冰和好成就、自适应退避轮询、Web Audio 降噪压制、双向状态机握手、和好足迹备忘录与 300DPI 拍立得海报离屏渲染)
+ * 作用: 破冰与情感信号箱客户端主控 (自适应智能心跳轮询、浏览器原生系统通知、Web Audio 降噪、握手逻辑)
  */
 
 class IceBreakerManager {
@@ -9,12 +9,13 @@ class IceBreakerManager {
     this.config = config || window.LOVE_CONFIG || {};
     this.deviceId = this.getOrCreateDeviceId();
     this.pollTimer = null;
-    this.pollInterval = 4000;
-    this.consecutiveNoChangeCount = 0;
-    this.currentActiveSignal = null;
     this.audioContext = null;
     this.currentPosterDataUrl = "";
-    this.hasCelebratedThisSignal = false;
+    
+    // 🌟 核心防打扰标识：记录最新一次弹出系统通知的信号指纹
+    this.lastNotifiedFingerprint = null;
+    // 🌟 事件拦截节流阀：防用户狂点导致无限发请求
+    this.lastFetchTime = 0;
   }
 
   getOrCreateDeviceId() {
@@ -83,7 +84,7 @@ class IceBreakerManager {
     this.bindGlobalEvents();
     this.bindStageLifecycle();
     this.initAudioContext();
-    this.startAdaptivePolling();
+    this.executePoll(); // 立即发起第一次智能心跳查询
     this.fetchAndRenderHistory();
   }
 
@@ -123,6 +124,11 @@ class IceBreakerManager {
         e.preventDefault();
         const actionType = btn.getAttribute("data-action-type");
         this.handleSendSignal(actionType);
+        
+        // 当用户主动发信号时，顺便申请一次系统弹窗权限，极为自然且不易被浏览器拦截
+        if ("Notification" in window && Notification.permission === "default") {
+          Notification.requestPermission();
+        }
       };
     });
   }
@@ -158,8 +164,8 @@ class IceBreakerManager {
           }
           this.triggerSendingPulse();
         }
-        this.pollInterval = 3000;
-        this.startAdaptivePolling();
+        
+        this.executePoll(); // 发送完毕立即刷新本地状态
         this.fetchAndRenderHistory();
       } else if (data.code === "IN_COOLDOWN") {
         alert(`⏳ ${data.message} (还剩 ${data.remainingSeconds} 秒)`);
@@ -171,32 +177,65 @@ class IceBreakerManager {
     }
   }
 
-  startAdaptivePolling() {
+  // 🌟 核心引擎 1：自适应智能心跳轮询调度 (Adaptive Smart Polling)
+  async executePoll() {
+    this.lastFetchTime = Date.now();
     clearTimeout(this.pollTimer);
 
-    const executePoll = async () => {
-      if (document.hidden) {
-        return;
+    try {
+      const res = await fetch("/api/love/signal");
+      if (res.ok) {
+        const data = await res.json();
+        this.handleServerSignalResponse(data);
       }
+    } catch (_) {}
 
+    // 智能变频降本策略：前台盯屏时 40 秒查一次，后台锁屏/休眠时降级为 10 分钟查一次
+    const nextInterval = document.hidden ? 600000 : 40000;
+    this.pollTimer = setTimeout(() => this.executePoll(), nextInterval);
+  }
+
+  // 🌟 核心引擎 2：处理系统级原生通知 (Native Notification API)
+  triggerSystemNotification(signal) {
+    // 幂等指纹拦截：仅当该信号的该状态从未被通知过时才触发，杜绝死循环打扰
+    const fingerprint = `${signal.signalId}_${signal.status}`;
+    if (this.lastNotifiedFingerprint === fingerprint) return;
+    this.lastNotifiedFingerprint = fingerprint;
+
+    let title = "💌 收到新的情感信号";
+    let body = "对方递来了一封信笺...";
+    
+    if (signal.status === "mutual_resolved") {
+       title = "✨ 双向奔赴的和好";
+       body = "奇妙的默契！你们在同一刻选择了彼此与和好！";
+    } else if (signal.status === "accepted" && signal.senderDeviceId === this.deviceId) {
+       title = "🎉 破冰成功";
+       body = "对方已接纳了你的信号，愿爱永不止息。";
+    } else if (signal.status === "active") {
+       const senderTitle = signal.senderGender === "boy" ? "他" : "她";
+       if (signal.actionType === "calm_down") body = `${senderTitle}需要片刻冷静...\n“${signal.content}”`;
+       else if (signal.actionType === "apology") body = `${senderTitle}向你真诚道歉...\n“${signal.content}”`;
+       else if (signal.actionType === "miss_you") body = `${senderTitle}正在深深想念你...\n“${signal.content}”`;
+       else if (signal.actionType === "warm_hug") body = `${senderTitle}送来一个温暖拥抱...\n“${signal.content}”`;
+       else if (signal.actionType === "accompany") body = `${senderTitle}想要陪伴在你身边...\n“${signal.content}”`;
+    } else {
+       // 不对冷却中 (cooling) 或已阅 (viewed) 发起系统弹窗
+       return; 
+    }
+
+    if ("Notification" in window && Notification.permission === "granted") {
       try {
-        const res = await fetch("/api/love/signal");
-        if (res.ok) {
-          const data = await res.json();
-          this.handleServerSignalResponse(data);
-        }
-      } catch (_) {}
-
-      if (this.consecutiveNoChangeCount > 4) {
-        this.pollInterval = Math.min(12000, this.pollInterval + 2000);
-      } else {
-        this.pollInterval = Math.max(4000, this.pollInterval);
-      }
-
-      this.pollTimer = setTimeout(executePoll, this.pollInterval);
-    };
-
-    this.pollTimer = setTimeout(executePoll, 1000);
+         const notification = new Notification(title, { 
+           body: body, 
+           icon: "/favicon-32x32.png" 
+         });
+         // 点击通知后唤醒并切回该网页
+         notification.onclick = () => {
+           window.focus();
+           notification.close();
+         };
+      } catch(e) {}
+    }
   }
 
   handleServerSignalResponse(data) {
@@ -204,34 +243,39 @@ class IceBreakerManager {
 
     if (!active) {
       this.hideBanner();
-      this.consecutiveNoChangeCount++;
       return;
     }
 
     if (active.status === "mutual_resolved") {
-      this.consecutiveNoChangeCount = 0;
       if (!this.currentActiveSignal || this.currentActiveSignal.status !== "mutual_resolved") {
         this.currentActiveSignal = active;
+        this.triggerSystemNotification(active); // 调用原生通知
         this.showMutualCelebration(active);
         this.fetchAndRenderHistory();
       }
       return;
     }
 
+    // 处理发件人是自己的情况
     if (active.senderDeviceId === this.deviceId) {
-      this.consecutiveNoChangeCount = 0;
-      if (active.status === "accepted" && !this.hasCelebratedThisSignal) {
-        this.hasCelebratedThisSignal = true;
+      if (active.status === "accepted" && (!this.currentActiveSignal || this.currentActiveSignal.status !== "accepted")) {
+        this.currentActiveSignal = active;
+        this.triggerSystemNotification(active); // 调用原生通知
         this.showAcceptedCelebration(active);
         this.fetchAndRenderHistory();
       }
       return;
     }
 
+    // 处理收件人情况 (对方发来的新信号)
     if (active.status === "active" || active.status === "viewed" || active.status === "cooling") {
-      this.consecutiveNoChangeCount = 0;
-      this.currentActiveSignal = active;
-      this.showIncomingBanner(active);
+      if (!this.currentActiveSignal || this.currentActiveSignal.status !== active.status) {
+        this.currentActiveSignal = active;
+        if (active.status === "active") {
+           this.triggerSystemNotification(active); // 仅在全新发来时弹通知
+        }
+        this.showIncomingBanner(active);
+      }
     }
   }
 
@@ -247,6 +291,7 @@ class IceBreakerManager {
     else if (signal.actionType === "apology") actionTip = `${senderTitle}真诚地向你道歉了...`;
     else if (signal.actionType === "miss_you") actionTip = `${senderTitle}正在深深地想念你...`;
     else if (signal.actionType === "warm_hug") actionTip = `${senderTitle}隔空送来了温暖拥抱...`;
+    else if (signal.actionType === "accompany") actionTip = `${senderTitle}想要陪伴在你身边...`; // 注入新文案
 
     textEl.textContent = `💌 ${actionTip}`;
     banner.classList.add("show");
@@ -359,7 +404,6 @@ class IceBreakerManager {
       }
     }
 
-    // 🌟 广播破冰和好成就信号
     window.dispatchEvent(new CustomEvent("achievement:trigger", {
       detail: { type: "icebreaker_resolved" }
     }));
@@ -384,7 +428,6 @@ class IceBreakerManager {
       }
     }
 
-    // 🌟 广播破冰和好成就信号
     window.dispatchEvent(new CustomEvent("achievement:trigger", {
       detail: { type: "icebreaker_resolved" }
     }));
@@ -417,7 +460,6 @@ class IceBreakerManager {
         return;
       }
 
-      // 如果已有和好记录，静默触发成就解锁
       window.dispatchEvent(new CustomEvent("achievement:trigger", {
         detail: { type: "icebreaker_resolved" }
       }));
@@ -775,14 +817,27 @@ class IceBreakerManager {
     }
   }
 
+  // 🌟 核心引擎 3：事件驱动的心跳节流截流机制，交互即唤醒
   bindGlobalEvents() {
     document.addEventListener("visibilitychange", () => {
       if (!document.hidden) {
-        this.pollInterval = 3000;
-        this.startAdaptivePolling();
-        this.fetchAndRenderHistory();
+        this.executePoll(); // 从后台切回前台时，无条件立即刷新
       }
     });
+
+    const interactionHandler = () => {
+      if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+      }
+      
+      // 事件唤醒节流：防止用户狂点屏幕发送上百次请求，锁定在 10 秒内只允许一次交互唤醒
+      if (Date.now() - (this.lastFetchTime || 0) > 10000) {
+         this.executePoll();
+      }
+    };
+
+    document.addEventListener("click", interactionHandler, { passive: true });
+    document.addEventListener("touchstart", interactionHandler, { passive: true });
   }
 }
 
