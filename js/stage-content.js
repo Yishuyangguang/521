@@ -1,9 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印
  * 文件名: js/stage-content.js
- * 作用: 
- *   1. 独立管理恋爱期、订婚期、结婚期、孕期前后、婚后进阶 五大阶段专属的待办清单
- *   2. 提供星轨中枢舞台生命周期管理器 (StageManager)
+ * 作用: 独立管理恋爱期、订婚期、结婚期、孕期前后、婚后进阶 五大阶段专属的待办清单数据字典
  */
 
 window.STAGE_CONTENT = {
@@ -141,36 +139,34 @@ window.STAGE_CONTENT = {
     ]
   },
 
-  // ================= 🍼 4. 孕期前后 (Pregnancy Phase) =================
   pregnancy: {
     title: "孕期前后待办清单",
     subtitle: "共同孕育生命的奇迹，在软弱中彼此扶持",
     scratchTitle: "孕期前后 · 专属特权",
     checklist: [
-      { id: "p_1", title: "[解绑数据焦虑]在备孕期间，不把量体温、算排卵期变成冷冰冰的任务和“业绩考核”；在没有成功受孕的日子里，给彼此一个大大的拥抱，确信“我们相爱本身，就已经是最大的圆满”。", completed: false },
-      { id: "p_2", title: "[无声的气味守护]在孕早期她孕吐、恶心最严重的时候，男方默默收起家里所有可能引发孕吐的食物、香水和沐浴露，甚至自己也清淡饮食，毫无怨言地守护她的胃。", completed: false },
-      { id: "p_3", title: "[赞美新生的曲线]当她看着自己身上长出妊娠纹、皮肤变黑、体重不断增加而感到焦虑和自卑时，男方要搂着她，真诚、温柔地看着她的眼睛说：“为了我们的宝宝，你正在付出最美丽的代价。现在的你，比以往任何时候都要伟大和动人。”", completed: false },
-      { id: "p_4", title: "[不做逻辑裁判]面对她因为孕期激素变化而产生的、在外人看来“莫名其妙”的流泪或脾气，男方不讲大道理，不用逻辑分析对错，只坚定地抱紧她，做她最安全的消气桶。", completed: false },
-      { id: "p_5", title: "[共同的“准爸爸”作业]男方主动下载孕期和育儿软件，阅读孕期科普知识，比她更早知道每个阶段胎儿的发育情况和孕妇的生理不适，不把“了解孕期”变成她一个人的脑力负担。", completed: false },
-      { id: "p_6", title: "[每一次的握手守候]每一次产检（尤其是建档、排畸、糖筛等重要关口），男方都尽量请假陪同，在冰冷的医院长廊里，用温热的手心牢牢握住她的手，共同迎接未知的检查结果。", completed: false },
-      { id: "p_7", title: "[深夜的恐惧排毒]在深夜睡前，留出十分钟听她倾诉对分娩痛苦、产后身材恢复、以及能否成为一个好妈妈的最深恐惧，不打岔、不敷衍，用无条件的爱和陪伴去消融她的不安。", completed: false },
-      { id: "p_8", title: "[深夜的跑腿浪漫]当她因为孕期口味奇特，在深夜两点突然极度想吃某种特定食物（如酸草莓、某家特定的热干面）时，男方欢快地出门跑腿，把它当成是一次为爱而行的“深夜大冒险”。", completed: false },
-      { id: "p_9", title: "[重力卸载仪式]在她肚子一天天变大、腰酸背痛、小腿甚至开始水肿的孕中晚期，每天晚上用温水帮她泡脚，用轻柔的手法帮她按摩发胀的双腿和酸痛的后背。", completed: false },
-      { id: "p_10", title: "[我们先于宝宝]即使在准备各种婴儿用品、布置婴儿房的忙碌中，也时刻提醒彼此：“孩子是我们生命的礼物，但我们夫妻彼此守护、相爱，才是一切安全感的源头。”", completed: false },
-      { id: "p_11", title: "[没有中奖时的安慰]当验孕棒上再次出现“一条杠”，面对极大的失望时，男方要及时搂住那个眼眶红红的她，温柔地对她说：“没关系的，我们有彼此，就是最棒的二人世界。我们慢慢来。”", completed: false },
-      { id: "p_12", title: "[育儿账单的降噪]面对网络上铺天盖地的“天价母婴用品”带来的经济焦虑，两个人达成共识：不攀比、不陷入物质虚荣，量入为出地准备必需品，深信“温和快乐的父母，比最昂贵的婴儿车更重要”。", completed: false },
-      { id: "p_13", title: "[主动退步的温柔]当她因为孕期身体极度容易劳累、无法像以前那样精细地照顾家务时，女方学会原谅自己的“无能为力”，大方请求帮助；男方立刻体贴、毫无怨言地全面接管家务。", completed: false },
-      { id: "p_14", title: "[不评判的筑巢探索]在挑选婴儿车、纸尿裤或给宝宝起名字的过程中，即便审美和理念不合，也不指责对方“不会买、不操心”，在欢笑和妥协中享受共同为孩子筑巢的过程。", completed: false },
-      { id: "p_15", title: "[孕妈妈的“放风日”]在身体允许的情况下，男方主动策划，陪她去她最喜欢的公园、餐厅或者看一场温和的电影，不因怀孕而将她彻底禁锢在“保胎”的牢笼里，让她保持舒畅。", completed: false },
-      { id: "p_16", title: "[呼吸的共同练习]在孕晚期，男方陪同女方一起练习呼吸法或产前放松操，不当冷眼旁观的教练，而是用肢体动作陪她一起训练，把“生产”当成两个人并肩上战场的演练。", completed: false },
-      { id: "p_17", title: "[致敬你的肉身舍己]在分娩前夕，男方真诚地写下一封信或者亲口对她说：“谢谢你，为了我们这个新生命，甘愿承受肉体的撕裂与巨大的付出。无论生孩子时发生什么，我都会一直在手术室门外守着你，你永远是第一位的。”", completed: false },
-      { id: "p_18", title: "[产前的断舍离]在宝宝降生前夕，共同整理一次家里的杂物，也在心里做一次“断舍离”：写下我们最不希望带入下一代的坏脾气和相处模式，约定在未来成为父母的日子里，共同警醒。", completed: false },
-      { id: "p_19", title: "[在未知中交托安息]不为未来的生产计划（如是否顺产、是否打无痛、产后去哪里坐月子）制定过于死板、不容改变的方案。保持平和、柔软的心态，明白没有完美的生产，只有在每个未知变化中都互相托底、彼此依靠的我们。", completed: false }
+      { id: "p_1", title: "[解绑数据焦虑] 在备孕期间，不把量体温、算排卵期变成冷冰冰的任务和“业绩考核”；在没有成功受孕的日子里，给彼此一个大大的拥抱，确信“我们相爱本身，就已经是最大的圆满”。", completed: false },
+      { id: "p_2", title: "[无声的气味守护] 在孕早期她孕吐、恶心最严重的时候，男方默默收起家里所有可能引发孕吐的食物、香水和沐浴露，甚至自己也清淡饮食，毫无怨言地守护她的胃。", completed: false },
+      { id: "p_3", title: "[赞美新生的曲线] 当她看着自己身上长出妊娠纹、皮肤变黑、体重不断增加而感到焦虑和自卑时，男方要搂着她，真诚、温柔地看着她的眼睛说：“为了我们的宝宝，你正在付出最美丽的代价。现在的你，比以往任何时候都要伟大和动人。”", completed: false },
+      { id: "p_4", title: "[不做逻辑裁判] 面对她因为孕期激素变化而产生的、在外人看来“莫名其妙”的流泪或脾气，男方不讲大道理，不用逻辑分析对错，只坚定地抱紧她，做她最安全的消气桶。", completed: false },
+      { id: "p_5", title: "[共同的“准爸爸”作业] 男方主动下载孕期和育儿软件，阅读孕期科普知识，比她更早知道每个阶段胎儿的发育情况和孕妇的生理不适，不把“了解孕期”变成她一个人的脑力负担。", completed: false },
+      { id: "p_6", title: "[每一次的握手守候] 每一次产检（尤其是建档、排畸、糖筛等重要关口），男方都尽量请假陪同，在冰冷的医院长廊里，用温热的手心牢牢握住她的手，共同迎接未知的检查结果。", completed: false },
+      { id: "p_7", title: "[深夜的恐惧排毒] 在深夜睡前，留出十分钟听她倾诉对分娩痛苦、产后身材恢复、以及能否成为一个好妈妈的最深恐惧，不打岔、不敷衍，用无条件的爱和陪伴去消融她的不安。", completed: false },
+      { id: "p_8", title: "[深夜的跑腿浪漫] 当她因为孕期口味奇特，在深夜两点突然极度想吃某种特定食物（如酸草莓、某家特定的热干面）时，男方欢快地出门跑腿，把它当成是一次为爱而行的“深夜大冒险”。", completed: false },
+      { id: "p_9", title: "[重力卸载仪式] 在她肚子一天天变大、腰酸背痛、小腿甚至开始水肿的孕中晚期，每天晚上用温水帮她泡脚，用轻柔的手法帮她按摩发胀的双腿和酸痛的后背。", completed: false },
+      { id: "p_10", title: "[我们先于宝宝] 即使在准备各种婴儿用品、布置婴儿房的忙碌中，也时刻提醒彼此：“孩子是我们生命的礼物，但我们夫妻彼此守护、相爱，才是一切安全感的源头。”", completed: false },
+      { id: "p_11", title: "[没有中奖时的安慰] 当验孕棒上再次出现“一条杠”，面对极大的失望时，男方要及时搂住那个眼眶红红的她，温柔地对她说：“没关系的，我们有彼此，就是最棒的二人世界。我们慢慢来。”", completed: false },
+      { id: "p_12", title: "[育儿账单的降噪] 面对网络上铺天盖地的“天价母婴用品”带来的经济焦虑，两个人达成共识：不攀比、不陷入物质虚荣，量入为出地准备必需品，深信“温和快乐的父母，比最昂贵的婴儿车更重要”。", completed: false },
+      { id: "p_13", title: "[主动退步的温柔] 当她因为孕期身体极度容易劳累、无法像以前那样精细地照顾家务时，女方学会原谅自己的“无能为力”，大方请求帮助；男方立刻体贴、毫无怨言地全面接管家务。", completed: false },
+      { id: "p_14", title: "[不评判的筑巢探索] 在挑选婴儿车、纸尿裤或给宝宝起名字的过程中，即便审美和理念不合，也不指责对方“不会买、不操心”，在欢笑和妥协中享受共同为孩子筑巢的过程。", completed: false },
+      { id: "p_15", title: "[孕妈妈的“放风日”] 在身体允许的情况下，男方主动策划，陪她去她最喜欢的公园、餐厅或者看一场温和的电影，不因怀孕而将她彻底禁锢在“保胎”的牢笼里，让她保持舒畅。", completed: false },
+      { id: "p_16", title: "[呼吸的共同练习] 在孕晚期，男方陪同女方一起练习呼吸法或产前放松操，不当冷眼旁观的教练，而是用肢体动作陪她一起训练，把“生产”当成两个人并肩上战场的演练。", completed: false },
+      { id: "p_17", title: "[致敬你的肉身舍己] 在分娩前夕，男方真诚地写下一封信或者亲口对她说：“谢谢你，为了我们这个新生命，甘愿承受肉体的撕裂与巨大的付出。无论生孩子时发生什么，我都会一直在手术室门外守着你，你永远是第一位的。”", completed: false },
+      { id: "p_18", title: "[产前的断舍离] 在宝宝降生前夕，共同整理一次家里的杂物，也在心里做一次“断舍离”：写下我们最不希望带入下一代的坏脾气和相处模式，约定在未来成为父母的日子里，共同警醒。", completed: false },
+      { id: "p_19", title: "[在未知中交托安息] 不为未来的生产计划（如是否顺产、是否打无痛、产后去哪里坐月子）制定过于死板、不容改变的方案。保持平和、柔软的心态，明白没有完美的生产，只有在每个未知变化中都互相托底、彼此依靠的我们。", completed: false }
     ],
     scratchCards: []
   },
 
-  // ================= 🚀 5. 婚后进阶 (Advanced Phase) =================
   advanced: {
     title: "婚后进阶待办清单",
     subtitle: "在极度平淡的日常中，练习看见彼此的深沉光芒",
@@ -218,157 +214,3 @@ window.STAGE_CONTENT = {
     scratchCards: []
   }
 };
-
-class StageManager {
-  constructor() {
-    this.currentStage = null;
-    this.lockedScrollY = 0;
-    this.container = null;
-    this.overlay = null;
-    this.isTransitioning = false;
-    this.initialized = false;
-  }
-
-  init() {
-    this.container = document.getElementById("stage-modal-container");
-    this.overlay = document.getElementById("stage-modal-overlay");
-
-    if (this.initialized) return;
-    this.initialized = true;
-
-    document.addEventListener("click", (e) => {
-      const openBtn = e.target.closest("[data-open-stage]");
-      if (openBtn) {
-        e.preventDefault();
-        const stageId = openBtn.getAttribute("data-open-stage");
-        this.openStage(stageId);
-        return;
-      }
-
-      const closeBtn = e.target.closest(".stage-modal__close-btn, [data-close-stage]");
-      if (closeBtn) {
-        e.preventDefault();
-        this.closeStage();
-        return;
-      }
-
-      if (this.overlay && (e.target === this.overlay || e.target.id === "stage-modal-container")) {
-        this.closeStage();
-      }
-    });
-
-    window.addEventListener("popstate", (e) => {
-      if (e.state && e.state.stage) {
-        this.showStageDom(e.state.stage);
-      } else if (this.currentStage) {
-        this.closeStageDom();
-      }
-    });
-
-    window.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && this.currentStage) {
-        this.closeStage();
-      }
-    });
-
-    const initialHash = window.location.hash.replace("#", "");
-    if (initialHash && document.getElementById(`stage-${initialHash}`)) {
-      setTimeout(() => {
-        this.openStage(initialHash, false);
-      }, 300);
-    }
-  }
-
-  openStage(stageId, pushHistory = true) {
-    if (!this.container || !this.overlay) {
-      this.container = document.getElementById("stage-modal-container");
-      this.overlay = document.getElementById("stage-modal-overlay");
-    }
-
-    const stageEl = document.getElementById(`stage-${stageId}`);
-    if (!stageEl || this.isTransitioning) return;
-
-    this.isTransitioning = true;
-    this.lockScroll();
-
-    if (pushHistory) {
-      window.history.pushState({ stage: stageId }, "", `#${stageId}`);
-    }
-
-    this.showStageDom(stageId);
-
-    setTimeout(() => {
-      window.dispatchEvent(new CustomEvent("stage:opened", { detail: { stageId } }));
-      window.dispatchEvent(new Event("resize"));
-      this.isTransitioning = false;
-    }, 280);
-  }
-
-  closeStage(updateHistory = true) {
-    if (!this.currentStage || this.isTransitioning) return;
-    this.isTransitioning = true;
-
-    const closingStageId = this.currentStage;
-    window.dispatchEvent(new CustomEvent("stage:closing", { detail: { stageId: closingStageId } }));
-
-    if (updateHistory && window.location.hash) {
-      window.history.pushState(null, "", window.location.pathname + window.location.search);
-    }
-
-    this.closeStageDom();
-    this.unlockScroll();
-
-    setTimeout(() => {
-      window.dispatchEvent(new CustomEvent("stage:closed", { detail: { stageId: closingStageId } }));
-      this.isTransitioning = false;
-    }, 280);
-  }
-
-  showStageDom(stageId) {
-    document.querySelectorAll(".stage-modal").forEach(el => {
-      el.classList.remove("stage-modal--active");
-    });
-
-    const targetEl = document.getElementById(`stage-${stageId}`);
-    if (targetEl) {
-      if (this.container) this.container.classList.add("stage-container--active");
-      if (this.overlay) this.overlay.classList.add("stage-overlay--active");
-      targetEl.classList.add("stage-modal--active");
-      this.currentStage = stageId;
-
-      const bodyWrapper = targetEl.querySelector(".stage-modal__body");
-      if (bodyWrapper) bodyWrapper.scrollTop = 0;
-    }
-  }
-
-  closeStageDom() {
-    if (this.container) this.container.classList.remove("stage-container--active");
-    if (this.overlay) this.overlay.classList.remove("stage-overlay--active");
-    document.querySelectorAll(".stage-modal").forEach(el => {
-      el.classList.remove("stage-modal--active");
-    });
-    this.currentStage = null;
-  }
-
-  lockScroll() {
-    this.lockedScrollY = window.scrollY || window.pageYOffset || 0;
-    document.body.classList.add("body--locked");
-    document.body.style.top = `-${this.lockedScrollY}px`;
-  }
-
-  unlockScroll() {
-    document.body.classList.remove("body--locked");
-    document.body.style.top = "";
-    window.scrollTo(0, this.lockedScrollY);
-  }
-}
-
-window.StageManager = new StageManager();
-window.openStage = (id) => window.StageManager.openStage(id);
-window.closeStage = () => window.StageManager.closeStage();
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => window.StageManager.init());
-} else {
-  window.StageManager.init();
-}
