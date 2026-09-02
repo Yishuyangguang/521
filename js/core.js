@@ -7,6 +7,11 @@
 document.addEventListener("DOMContentLoaded", () => {
   let config = window.LOVE_CONFIG || {};
 
+  // 🌟 第 0 毫秒侦测会话穿透烙印：如果本会话已解锁，直接物理跳过所有动画
+  if (sessionStorage.getItem("universe_unlocked") === "true") {
+    setTimeout(() => unlockMainUniverse(false), 50);
+  }
+
   function escapeHtml(s) {
     return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
@@ -83,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
     downloadPosterBtn: document.getElementById("download-poster-btn"),
     closePosterBtn: document.getElementById("close-poster-btn"),
     universeFooterText: document.querySelector(".universe-footer__text"),
-    adminAuthModal: document.getElementById("hq-admin-auth-modal") // 🌟 挂载高级弹窗 DOM
+    adminAuthModal: document.getElementById("hq-admin-auth-modal")
   };
 
   function mergeWithDefaultConfig(cloudCfg) {
@@ -132,7 +137,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // 🌟 核心升级：废弃丑陋原生 prompt，调用高定 DOM 弹窗拦截密码输入
   function initAdminPortalTrigger() {
     if (!dom.heroNames) return;
     
@@ -168,7 +172,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 🌟 全新异步 DOM 弹窗引擎
   function showAdminAuthModal() {
     return new Promise((resolve) => {
       if (!dom.adminAuthModal) return resolve(null);
@@ -182,14 +185,13 @@ document.addEventListener("DOMContentLoaded", () => {
       if (errorMsg) errorMsg.style.display = "none";
       dom.adminAuthModal.style.display = "flex";
       
-      // 动画淡入
       setTimeout(() => dom.adminAuthModal.classList.add("active"), 10);
       if (inputEl) inputEl.focus();
 
       const cleanup = () => {
         dom.adminAuthModal.classList.remove("active");
         setTimeout(() => dom.adminAuthModal.style.display = "none", 300);
-        if (inputEl) inputEl.blur(); // 防键盘残留
+        if (inputEl) inputEl.blur(); 
         confirmBtn.onclick = null;
         cancelBtn.onclick = null;
         inputEl.onkeydown = null;
@@ -348,6 +350,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.success && data.custom && data.config) {
         config = mergeWithDefaultConfig(data.config);
         window.LOVE_CONFIG = config;
+        
+        // 🌟 核心：更新防竞态快照，确保前端能够零延迟识别是否关闭了门禁
+        const isGatekeeperEnabled = config.gatekeeper ? config.gatekeeper.enabled !== false : true;
+        localStorage.setItem("love_gatekeeper_enabled_snapshot", isGatekeeperEnabled ? "true" : "false");
 
         initGatekeeperUI();
 
@@ -444,6 +450,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function unlockMainUniverse(withAnimation = true) {
+    // 🌟 核心：刻入会话免密烙印
+    sessionStorage.setItem("universe_unlocked", "true");
+    
     if (document.activeElement && typeof document.activeElement.blur === "function") {
       document.activeElement.blur();
     }
