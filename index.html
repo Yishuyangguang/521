@@ -10,6 +10,15 @@
   <meta property="og:image" content="assets/images/share-cover.jpg">
 
   <title>众水不灭 · 我们的恒久印记</title>
+
+  <!-- 🌟 核心：第 0 毫秒会话免密穿透引擎 (防刷新白屏与二次打扰) -->
+  <script>
+    (function() {
+      if (sessionStorage.getItem("universe_unlocked") === "true") {
+        document.documentElement.classList.add("fast-unlock");
+      }
+    })();
+  </script>
   
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=2.5">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=2.5">
@@ -32,6 +41,11 @@
   <link rel="stylesheet" href="css/pet-badges.css?v=2.5">
   <link rel="stylesheet" href="css/scratch-card.css?v=2.5">
   <style>
+    /* 🌟 零延迟穿透样式：物理级隐藏门禁，直接显现主宇宙 */
+    html.fast-unlock #gatekeeper-screen { display: none !important; }
+    html.fast-unlock #main-container { display: block !important; opacity: 1 !important; visibility: visible !important; transform: none !important; }
+    html.fast-unlock .main-container--hidden { display: block !important; opacity: 1 !important; visibility: visible !important; transform: none !important; pointer-events: auto !important; }
+
     .perspective-capsule {
       position: fixed;
       top: max(18px, env(safe-area-inset-top, 18px));
@@ -516,7 +530,7 @@
     </div>
   </div>
 
-  <!-- 🌟 新增：高级控制台密钥鉴权弹窗 -->
+  <!-- 🌟 高级控制台密钥鉴权弹窗 -->
   <div id="hq-admin-auth-modal" class="hq-auth-modal">
     <div class="hq-auth-dialog">
       <div class="hq-auth-icon">⚙️</div>
@@ -563,10 +577,25 @@
       if (roseOverlay && gatekeeperDialog) {
         roseOverlay.addEventListener('click', () => {
           roseOverlay.style.display = 'none';
+          
           const config = window.LOVE_CONFIG || {};
-          const isGatekeeperEnabled = config.gatekeeper ? config.gatekeeper.enabled !== false : true;
-          if (isGatekeeperEnabled) gatekeeperDialog.classList.remove('gatekeeper__dialog--hidden'); 
-          else window.dispatchEvent(new Event('gatekeeper:bypass'));
+          let isGatekeeperEnabled = true;
+          
+          // 🌟 解决异步竞态：如果网络请求还没回来，读取本地快照进行瞬间判定
+          if (config.gatekeeper && typeof config.gatekeeper.enabled !== 'undefined') {
+            isGatekeeperEnabled = config.gatekeeper.enabled;
+          } else {
+            const snapshot = localStorage.getItem("love_gatekeeper_enabled_snapshot");
+            if (snapshot !== null) {
+              isGatekeeperEnabled = (snapshot === "true");
+            }
+          }
+          
+          if (isGatekeeperEnabled) {
+            gatekeeperDialog.classList.remove('gatekeeper__dialog--hidden'); 
+          } else {
+            window.dispatchEvent(new Event('gatekeeper:bypass'));
+          }
         });
       }
 
