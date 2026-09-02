@@ -21,14 +21,16 @@
   --accent-gold: #f59e0b;
   --accent-gold-glow: rgba(245, 158, 11, 0.4);
 
+  /* 深色模式徽章基础变量 */
   --badge-bg: rgba(245, 158, 11, 0.12);
   --badge-border: rgba(245, 158, 11, 0.35);
   --badge-text: #fde68a;
 
-  --timer-unit-bg: rgba(3, 7, 18, 0.75);
-  --timer-unit-border: rgba(255, 255, 255, 0.1);
+  /* 深色模式计时器基础变量 (调整为更通透的毛玻璃底色) */
+  --timer-unit-bg: rgba(15, 23, 42, 0.45);
+  --timer-unit-border: rgba(255, 255, 255, 0.12);
   --timer-num-color: #fde68a;
-  --timer-label-color: #94a3b8;
+  --timer-label-color: #cbd5e1;
   --timer-milestone-bg: rgba(251, 113, 133, 0.12);
   --timer-milestone-border: rgba(251, 113, 133, 0.35);
   --timer-milestone-text: #fb7185;
@@ -208,6 +210,17 @@ body[data-theme-type="light"] {
   --drawer-active-bg: linear-gradient(135deg, rgba(254, 205, 211, 0.6) 0%, rgba(253, 230, 138, 0.5) 100%);
   --drawer-active-border: #f43f5e;
   --drawer-active-title: #881337;
+
+  /* 注入浅色模式专属的计时器与徽章变量 (彻底解决不融洽与辨识度低的问题) */
+  --badge-bg: rgba(255, 255, 255, 0.7);
+  --badge-border: rgba(244, 63, 94, 0.45);
+  --badge-text: #e11d48;
+  
+  --timer-unit-bg: rgba(255, 255, 255, 0.55);
+  --timer-unit-border: rgba(255, 255, 255, 0.9);
+  /* 数字和单位使用高对比度的深色调 */
+  --timer-num-color: #881337; 
+  --timer-label-color: #9f1239;
 }
 
 /* 彻底解决第二张图中的中枢大标题白底白字隐形问题 */
@@ -225,7 +238,10 @@ body[data-theme-type="light"] .hero-section__names {
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   text-shadow: none !important;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.06)) drop-shadow(0 6px 16px rgba(190, 18, 60, 0.16)) !important;
+  /* 核心：使用多重纯白色的 drop-shadow 形成物理保护圈，杜绝文字边缘被浅色背景“吃掉” */
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 1)) 
+          drop-shadow(0 0 5px rgba(255, 255, 255, 0.9)) 
+          drop-shadow(0 6px 16px rgba(190, 18, 60, 0.16)) !important;
 }
 
 body[data-theme-type="light"] .name-connector {
@@ -239,4 +255,59 @@ body[data-theme-type="light"] .hero-section__subtitle {
   color: var(--text-subtitle) !important;
   font-weight: 800 !important;
   text-shadow: none !important;
+}
+
+/* ================= 🌟 核心强制接管：Hero 区域 UI 玻璃拟态与高可用重构 ================= */
+/* 
+ * 强制接管原组件样式，使顶部组件物理绑定上方的动态主题变量，
+ * 无论处于什么背景，都自动运用毛玻璃质感并维持高对比度。
+ */
+
+/* 1. THE ETERNAL SEAL 胶囊徽章接管 */
+.hero-section__badge {
+  background: var(--badge-bg) !important;
+  border: 1px solid var(--badge-border) !important;
+  color: var(--badge-text) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+  font-weight: 800 !important;
+  letter-spacing: 2px !important;
+  padding: 6px 20px !important;
+  border-radius: 50px !important;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* 2. 计时器方块接管 (彻底摒弃原有的工业风深色实体方块) */
+.love-timer__unit {
+  background: var(--timer-unit-bg) !important;
+  border: 1px solid var(--timer-unit-border) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+  border-radius: 16px !important;
+  padding: 14px 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 72px !important;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.love-timer__num {
+  color: var(--timer-num-color) !important;
+  font-size: 28px !important;
+  font-weight: 900 !important;
+  line-height: 1.1 !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  transition: color 0.4s ease !important;
+}
+
+.love-timer__label {
+  color: var(--timer-label-color) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  margin-top: 4px !important;
+  transition: color 0.4s ease !important;
 }
