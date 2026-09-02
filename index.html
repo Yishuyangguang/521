@@ -11,7 +11,6 @@
 
   <title>众水不灭 · 我们的恒久印记</title>
 
-  <!-- 🌟 核心：第 0 毫秒会话免密穿透引擎 (防刷新白屏与二次打扰) -->
   <script>
     (function() {
       if (sessionStorage.getItem("universe_unlocked") === "true") {
@@ -41,7 +40,6 @@
   <link rel="stylesheet" href="css/pet-badges.css?v=2.5">
   <link rel="stylesheet" href="css/scratch-card.css?v=2.5">
   <style>
-    /* 🌟 零延迟穿透样式：物理级隐藏门禁，直接显现主宇宙 */
     html.fast-unlock #gatekeeper-screen { display: none !important; }
     html.fast-unlock #main-container { display: block !important; opacity: 1 !important; visibility: visible !important; transform: none !important; }
     html.fast-unlock .main-container--hidden { display: block !important; opacity: 1 !important; visibility: visible !important; transform: none !important; pointer-events: auto !important; }
@@ -158,7 +156,6 @@
       }
     }
 
-    /* 🌟 高定管理鉴权弹窗 CSS 引擎 */
     .hq-auth-modal {
       position: fixed; inset: 0; z-index: 999999; display: none; align-items: center; justify-content: center;
       background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -303,7 +300,8 @@
           </div>
         </div>
 
-        <div class="hub-btn" data-open-stage="checklist" onclick="if(window.StageManager) window.StageManager.openStage('checklist')">
+        <!-- 🌟 核心：精准切断原弹窗路由，替换为全屏新视窗打开 -->
+        <div class="hub-btn" onclick="window.open('checklist.html', '_blank')">
           <div class="hub-btn__glow"></div>
           <span class="hub-btn__icon">📝</span>
           <div class="hub-btn__info">
@@ -408,28 +406,7 @@
       </div>
     </section>
 
-    <section id="stage-checklist" class="stage-modal">
-      <div class="stage-modal__header">
-        <div class="stage-modal__title-box"><span class="stage-modal__icon">📝</span><h2 class="stage-modal__title" id="checklist-stage-header-title">同行约定 · 待办清单</h2></div>
-        <button class="stage-modal__close-btn" onclick="if(window.StageManager) window.StageManager.closeStage()">✕</button>
-      </div>
-      <div class="stage-modal__body">
-        <div class="phase-switch-bar">
-          <button class="phase-tab-btn active" data-phase="dating">🌿 恋爱期</button>
-          <button class="phase-tab-btn" data-phase="engaged">💍 订婚期</button>
-          <button class="phase-tab-btn" data-phase="married">🏠 结婚期</button>
-        </div>
-        <div class="section-title">
-          <h3 class="section-title__text" id="checklist-section-title">恋爱期待办清单</h3>
-          <span class="section-title__desc" id="checklist-section-desc">在尊重与接纳中了解彼此，坚守圣洁、克制与纯粹</span>
-        </div>
-        <div class="checklist-card">
-          <div class="checklist-card__progress-bar"><div class="checklist-card__progress-fill" id="checklist-progress-fill"></div></div>
-          <div class="checklist-card__stats" id="checklist-stats">已达成心愿 0 / 0 项 (0%)</div>
-          <div class="checklist-grid" id="checklist-container"></div>
-        </div>
-      </div>
-    </section>
+    <!-- 🌟 这里已经彻底移除了旧的 #stage-checklist DOM 节点，为页面减负提速 -->
 
     <section id="stage-scratch" class="stage-modal">
       <div class="stage-modal__header">
@@ -581,7 +558,6 @@
           const config = window.LOVE_CONFIG || {};
           let isGatekeeperEnabled = true;
           
-          // 🌟 解决异步竞态：如果网络请求还没回来，读取本地快照进行瞬间判定
           if (config.gatekeeper && typeof config.gatekeeper.enabled !== 'undefined') {
             isGatekeeperEnabled = config.gatekeeper.enabled;
           } else {
