@@ -1,7 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印
  * 文件名: js/theme-engine.js
- * 作用: 多维物理引擎、12 套男女主题切换、双视角胶囊激活联动与全视口浅色/深色背景智能穿透
+ * 作用: 多维物理引擎、12 套男女主题切换、双视角胶囊激活联动与全视口跨页面无缝漫游
  */
 
 class ThemeEngineCore {
@@ -11,7 +11,7 @@ class ThemeEngineCore {
     this.particles = [];
     this.animationFrameId = null;
     this.currentPerspective = localStorage.getItem("love_user_perspective") || "boy";
-    this.currentThemeId = "sunset-twilight";
+    this.currentThemeId = localStorage.getItem("love_current_theme_id") || "sunset-twilight";
   }
 
   init() {
@@ -24,10 +24,10 @@ class ThemeEngineCore {
     this.handleResize = () => this.resizeCanvas();
     window.addEventListener("resize", this.handleResize);
 
-    // 绑定前台胶囊点击事件（原生监听保障 100% 触发）
     this.bindCapsuleEvents();
     this.updateCapsuleUI();
 
+    // 如果不是在主页初始化（比如从独立页加载），尽量使用本地记忆，防止断层
     const config = window.LOVE_CONFIG || {};
     const themeCfg = config.theme || {};
 
@@ -42,7 +42,6 @@ class ThemeEngineCore {
     this.applyTheme(defaultTheme, customBg, false);
   }
 
-  // 确保底层全视口独立背景容器存在
   ensureBackgroundLayer() {
     let bgLayer = document.getElementById("universe-bg-layer");
     if (!bgLayer) {
@@ -85,9 +84,10 @@ class ThemeEngineCore {
     }
   }
 
-  // 切换男女视角
   switchPerspective(gender) {
     this.currentPerspective = gender;
+    
+    // 🌟 核心：将视角记忆硬写入本地存储，供多页漫游读取
     localStorage.setItem("love_user_perspective", gender);
     this.updateCapsuleUI();
 
@@ -122,6 +122,10 @@ class ThemeEngineCore {
 
   applyTheme(themeId, customBgUrl = "", notify = false) {
     this.currentThemeId = themeId;
+    
+    // 🌟 核心：持久化当前主题与背景图，供 checklist.html 等独立页面实现 0 毫秒渲染
+    localStorage.setItem("love_current_theme_id", themeId);
+    localStorage.setItem("love_current_custom_bg", customBgUrl || "");
 
     const presets = window.THEME_PRESETS || { boy: [], girl: [] };
     const allThemes = [...(presets.boy || []), ...(presets.girl || [])];
@@ -134,7 +138,7 @@ class ThemeEngineCore {
     const isLight = themeMeta.themeType === "light" || this.currentPerspective === "girl";
     const themeType = isLight ? "light" : "dark";
 
-    // 1. 设置 Body 类名与无障碍对比度主题类型属性
+    // 设置 Body 类名与无障碍对比度主题类型属性
     document.body.className = document.body.className
       .replace(/theme-[a-z0-9-]+/g, "")
       .trim();
@@ -142,7 +146,6 @@ class ThemeEngineCore {
     document.body.setAttribute("data-theme-type", themeType);
     document.documentElement.setAttribute("data-theme-type", themeType);
 
-    // 2. 将高清壁纸精准注入至独立全视口背景层 (未上传自定义壁纸时完全由 CSS 变量 --theme-bg-gradient 呈现)
     const bgLayer = this.ensureBackgroundLayer();
     
     document.body.style.backgroundImage = "none";
@@ -154,11 +157,10 @@ class ThemeEngineCore {
         : "linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45))";
       bgLayer.style.backgroundImage = `${scrim}, url('${customBgUrl}')`;
     } else {
-      // 清空行内 style.backgroundImage，让 CSS 中定义的 --theme-bg-gradient 在电脑端与手机端 100% 完整生效
       bgLayer.style.backgroundImage = "";
     }
 
-    // 3. 启动物理粒子引擎 (浅色模式自动适配梦幻气泡或暖金阳光粒子)
+    // 独立页面不一定有 canvas，要做空值探测
     let particleType = themeMeta.particleType || "meteor";
     if (isLight && particleType === "meteor") {
       particleType = "bubbles";
