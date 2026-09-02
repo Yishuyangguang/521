@@ -1,7 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印
  * 文件名: js/pet-celebration.js
- * 作用: 灵宠晋升与徽章解锁庆贺动效中枢、纯代码 Web Audio 空灵和弦合成引擎、全站成就字典体系
+ * 作用: 灵宠晋升与徽章解锁庆贺动效中枢、全站成就字典体系 (引入隐形进度阶梯)
  */
 
 class PetCelebrationManager {
@@ -12,30 +12,33 @@ class PetCelebrationManager {
   }
 
   /**
-   * 🌟 15 徽章全量核心元数据字典 (已全面扩容与正名)
+   * 🌟 16 徽章全量核心元数据字典 (带有隐形进度追踪器 tracker 与目标值 target)
    */
   static get BADGE_DEFINITIONS() {
     return [
-      // 5 阶等级徽章
+      // === 5 阶核心陪伴等级 (Level) ===
       { id: "lvl_1", name: "小小雏鸽", icon: "🐣", category: "level", level: 1, desc: "初识恩典 · 光芒值达到 0+" },
       { id: "lvl_2", name: "感恩使者", icon: "💧", category: "level", level: 2, desc: "恩典流淌 · 光芒值达到 100+" },
       { id: "lvl_3", name: "舍己守护", icon: "🍎", category: "level", level: 3, desc: "舍己之美 · 光芒值达到 300+" },
       { id: "lvl_4", name: "和平织梦", icon: "🕊️✨", category: "level", level: 4, desc: "双翼展翅 · 光芒值达到 600+" },
       { id: "lvl_5", name: "和平使者", icon: "👑🕊️", category: "level", level: 5, desc: "神圣加冕 · 光芒值达到 1000+" },
 
-      // 7 项经典交互成就徽章
-      { id: "streak_7", name: "七日感恩", icon: "📅💧", category: "special", desc: "连续 7 天记录感恩之露" },
-      { id: "first_peace", name: "破冰勇士", icon: "🧊⚡", category: "special", desc: "首次使用破冰信号箱达成和解" },
-      { id: "checklist_100", name: "百件期待", icon: "✅💯", category: "special", desc: "完成 100 件同行约定清单" },
-      { id: "sacrifice_10", name: "舍己十诫", icon: "🤝🔟", category: "special", desc: "累计达成 10 次主动包容退让" },
-      { id: "photo_50", name: "时光雕刻", icon: "📸🎞️", category: "special", desc: "时光轴珍藏美好回忆时刻" },
-      { id: "music_100", name: "治愈之音", icon: "🎵💕", category: "special", desc: "在专属背景音乐中同行守护" },
-      { id: "egg_hunter", name: "彩蛋猎人", icon: "🥚🔍", category: "special", desc: "发现全站角落隐藏的爱意彩蛋" },
+      // === 🌱 隐形阶梯 1：触手可及 (新手启程) ===
+      { id: "diary_1", name: "初遇晨曦", icon: "🌅", category: "special", desc: "在日记本中写下第 1 篇专属记忆" },
+      { id: "first_peace", name: "破冰之勇", icon: "🧊⚡", category: "special", desc: "首次使用破冰信号箱主动和好" },
+      { id: "streak_7", name: "七日暖阳", icon: "📅☀️", category: "special", desc: "连续 7 天陪伴打卡", tracker: "streakDays", target: 7 },
+      { id: "music_100", name: "治愈之音", icon: "🎵💕", category: "special", desc: "在专属背景音乐中同行守护", tracker: "playedSongsCount", target: 5 },
 
-      // 🌟 新增：日记与陪伴专属成就徽章
-      { id: "diary_1", name: "时光执笔", icon: "📔✍️", category: "special", desc: "在我们的日记本中写下第 1 篇专属记忆" },
-      { id: "diary_10", name: "岁月史官", icon: "📚🕰️", category: "special", desc: "累计写下 10 篇以上的同行日记记录" },
-      { id: "accompany_1", name: "守护之诺", icon: "🫂💖", category: "special", desc: "破冰时首次使用“我会陪伴你”宣告不离不弃" }
+      // === 🌙 隐形阶梯 2：习惯养成 (中期沉淀) ===
+      { id: "diary_10", name: "岁月史官", icon: "📚🕰️", category: "special", desc: "累计写下 10 篇以上的同行日记", tracker: "diaryCount", target: 10 },
+      { id: "sacrifice_10", name: "包容之水", icon: "🌊🤝", category: "special", desc: "累计主动退让与包容 10 次", tracker: "sacrificeCount", target: 10 },
+      { id: "streak_30", name: "月相盈亏", icon: "🌖", category: "special", desc: "连续陪伴打卡满 30 天", tracker: "streakDays", target: 30 },
+      { id: "egg_hunter", name: "寻宝猎人", icon: "🥚🔍", category: "special", desc: "发现全站角落隐藏的爱意彩蛋", tracker: "foundEggsCount", target: 2 },
+      { id: "photo_50", name: "时光雕刻", icon: "📸🎞️", category: "special", desc: "翻转查看时光轴回忆照片", tracker: "flippedCardsCount", target: 15 },
+
+      // === 🌌 隐形阶梯 3：白金荣耀 (史诗羁绊) ===
+      { id: "streak_100", name: "百日星辰", icon: "💯✨", category: "special", desc: "连续陪伴打卡达到 100 天", tracker: "streakDays", target: 100 },
+      { id: "sacrifice_50", name: "灵魂伴侣", icon: "💞🕊️", category: "special", desc: "累计主动退让达到 50 次", tracker: "sacrificeCount", target: 50 }
     ];
   }
 
