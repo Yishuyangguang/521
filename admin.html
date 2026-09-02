@@ -12,15 +12,7 @@
 </head>
 <body>
 
-  <div id="authModal" class="admin-auth-modal">
-    <div class="admin-auth-dialog">
-      <div class="admin-auth-icon">👑</div>
-      <h2 class="admin-auth-title">管理身份验证</h2>
-      <p class="admin-auth-desc">请输入管理员口令以开启全模块控制权限：</p>
-      <input type="password" id="adminPwdInput" class="admin-input" placeholder="请输入管理口令 ..." onkeydown="if(event.key==='Enter') verifyAdminLogin();">
-      <button class="btn-admin-action" onclick="verifyAdminLogin()">🚀 登入工作台</button>
-    </div>
-  </div>
+  <!-- 🌟 已物理移除图二（#authModal）二次拦截模态框，实现验证直通 -->
 
   <div class="admin-layout" id="adminLayout" style="display:none;">
     <header class="admin-header">
@@ -57,10 +49,33 @@
         <section id="tab-meta" class="tab-pane active">
           <div class="pane-header"><h3>👫 基础档案与生命周期阶段设置</h3></div>
           <div class="form-grid">
-            <div class="form-group" style="grid-column: 1 / -1; background: rgba(56, 189, 248, 0.1); padding: 14px; border-radius: 14px; border: 1px solid rgba(56, 189, 248, 0.3);">
-              <label style="color:#7dd3fc; font-weight:800;">🔑 本站后台独立管理登录密码 (注意：为了保密，密码修改后请牢记，不可找回！！！默认 521)</label>
-              <input type="text" id="admin_customPassword" class="admin-input" placeholder="输入新管理密码 (留空则默认为 521)">
+            
+            <!-- 🌟 核心：全新安全密级管理 (旧密码核验 -> 新密码 -> 确认新密码) -->
+            <div class="form-group" style="grid-column: 1 / -1; background: rgba(56, 189, 248, 0.08); padding: 18px; border-radius: 16px; border: 1.5px solid rgba(56, 189, 248, 0.35);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+                <label style="color:#7dd3fc; font-weight:900; font-size:14px; margin:0;">🔑 后台独立管理登录密码安全修改 (系统默认密码: 521)</label>
+                <span style="font-size:11.5px; color:#94a3b8;">须验证原密码后方可更新生效</span>
+              </div>
+              <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:14px;">
+                <div>
+                  <label style="font-size:11.5px; color:#cbd5e1; margin-bottom:4px; display:block;">原管理密码 (旧密码)</label>
+                  <input type="password" id="admin_oldPassword" class="admin-input" placeholder="请输入当前旧密码...">
+                </div>
+                <div>
+                  <label style="font-size:11.5px; color:#cbd5e1; margin-bottom:4px; display:block;">新管理密码</label>
+                  <input type="password" id="admin_newPassword" class="admin-input" placeholder="输入新管理密码...">
+                </div>
+                <div>
+                  <label style="font-size:11.5px; color:#cbd5e1; margin-bottom:4px; display:block;">确认新管理密码</label>
+                  <input type="password" id="admin_confirmPassword" class="admin-input" placeholder="再次输入新密码...">
+                </div>
+              </div>
+              <div style="display:flex; justify-content:flex-end; gap:10px; align-items:center;">
+                <button type="button" class="btn-tool" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#fff; border:none; padding:8px 18px; font-weight:800; border-radius:12px;" onclick="modifyAdminPasswordWithOld()">🔐 验证原密码并更新</button>
+              </div>
+              <input type="hidden" id="admin_customPassword" value="521">
             </div>
+
             <div class="form-group" style="grid-column: 1 / -1; background: rgba(245, 158, 11, 0.12); padding: 14px; border-radius: 14px; border: 1px solid rgba(245,158,11,0.3);">
               <label style="color:#fde68a; font-weight:800;">🌟 当前关系生命周期 (严格边界机制)</label>
               <select id="lifecycle_phase" class="admin-select" style="font-weight: 900; color: #38bdf8;">
@@ -183,7 +198,6 @@
           <div id="icebreakerActionsContainer" style="display:flex; flex-direction:column; gap:14px;"></div>
         </section>
 
-        <!-- 🌟 核心：移除原来的旧 DOM，改为全动态注入 -->
         <section id="tab-checklist" class="tab-pane">
           <div class="pane-header" style="display:flex; justify-content:space-between;">
             <div>
@@ -195,13 +209,11 @@
           <div id="checklistItemsContainer" class="dynamic-list"></div>
         </section>
 
-        <!-- 8. 刮刮乐 -->
         <section id="tab-scratch" class="tab-pane">
           <div class="pane-header" style="display:flex; justify-content:space-between;"><div><h3>🎟️ 刮刮乐</h3></div><button class="btn-add" onclick="addScratchCard()">➕ 新增</button></div>
           <div id="scratchCardsContainer" class="dynamic-list"></div>
         </section>
 
-        <!-- 9. 背景音乐与多曲目播放列表 -->
         <section id="tab-audio" class="tab-pane">
           <div class="pane-header">
             <h3>🎵 背景音乐与多曲目播放列表</h3>
@@ -274,7 +286,6 @@
           </div>
         </section>
 
-        <!-- 10. 隐藏彩蛋 -->
         <section id="tab-eggs" class="tab-pane">
           <div class="pane-header"><h3>🐣 隐藏角落彩蛋悄悄话</h3></div>
           <div class="form-grid">
@@ -283,7 +294,6 @@
           </div>
         </section>
 
-        <!-- 11. 双视角主题陈列室 -->
         <section id="tab-theme" class="tab-pane">
           <div class="pane-header"><h3>🎨 双视角主题陈列室</h3></div>
           <div style="background: rgba(15, 23, 42, 0.6); border: 1.5px solid rgba(56, 189, 248, 0.3); border-radius: 18px; padding: 18px; margin-bottom: 24px;">
@@ -312,7 +322,6 @@
           </div>
         </section>
 
-        <!-- 12. 授权 -->
         <section id="tab-license" class="tab-pane">
           <div class="pane-header"><h3>💎 契约 · 专属授权激活状态</h3></div>
           <div style="background: rgba(3, 7, 18, 0.7); border: 1.5px solid rgba(56, 189, 248, 0.3); border-radius: 18px; padding: 22px;">
