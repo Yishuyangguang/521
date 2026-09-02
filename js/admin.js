@@ -1018,7 +1018,6 @@ function renderChecklist() {
 function addChecklistItem() { if (!currentConfig.checklist100) currentConfig.checklist100 = []; currentConfig.checklist100.push({ id: currentConfig.checklist100.length + 1, phase: 1, title: "一起去做一件浪漫的事", completed: false }); renderChecklist(); }
 function deleteChecklistItem(idx) { currentConfig.checklist100.splice(idx, 1); renderChecklist(); }
 
-// 刮刮乐渲染
 function renderScratchCards() {
   const container = document.getElementById("scratchCardsContainer");
   if (!container) return;
