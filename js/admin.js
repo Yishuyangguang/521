@@ -127,7 +127,6 @@ function mergeWithDefaultConfig(cloudCfg) {
   };
 }
 
-// 🌟 核心引擎：动态同步控制台背景主题，实现所见即所得
 function syncAdminBackgroundTheme() {
   if (!currentConfig || !currentConfig.theme) return;
   
@@ -566,7 +565,8 @@ function renderIcebreakerSettings() {
     return `
       <div class="item-card highlight-panel" style="margin-bottom:14px; padding:16px;">
         <div class="highlight-text" style="font-size:14px; margin-bottom:12px;">${st.name}</div>
-        <div style="display:flex; flex-direction:column; gap:10px;">
+        <!-- 🌟 核心拦截：为激增的 14 个卡片加入内建滚动防御容器，防止撑破管理台 -->
+        <div style="display:flex; flex-direction:column; gap:10px; max-height:420px; overflow-y:auto; padding-right:8px; scrollbar-width:thin;">
           ${list.map((act, actIdx) => `
             <div style="background:rgba(0,0,0,0.1); border:1px solid var(--timer-unit-border); border-radius:12px; padding:12px;">
               <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
@@ -576,7 +576,7 @@ function renderIcebreakerSettings() {
               </div>
               <div class="form-group" style="margin-bottom:0;">
                 <label style="font-size:11px;">自定义台阶文案</label>
-                <textarea class="admin-textarea" rows="2" oninput="updateIcebreakerActionText('${st.key}', '${act.type}', this.value)">${escapeHtml(act.desc || "")}</textarea>
+                <textarea class="admin-textarea" rows="3" oninput="updateIcebreakerActionText('${st.key}', '${act.type}', this.value)">${escapeHtml(act.desc || "")}</textarea>
               </div>
             </div>
           `).join("")}
