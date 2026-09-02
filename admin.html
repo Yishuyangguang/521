@@ -7,12 +7,43 @@
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=2.0">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=2.0">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2.0">
-  <link rel="stylesheet" href="css/admin.css?v=2.3">
-  <link rel="stylesheet" href="css/themes.css?v=2.3">
+  <link rel="stylesheet" href="css/admin.css?v=2.4">
+  <link rel="stylesheet" href="css/themes.css?v=2.4">
+  
+  <!-- 🌟 核心防雷：确保在任何极端浅色/高饱和背景下，控制台依然保持暗色工业级的高对比度读写体验 -->
+  <style>
+    .universe-bg-layer {
+      position: fixed;
+      inset: 0;
+      z-index: -999;
+      background-color: var(--bg-primary, #090d16);
+      background-image: var(--theme-bg-gradient);
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      transition: background-color 0.5s ease, background-image 0.5s ease;
+    }
+    .admin-layout {
+      position: relative;
+      z-index: 1;
+    }
+    /* 深色透光毛玻璃结界 */
+    .admin-layout::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      pointer-events: none;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- 🌟 已物理移除图二（#authModal）二次拦截模态框，实现验证直通 -->
+  <!-- 🌟 注入主题动态背景层 -->
+  <div id="universe-bg-layer" class="universe-bg-layer"></div>
 
   <div class="admin-layout" id="adminLayout" style="display:none;">
     <header class="admin-header">
@@ -50,7 +81,6 @@
           <div class="pane-header"><h3>👫 基础档案与生命周期阶段设置</h3></div>
           <div class="form-grid">
             
-            <!-- 🌟 核心：全新安全密级管理 (旧密码核验 -> 新密码 -> 确认新密码) -->
             <div class="form-group" style="grid-column: 1 / -1; background: rgba(56, 189, 248, 0.08); padding: 18px; border-radius: 16px; border: 1.5px solid rgba(56, 189, 248, 0.35);">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
                 <label style="color:#7dd3fc; font-weight:900; font-size:14px; margin:0;">🔑 后台独立管理登录密码安全修改 (系统默认密码: 521)</label>
@@ -339,9 +369,9 @@
   <input type="file" id="globalUploader" style="display:none;">
   <div id="toast" class="admin-toast">✓ 操作成功</div>
 
-  <script src="js/config.js?v=2.3"></script>
-  <script src="js/theme-presets.js?v=2.3"></script>
-  <script src="js/anniversary-engine.js?v=2.3"></script>
-  <script src="js/admin.js?v=2.3"></script>
+  <script src="js/config.js?v=2.4"></script>
+  <script src="js/theme-presets.js?v=2.4"></script>
+  <script src="js/anniversary-engine.js?v=2.4"></script>
+  <script src="js/admin.js?v=2.4"></script>
 </body>
 </html>
