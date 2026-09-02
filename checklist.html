@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>雅歌之印 · 同行约定</title>
+  
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.5);
+      --card-border: rgba(255, 255, 255, 0.05);
+      --primary-gold: #f59e0b;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --safe-top: max(20px, env(safe-area-inset-top));
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(245, 158, 11, 0.4); border-radius: 4px; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", sans-serif;
+      background: var(--bg-dark);
+      background-image: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f172a 60%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 60px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 顶部导航与胶囊 */
+    .top-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--safe-top) 16px 16px;
+      position: sticky;
+      top: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 100;
+    }
+    .back-btn {
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+      color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 700;
+      cursor: pointer; text-decoration: none;
+    }
+    .page-title { font-size: 18px; font-weight: 900; color: #e2e8f0; letter-spacing: 1px; }
+
+    /* 横向防挤压滑动胶囊 */
+    .capsule-nav-container {
+      width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; padding: 12px 0 16px;
+    }
+    .capsule-nav-container::-webkit-scrollbar { display: none; }
+    .capsule-nav-scroll {
+      display: flex; gap: 10px; width: max-content; padding: 0 16px;
+    }
+    .capsule-btn {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      color: #94a3b8; border-radius: 24px; padding: 12px 20px;
+      font-size: 14px; font-weight: 800; white-space: nowrap; cursor: pointer; transition: 0.3s;
+    }
+    .capsule-btn.active {
+      background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff;
+      box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35); border-color: transparent;
+      transform: translateY(-2px);
+    }
+
+    /* 霓虹流光吸顶进度条 */
+    .neon-progress-wrap {
+      padding: 0 16px 16px;
+      position: sticky;
+      top: calc(var(--safe-top) + 40px);
+      z-index: 90;
+      background: linear-gradient(180deg, rgba(15,23,42,1) 0%, rgba(15,23,42,0) 100%);
+    }
+    .neon-progress-meta {
+      display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: #cbd5e1; margin-bottom: 8px;
+    }
+    .neon-progress-meta span.highlight { color: #f59e0b; }
+    .neon-progress-bar {
+      height: 6px; border-radius: 3px; background: rgba(255,255,255,0.08); overflow: hidden;
+    }
+    .neon-progress-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #38bdf8, #a855f7, #f43f5e);
+      box-shadow: 0 0 12px rgba(168, 85, 247, 0.8);
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* 任务清单区域 */
+    .checklist-wrapper { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; }
+    
+    .task-card {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 20px; padding: 20px 16px;
+      display: flex; align-items: flex-start; gap: 16px;
+      cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none; -webkit-tap-highlight-color: transparent;
+    }
+    .task-card:active { transform: scale(0.97); }
+    .task-card.completed {
+      background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.25);
+    }
+    
+    .task-text { flex: 1; font-size: 15px; line-height: 1.6; color: #f8fafc; font-weight: 500; transition: all 0.4s; }
+    .task-card.completed .task-text {
+      opacity: 0.45; text-decoration: line-through; color: #94a3b8;
+    }
+
+    /* SVG 丝滑打勾动画 */
+    .check-svg { width: 26px; height: 26px; flex-shrink: 0; margin-top: -2px; }
+    .check-svg circle { transition: all 0.4s; }
+    .task-card.completed .check-svg circle {
+      fill: rgba(245, 158, 11, 0.15); stroke: #f59e0b;
+    }
+    .check-path {
+      stroke-dasharray: 24; stroke-dashoffset: 24; transition: stroke-dashoffset 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .task-card.completed .check-path { stroke-dashoffset: 0; }
+
+    /* 提示层 */
+    .toast-msg {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-20px);
+      background: rgba(255, 255, 255, 0.95); color: #0f172a; padding: 12px 24px; border-radius: 30px;
+      font-size: 14px; font-weight: 800; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+      z-index: 60000; opacity: 0; pointer-events: none; transition: all 0.3s; white-space: nowrap;
+    }
+    .toast-msg.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+  <div id="toastMsg" class="toast-msg">✓ 操作成功</div>
+
+  <div class="container">
+    <header class="top-header">
+      <a href="index.html" class="back-btn">➔ 返回星轨</a>
+      <span class="page-title">同行约定清单</span>
+      <div style="width: 86px;"></div> 
+    </header>
+
+    <div class="capsule-nav-container">
+      <div class="capsule-nav-scroll">
+        <button class="capsule-btn active" id="tab-1" onclick="switchPhase(1)">❤️ 恋爱期</button>
+        <button class="capsule-btn" id="tab-2" onclick="switchPhase(2)">💍 订婚期</button>
+        <button class="capsule-btn" id="tab-3" onclick="switchPhase(3)">🏠 结婚期</button>
+        <button class="capsule-btn" id="tab-4" onclick="switchPhase(4)">🍼 孕期前后</button>
+        <button class="capsule-btn" id="tab-5" onclick="switchPhase(5)">🚀 婚后进阶</button>
+      </div>
+    </div>
+
+    <div class="neon-progress-wrap">
+      <div class="neon-progress-meta">
+        <span id="phase-title">恋爱期目标</span>
+        <span id="progress-text">已达成 <span class="highlight">0</span> / 0 项</span>
+      </div>
+      <div class="neon-progress-bar">
+        <div class="neon-progress-fill" id="progress-fill"></div>
+      </div>
+    </div>
+
+    <div class="checklist-wrapper" id="checklist-wrapper">
+      <!-- 动态加载清单卡片 -->
+    </div>
+  </div>
+
+  <script src="js/stage-content.js?v=2.5"></script>
+  <script>
+    let appData = [];
+    let currentPhase = 1;
+    let audioCtx = null;
+    let isSaving = false;
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      initAudioContext();
+      await fetchCloudConfig();
+      renderChecklist();
+    });
+
+    // 🌟 音效引挚：纯代码合成无阻断清脆打勾声 (Ping)
+    function initAudioContext() {
+      const unlock = () => {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx && !audioCtx) audioCtx = new AudioCtx();
+        if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+        document.removeEventListener("touchstart", unlock);
+        document.removeEventListener("click", unlock);
+      };
+      document.addEventListener("touchstart", unlock, { once: true });
+      document.addEventListener("click", unlock, { once: true });
+    }
+
+    function playDingSound() {
+      try {
+        if (!audioCtx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) audioCtx = new AudioCtx();
+        }
+        if (!audioCtx) return;
+        if (audioCtx.state === "suspended") audioCtx.resume();
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(1200, audioCtx.currentTime); 
+        osc.frequency.exponentialRampToValueAtTime(2000, audioCtx.currentTime + 0.1); 
+        
+        gain.gain.setValueAtTime(0, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.2);
+      } catch(e) {}
+    }
+
+    // 构建或合并数据
+    function buildChecklistData(cloudChecklist) {
+      if (Array.isArray(cloudChecklist) && cloudChecklist.length > 0) {
+        return cloudChecklist;
+      }
+      // 如果云端没有数据，从底层字典映射生成
+      const list = [];
+      let idCounter = 1;
+      const phasesMap = [
+        { key: 'dating', p: 1 }, { key: 'engaged', p: 2 }, { key: 'married', p: 3 }, 
+        { key: 'pregnancy', p: 4 }, { key: 'advanced', p: 5 }
+      ];
+      phasesMap.forEach(ph => {
+        if (window.STAGE_CONTENT[ph.key] && window.STAGE_CONTENT[ph.key].checklist) {
+          window.STAGE_CONTENT[ph.key].checklist.forEach(item => {
+            list.push({ id: idCounter++, phase: ph.p, title: item.title, completed: false });
+          });
+        }
+      });
+      return list;
+    }
+
+    async function fetchCloudConfig() {
+      try {
+        const res = await fetch("/api/love/config");
+        const data = await res.json();
+        if (data.success && data.config) {
+          window.LOVE_CONFIG = data.config;
+          appData = buildChecklistData(data.config.checklist100);
+        } else {
+          appData = buildChecklistData([]);
+        }
+      } catch (_) {
+        appData = buildChecklistData([]);
+      }
+    }
+
+    function switchPhase(phase) {
+      currentPhase = phase;
+      document.querySelectorAll(".capsule-btn").forEach(b => b.classList.remove("active"));
+      document.getElementById(`tab-${phase}`).classList.add("active");
+
+      const titles = { 1: "恋爱期目标", 2: "订婚期目标", 3: "结婚期目标", 4: "孕期前后目标", 5: "婚后进阶目标" };
+      document.getElementById("phase-title").textContent = titles[phase];
+
+      renderChecklist();
+    }
+
+    function renderChecklist() {
+      const container = document.getElementById("checklist-wrapper");
+      container.innerHTML = "";
+
+      const phaseItems = appData.filter(i => i.phase === currentPhase);
+      const total = phaseItems.length;
+      let completedCount = 0;
+
+      phaseItems.forEach(item => {
+        if (item.completed) completedCount++;
+        const card = document.createElement("div");
+        card.className = `task-card ${item.completed ? 'completed' : ''}`;
+        card.onclick = () => toggleChecklistItem(item.id, card);
+        card.innerHTML = `
+          <svg class="check-svg" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" fill="transparent" stroke="rgba(255,255,255,0.15)" stroke-width="2"></circle>
+            <path class="check-path" d="M7 13l3 3 7-7" fill="transparent" stroke="#f59e0b" stroke-width="2.5"></path>
+          </svg>
+          <div class="task-text">${escapeHtml(item.title)}</div>
+        `;
+        container.appendChild(card);
+      });
+
+      updateProgressUI(completedCount, total);
+    }
+
+    // 🌟 极速乐观更新引擎 (0ms 反馈)
+    function toggleChecklistItem(id, cardEl) {
+      const item = appData.find(i => i.id === id);
+      if (!item) return;
+
+      // 1. 本地物理改变状态
+      item.completed = !item.completed;
+      
+      // 2. DOM 瞬间动画流转
+      if (item.completed) {
+        cardEl.classList.add('completed');
+        playDingSound();
+        if (navigator.vibrate) navigator.vibrate([40]);
+      } else {
+        cardEl.classList.remove('completed');
+      }
+
+      // 3. 霓虹进度条平滑重绘
+      const phaseItems = appData.filter(i => i.phase === currentPhase);
+      const completedCount = phaseItems.filter(i => i.completed).length;
+      updateProgressUI(completedCount, phaseItems.length);
+
+      // 4. 全局广播 (用于触发勋章系统记录)
+      window.dispatchEvent(new CustomEvent("achievement:trigger", {
+        detail: { type: "checklist_updated", completedCount: appData.filter(x => x.completed).length }
+      }));
+
+      // 5. 后台静默发送 R2 同步，绝不阻塞 UI
+      syncDataToR2_Silent();
+    }
+
+    function updateProgressUI(current, total) {
+      const pct = total > 0 ? Math.round((current / total) * 100) : 0;
+      document.getElementById("progress-text").innerHTML = `已达成 <span class="highlight">${current}</span> / ${total} 项`;
+      document.getElementById("progress-fill").style.width = `${pct}%`;
+    }
+
+    async function syncDataToR2_Silent() {
+      if (isSaving) return;
+      isSaving = true;
+      const token = localStorage.getItem("love_admin_token") || sessionStorage.getItem("LOVE_DIARY_TOKEN") || "";
+      try {
+        const config = window.LOVE_CONFIG || {};
+        config.checklist100 = appData;
+        await fetch(`/api/love/config?auth=${encodeURIComponent(token)}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-admin-auth": token, "Authorization": `Bearer ${token}` },
+          body: JSON.stringify({ config: config })
+        });
+      } catch (_) {}
+      finally {
+        isSaving = false;
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toastMsg");
+      toast.innerText = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    function escapeHtml(s) {
+      return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+  </script>
+</body>
+</html>
