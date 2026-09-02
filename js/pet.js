@@ -1,7 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印
  * 文件名: js/pet.js
- * 作用: 恩典灵宠状态管理、数据双向同步。支持跨页面 UI 分发渲染 (主页负责浮窗与勋章陈列，独立页负责互动喂养)
+ * 作用: 恩典灵宠状态管理、数据双向同步。支持动态注入陈列室进度条引擎。
  */
 
 class GracePetManager {
@@ -55,7 +55,7 @@ class GracePetManager {
       lastInteractionDate: typeof src.lastInteractionDate === "string" ? src.lastInteractionDate : null,
       totalGlowEarned: Number(src.totalGlowEarned) || glow, flippedCardsCount: Number(src.flippedCardsCount) || 0,
       playedSongsCount: Number(src.playedSongsCount) || 0, foundEggsCount: Number(src.foundEggsCount) || 0,
-      checklistDoneCount: Number(src.checklistDoneCount) || 0
+      diaryCount: Number(src.diaryCount) || 0 // 🌟 为日记进度条预留追踪器
     };
   }
 
@@ -91,22 +91,28 @@ class GracePetManager {
     window.addEventListener("achievement:trigger", (e) => {
       const type = (e.detail || {}).type;
       if (type === "icebreaker_resolved") this.unlockSpecificBadge("first_peace");
-      else if (type === "checklist_updated") {
-        this.petData.checklistDoneCount = Number(e.detail.completedCount) || (this.petData.checklistDoneCount + 1);
-        if (this.petData.checklistDoneCount >= 10) this.unlockSpecificBadge("checklist_100");
-      }
       else if (type === "polaroid_flipped") {
         this.petData.flippedCardsCount = (this.petData.flippedCardsCount || 0) + 1;
-        if (this.petData.flippedCardsCount >= 3) this.unlockSpecificBadge("photo_50");
       }
       else if (type === "music_played") {
         this.petData.playedSongsCount = (this.petData.playedSongsCount || 0) + 1;
-        if (this.petData.playedSongsCount >= 5) this.unlockSpecificBadge("music_100");
       }
       else if (type === "egg_discovered") {
         this.petData.foundEggsCount = (this.petData.foundEggsCount || 0) + 1;
-        if (this.petData.foundEggsCount >= 2) this.unlockSpecificBadge("egg_hunter");
       }
+      
+      // 🌟 核心：为日记本增加拦截更新
+      try {
+         const localDiary = localStorage.getItem("LOVE_DIARY_LOCAL_CACHE");
+         if (localDiary) {
+            const parsed = JSON.parse(localDiary);
+            if (parsed.notes && Array.isArray(parsed.notes)) {
+              this.petData.diaryCount = parsed.notes.length;
+              if (this.petData.diaryCount >= 1) this.unlockSpecificBadge("diary_1");
+            }
+         }
+      } catch (_) {}
+
       this.saveLocalPetData(); this.checkAllBadgeUnlocks(); this.updateUI();
     });
   }
@@ -116,8 +122,20 @@ class GracePetManager {
     this.isEvaluatingBadges = true;
     const tier = GracePetManager.getTierInfo(this.petData.glowEnergy);
     for (let i = 1; i <= tier.level; i++) { this.unlockSpecificBadge(`lvl_${i}`, false); }
-    if (this.petData.streakDays >= 7 || this.petData.longestStreak >= 7) this.unlockSpecificBadge("streak_7", false);
-    if (this.petData.sacrificeCount >= 10) this.unlockSpecificBadge("sacrifice_10", false);
+
+    // 🌟 核心升级：动态遍历字典中所有带 target 的进度条徽章，自动判断解锁
+    const allBadges = (window.PetCelebrationManager && window.PetCelebrationManager.BADGE_DEFINITIONS) || [];
+    allBadges.forEach(b => {
+      if (b.tracker && b.target) {
+        const currentVal = Number(this.petData[b.tracker]) || 0;
+        // 如果是 streakDays，兼容 longestStreak
+        const actualVal = (b.tracker === "streakDays") ? Math.max(currentVal, this.petData.longestStreak || 0) : currentVal;
+        if (actualVal >= b.target) {
+          this.unlockSpecificBadge(b.id, false);
+        }
+      }
+    });
+
     this.isEvaluatingBadges = false;
   }
 
@@ -160,7 +178,6 @@ class GracePetManager {
     }
     this.petData.longestStreak = Math.max(this.petData.longestStreak || 0, this.petData.streakDays);
     this.petData.lastInteractionDate = today;
-    if (this.petData.streakDays >= 7) this.unlockSpecificBadge("streak_7");
   }
 
   async fetchCloudPetData() {
@@ -181,7 +198,6 @@ class GracePetManager {
     } catch (_) {}
   }
 
-  // 🌟 核心升级：彻底移除内嵌繁杂 DOM。主页只生成悬浮入口。
   injectDOM() {
     if (!document.getElementById("grace-pet-trigger") && window.location.pathname.indexOf('pet.html') === -1) {
       const tier = GracePetManager.getTierInfo(this.petData.glowEnergy);
@@ -197,14 +213,12 @@ class GracePetManager {
     }
   }
 
-  // 🌟 核心升级：点击悬浮框，物理路由跳转全屏陪伴页面
   bindEvents() {
     const trigger = document.getElementById("grace-pet-trigger");
     if (trigger) {
       trigger.onclick = () => { window.location.href = 'pet.html'; };
     }
     
-    // 给 pet.html 中的按钮绑定事件
     const feedBtn = document.getElementById("feed-gratitude-btn");
     const sacrificeBtn = document.getElementById("feed-sacrifice-btn");
     if (feedBtn) feedBtn.onclick = () => this.feedGratitude();
@@ -271,7 +285,6 @@ class GracePetManager {
     this.syncToCloud(`🕊️ 结出宝贵舍己之果 (+${addedGlow} 光芒)，愿爱化解一切隔阂！`);
   }
 
-  // 🌟 核心升级：包含严格的 DOM 存在探测 (双页通用)
   updateUI() {
     const tier = GracePetManager.getTierInfo(this.petData.glowEnergy);
     const bonus = GracePetManager.getStreakBonus(this.petData.streakDays);
@@ -303,18 +316,42 @@ class GracePetManager {
     safeUpdate("stat-sacrifice-count", el => el.textContent = this.petData.sacrificeCount);
     safeUpdate("action-streak-tag", el => el.textContent = `连胜加成 ${bonus.mult}x`);
 
+    // 🌟 核心升级：陈列室渲染时注入隐形进度条系统
     const allBadges = (window.PetCelebrationManager && window.PetCelebrationManager.BADGE_DEFINITIONS) || [];
     const unlockedList = this.petData.unlockedBadges || [];
 
-    safeUpdate("grace-badges-unlocked-count", el => el.textContent = `已解锁 ${unlockedList.length} / ${allBadges.length}`);
+    safeUpdate("grace-badges-unlocked-count", el => el.textContent = `已点亮 ${unlockedList.length} / ${allBadges.length}`);
     safeUpdate("grace-badge-grid-container", el => {
       el.innerHTML = allBadges.map(badge => {
         const isUnlocked = unlockedList.includes(badge.id);
+        
+        let progressHtml = `<span class="grace-badge-desc-tip">未点亮</span>`;
+
+        if (isUnlocked) {
+          progressHtml = `<span class="grace-badge-desc-tip" style="color: #f59e0b; font-weight:800;">✓ 已点亮</span>`;
+        } else if (badge.tracker && badge.target) {
+          // 计算当前进度
+          const currentVal = Number(this.petData[badge.tracker]) || 0;
+          const actualVal = (badge.tracker === "streakDays") ? Math.max(currentVal, this.petData.longestStreak || 0) : currentVal;
+          const pct = Math.min(100, Math.round((actualVal / badge.target) * 100));
+          
+          progressHtml = `
+            <div style="width: 100%; padding: 0 10px; margin-top: 4px;">
+              <div style="font-size: 10px; color: #64748b; margin-bottom: 3px; display:flex; justify-content:space-between;">
+                <span>进度</span><span>${actualVal}/${badge.target}</span>
+              </div>
+              <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;">
+                <div style="width: ${pct}%; height: 100%; background: linear-gradient(90deg, #38bdf8, #a855f7); border-radius: 2px;"></div>
+              </div>
+            </div>
+          `;
+        }
+
         return `
           <div class="grace-badge-card ${isUnlocked ? 'unlocked' : 'locked'}" title="${badge.name}: ${badge.desc}" onclick="window.Effects && window.Effects.showMiniToast('${badge.icon} 【${badge.name}】: ${badge.desc}')">
             <span class="grace-badge-icon">${badge.icon}</span>
             <span class="grace-badge-name">${badge.name}</span>
-            <span class="grace-badge-desc-tip">${isUnlocked ? '✓ 已获得' : '未解锁'}</span>
+            ${progressHtml}
           </div>
         `;
       }).join("");
