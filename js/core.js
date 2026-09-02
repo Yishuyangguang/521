@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
       scratchCards: (Array.isArray(cloudCfg.scratchCards) && cloudCfg.scratchCards.length > 0) ? cloudCfg.scratchCards : (base.scratchCards || []),
       easterEggs: (Array.isArray(cloudCfg.easterEggs) && cloudCfg.easterEggs.length > 0) ? cloudCfg.easterEggs : (base.easterEggs || []),
       _license: cloudCfg._license || base._license || null,
-      adminSecurity: cloudCfg.adminSecurity || base.adminSecurity || null
+      adminSecurity: cloudCfg.adminSecurity || base.adminSecurity || { password: "521" }
     };
   }
 
@@ -137,6 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // 🌟 核心：单次验证直达后台，写入共享 Token 杜绝二次验证
   function initAdminPortalTrigger() {
     if (!dom.heroNames) return;
     
@@ -147,27 +148,29 @@ document.addEventListener("DOMContentLoaded", () => {
       const pwd = await showAdminAuthModal();
       if (!pwd) return;
 
-      try {
-        const res = await fetch("/api/love/verify-gatekeeper", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password: pwd })
-        });
-        const result = await res.json();
-        
-        if (result.success && result.isAdmin) {
-          location.href = "admin.html";
-        } else if (pwd === "521") {
-          location.href = "admin.html";
-        } else {
-          showAuthError("❌ 密钥验证失败，您无权访问控制台。");
-        }
-      } catch (_) {
-        if (pwd === "521") {
-          location.href = "admin.html";
-        } else {
-          showAuthError("❌ 网络异常或鉴权失败，请重试。");
-        }
+      const activeAdminPwd = (config.adminSecurity?.password || "521").trim();
+      let isVerified = (pwd === activeAdminPwd || pwd === "521");
+
+      if (!isVerified) {
+        try {
+          const res = await fetch(`/api/love/config?auth=${encodeURIComponent(pwd)}`, {
+            headers: { "x-admin-auth": pwd, "Authorization": `Bearer ${pwd}` }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success && data.isAdmin) {
+              isVerified = true;
+            }
+          }
+        } catch (_) {}
+      }
+
+      if (isVerified) {
+        localStorage.setItem("love_admin_token", pwd);
+        sessionStorage.setItem("universe_admin_auth", "true");
+        location.href = "admin.html";
+      } else {
+        showAuthError("❌ 密钥验证失败，密码错误或未授权。");
       }
     });
   }
@@ -351,7 +354,6 @@ document.addEventListener("DOMContentLoaded", () => {
         config = mergeWithDefaultConfig(data.config);
         window.LOVE_CONFIG = config;
         
-        // 🌟 核心：更新防竞态快照，确保前端能够零延迟识别是否关闭了门禁
         const isGatekeeperEnabled = config.gatekeeper ? config.gatekeeper.enabled !== false : true;
         localStorage.setItem("love_gatekeeper_enabled_snapshot", isGatekeeperEnabled ? "true" : "false");
 
@@ -450,7 +452,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function unlockMainUniverse(withAnimation = true) {
-    // 🌟 核心：刻入会话免密烙印
     sessionStorage.setItem("universe_unlocked", "true");
     
     if (document.activeElement && typeof document.activeElement.blur === "function") {
