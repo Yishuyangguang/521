@@ -1,7 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印 (Love Universe)
  * 文件名: js/icebreaker.js
- * 作用: 破冰与情感信号箱客户端主控 (内建独立 Toast 引擎、乐观 UI 更新、状态机免疫、防抖拦截)
+ * 作用: 破冰与情感信号箱客户端主控 (动态字典映射、长文本渲染、乐观 UI 更新)
  */
 
 class IceBreakerManager {
@@ -76,7 +76,6 @@ class IceBreakerManager {
     }
   }
 
-  // 🌟 核心升级 1：独立、绝不丢失的极速交互 Toast 引擎
   showToast(msg, type = "info") {
     let toast = document.getElementById("icebreaker-toast-layer");
     if (!toast) {
@@ -93,15 +92,15 @@ class IceBreakerManager {
     }
 
     if (type === "error" || type === "warning") {
-      toast.style.background = "rgba(220, 38, 38, 0.95)"; // 红色警告
+      toast.style.background = "rgba(220, 38, 38, 0.95)"; 
     } else if (type === "success") {
-      toast.style.background = "rgba(16, 185, 129, 0.95)"; // 绿色成功
+      toast.style.background = "rgba(16, 185, 129, 0.95)"; 
     } else {
-      toast.style.background = "rgba(31, 41, 55, 0.95)"; // 黑色默认
+      toast.style.background = "rgba(31, 41, 55, 0.95)"; 
     }
 
     toast.innerHTML = msg;
-    void toast.offsetWidth; // 触发重绘
+    void toast.offsetWidth; 
     toast.style.opacity = "1";
     toast.style.transform = "translateX(-50%) translateY(0)";
 
@@ -159,7 +158,6 @@ class IceBreakerManager {
       btn.onclick = (e) => {
         e.preventDefault();
         const actionType = btn.getAttribute("data-action-type");
-        // 将被点击的按钮实体传入，以便实现动态变色
         this.handleSendSignal(actionType, btn);
         
         if ("Notification" in window && Notification.permission === "default") {
@@ -169,7 +167,6 @@ class IceBreakerManager {
     });
   }
 
-  // 🌟 核心升级 2：按钮动态反馈与彻底移除丑陋的 alert()
   async handleSendSignal(actionType, clickedBtn) {
     const phase = this.config.lifecycle?.currentPhase || "dating";
     const perspective = (window.ThemeEngine && window.ThemeEngine.currentPerspective) || "boy";
@@ -225,7 +222,6 @@ class IceBreakerManager {
         this.executePoll(); 
         this.fetchAndRenderHistory();
       } else if (data.code === "IN_COOLDOWN") {
-        // 优雅处理 429 冷却状态
         this.showToast(`⏳ 对方需要时间消化，请等待 ${data.remainingSeconds} 秒后再试`, "warning");
         if (clickedBtn) clickedBtn.innerHTML = originalHtml;
       } else {
@@ -239,7 +235,6 @@ class IceBreakerManager {
     } finally {
       allBtns.forEach(btn => btn.style.pointerEvents = "auto");
       
-      // 3 秒后还原按钮样式
       if (clickedBtn) {
         setTimeout(() => {
           clickedBtn.innerHTML = originalHtml;
@@ -266,6 +261,30 @@ class IceBreakerManager {
     this.pollTimer = setTimeout(() => this.executePoll(), nextInterval);
   }
 
+  // 🌟 核心引擎补充：动态全库字典溯源方法，用于彻底消灭写死的 if-else
+  _getActionMeta(actionType) {
+    const allActions = this.config.icebreaker?.actions || window.LOVE_CONFIG?.icebreaker?.actions || {};
+    let foundMeta = null;
+    
+    // 遍历所有阶段（dating, engaged, married）去匹配发来的 actionType
+    for (const stageKey in allActions) {
+      if (Array.isArray(allActions[stageKey])) {
+        const match = allActions[stageKey].find(a => a.type === actionType);
+        if (match) {
+          foundMeta = match;
+          break;
+        }
+      }
+    }
+
+    // 兜底返回，防止空指针崩溃
+    return foundMeta || { 
+      label: "温情信笺", 
+      icon: "💌", 
+      desc: "对方发来了一封破冰信笺，希望能和你和好。" 
+    };
+  }
+
   triggerSystemNotification(signal) {
     const fingerprint = `${signal.signalId}_${signal.status}`;
     if (this.lastNotifiedFingerprint === fingerprint) return;
@@ -282,11 +301,10 @@ class IceBreakerManager {
        body = "对方已接纳了你的信号，愿爱永不止息。";
     } else if (signal.status === "active") {
        const senderTitle = signal.senderGender === "boy" ? "他" : "她";
-       if (signal.actionType === "calm_down") body = `${senderTitle}需要片刻冷静...\n“${signal.content}”`;
-       else if (signal.actionType === "apology") body = `${senderTitle}向你真诚道歉...\n“${signal.content}”`;
-       else if (signal.actionType === "miss_you") body = `${senderTitle}正在深深想念你...\n“${signal.content}”`;
-       else if (signal.actionType === "warm_hug") body = `${senderTitle}送来一个温暖拥抱...\n“${signal.content}”`;
-       else if (signal.actionType === "accompany") body = `${senderTitle}想要陪伴在你身边...\n“${signal.content}”`;
+       // 🌟 核心：使用动态字典溯源
+       const meta = this._getActionMeta(signal.actionType);
+       title = `${meta.icon} ${meta.label}`;
+       body = `${senderTitle} 发送了信笺：\n“${signal.content || meta.desc}”`;
     } else {
        return; 
     }
@@ -357,13 +375,10 @@ class IceBreakerManager {
     if (!banner || !textEl) return;
 
     const senderTitle = signal.senderGender === "boy" ? "他" : "她";
-    let actionTip = `${senderTitle}递来了一封和解信笺...`;
-
-    if (signal.actionType === "calm_down") actionTip = `${senderTitle}需要片刻冷静...`;
-    else if (signal.actionType === "apology") actionTip = `${senderTitle}真诚地向你道歉了...`;
-    else if (signal.actionType === "miss_you") actionTip = `${senderTitle}正在深深地想念你...`;
-    else if (signal.actionType === "warm_hug") actionTip = `${senderTitle}隔空送来了温暖拥抱...`;
-    else if (signal.actionType === "accompany") actionTip = `${senderTitle}想要陪伴在你身边...`; 
+    
+    // 🌟 核心：使用动态字典溯源
+    const meta = this._getActionMeta(signal.actionType);
+    let actionTip = `${senderTitle} 发送了：[${meta.label}]`;
 
     textEl.textContent = `💌 ${actionTip}`;
     banner.classList.add("show");
@@ -393,27 +408,27 @@ class IceBreakerManager {
     const actionsEl = document.getElementById("icebreaker-modal-actions");
 
     const senderTitle = signal.senderGender === "boy" ? "良人" : "佳偶";
+    
+    // 🌟 核心：使用动态字典溯源，彻底解决大弹窗文案错乱问题
+    const meta = this._getActionMeta(signal.actionType);
+    const displayDesc = signal.content || meta.desc;
+
     if (badgeEl) badgeEl.textContent = `SACRED COVENANT · ${senderTitle}的温情信笺`;
     if (titleEl) titleEl.textContent = "愿爱化解一切 · 我们的避风港";
-    if (letterEl) letterEl.textContent = `“ ${signal.content} ”`;
+    if (letterEl) {
+      letterEl.textContent = `“ ${displayDesc} ”`;
+      // 动态注入优雅的长文本排版行高，适应手机端
+      letterEl.style.lineHeight = "1.7";
+      letterEl.style.textAlign = "justify";
+    }
 
     if (actionsEl) {
-      if (signal.actionType === "calm_down") {
-        actionsEl.innerHTML = `
-          <div class="icebreaker-cooling-box">
-            <span>🌿 情绪正在降温中，深呼吸，平静安息。</span>
-            <div class="icebreaker-cooling-timer" id="coolingTimerText">冷静期进行中</div>
-          </div>
-          <button class="icebreaker-btn-primary" id="btn-accept-peace"><span>🤝 握住这只手 (我也在调整心情)</span></button>
-          <button class="icebreaker-btn-secondary" id="btn-close-modal"><span>稍后回应 ✕</span></button>
-        `;
-      } else {
-        actionsEl.innerHTML = `
-          <button class="icebreaker-btn-primary" id="btn-accept-peace"><span>🕊️ 握住这只手 (接纳并和好)</span></button>
-          <button class="icebreaker-btn-secondary" id="btn-wait-peace"><span>还在整理心情中 (稍等片刻)</span></button>
-          <button class="icebreaker-btn-secondary" id="btn-close-modal"><span>收起 ✕</span></button>
-        `;
-      }
+      // 🌟 核心：统一全站长文案操作按钮的响应样式
+      actionsEl.innerHTML = `
+        <button class="icebreaker-btn-primary" id="btn-accept-peace"><span>🕊️ 握住这只手 (接纳并和好)</span></button>
+        <button class="icebreaker-btn-secondary" id="btn-wait-peace"><span>还在整理心情中 (稍等片刻)</span></button>
+        <button class="icebreaker-btn-secondary" id="btn-close-modal"><span>收起 ✕</span></button>
+      `;
 
       const acceptBtn = document.getElementById("btn-accept-peace");
       const waitBtn = document.getElementById("btn-wait-peace");
