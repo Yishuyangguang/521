@@ -1,7 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印
  * 文件名: js/pet-celebration.js
- * 作用: 灵宠晋升与徽章解锁庆贺动效中枢、纯代码 Web Audio 空灵和弦合成引擎、全屏粒子爆发与独立模态弹窗
+ * 作用: 灵宠晋升与徽章解锁庆贺动效中枢、纯代码 Web Audio 空灵和弦合成引擎、全站成就字典体系
  */
 
 class PetCelebrationManager {
@@ -12,31 +12,33 @@ class PetCelebrationManager {
   }
 
   /**
-   * 12 徽章全量核心元数据字典 (单一大数据源)
+   * 🌟 15 徽章全量核心元数据字典 (已全面扩容与正名)
    */
   static get BADGE_DEFINITIONS() {
     return [
       // 5 阶等级徽章
-      { id: "lvl_1", name: "初信雏鸽", icon: "🐣", category: "level", level: 1, desc: "初识恩典 · 光芒值达到 0+" },
+      { id: "lvl_1", name: "小小雏鸽", icon: "🐣", category: "level", level: 1, desc: "初识恩典 · 光芒值达到 0+" },
       { id: "lvl_2", name: "感恩使者", icon: "💧", category: "level", level: 2, desc: "恩典流淌 · 光芒值达到 100+" },
       { id: "lvl_3", name: "舍己守护", icon: "🍎", category: "level", level: 3, desc: "舍己之美 · 光芒值达到 300+" },
       { id: "lvl_4", name: "和平织梦", icon: "🕊️✨", category: "level", level: 4, desc: "双翼展翅 · 光芒值达到 600+" },
-      { id: "lvl_5", name: "永恒圣徒", icon: "👑🕊️", category: "level", level: 5, desc: "神圣加冕 · 光芒值达到 1000+" },
+      { id: "lvl_5", name: "和平使者", icon: "👑🕊️", category: "level", level: 5, desc: "神圣加冕 · 光芒值达到 1000+" },
 
-      // 7 项专项成就徽章
+      // 7 项经典交互成就徽章
       { id: "streak_7", name: "七日感恩", icon: "📅💧", category: "special", desc: "连续 7 天记录感恩之露" },
       { id: "first_peace", name: "破冰勇士", icon: "🧊⚡", category: "special", desc: "首次使用破冰信号箱达成和解" },
       { id: "checklist_100", name: "百件期待", icon: "✅💯", category: "special", desc: "完成 100 件同行约定清单" },
       { id: "sacrifice_10", name: "舍己十诫", icon: "🤝🔟", category: "special", desc: "累计达成 10 次主动包容退让" },
       { id: "photo_50", name: "时光雕刻", icon: "📸🎞️", category: "special", desc: "时光轴珍藏美好回忆时刻" },
       { id: "music_100", name: "治愈之音", icon: "🎵💕", category: "special", desc: "在专属背景音乐中同行守护" },
-      { id: "egg_hunter", name: "彩蛋猎人", icon: "🥚🔍", category: "special", desc: "发现全站角落隐藏的爱意彩蛋" }
+      { id: "egg_hunter", name: "彩蛋猎人", icon: "🥚🔍", category: "special", desc: "发现全站角落隐藏的爱意彩蛋" },
+
+      // 🌟 新增：日记与陪伴专属成就徽章
+      { id: "diary_1", name: "时光执笔", icon: "📔✍️", category: "special", desc: "在我们的日记本中写下第 1 篇专属记忆" },
+      { id: "diary_10", name: "岁月史官", icon: "📚🕰️", category: "special", desc: "累计写下 10 篇以上的同行日记记录" },
+      { id: "accompany_1", name: "守护之诺", icon: "🫂💖", category: "special", desc: "破冰时首次使用“我会陪伴你”宣告不离不弃" }
     ];
   }
 
-  /**
-   * 初始化 Web Audio 上下文 (手势凭证激活)
-   */
   initAudioContext() {
     const unlock = () => {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -53,9 +55,6 @@ class PetCelebrationManager {
     document.addEventListener("click", unlock, { once: true });
   }
 
-  /**
-   * 纯代码现场合成：灵宠晋升荣耀空灵和弦 (C5 -> E5 -> G5 -> B5 -> C6)
-   */
   playLevelUpChord() {
     try {
       if (!this.audioContext) {
@@ -88,9 +87,6 @@ class PetCelebrationManager {
     } catch (_) {}
   }
 
-  /**
-   * 纯代码现场合成：徽章解锁星芒清脆风铃 (G5 -> C6 -> E6 -> G6)
-   */
   playBadgeUnlockChime() {
     try {
       if (!this.audioContext) {
@@ -123,9 +119,6 @@ class PetCelebrationManager {
     } catch (_) {}
   }
 
-  /**
-   * 触发等级提升庆贺盛典
-   */
   triggerLevelUp(newTier) {
     this.playLevelUpChord();
 
@@ -146,9 +139,6 @@ class PetCelebrationManager {
     });
   }
 
-  /**
-   * 触发专属成就徽章解锁盛典
-   */
   triggerBadgeUnlock(badge) {
     this.playBadgeUnlockChime();
 
@@ -168,9 +158,6 @@ class PetCelebrationManager {
     });
   }
 
-  /**
-   * 构建并展示独立高层级弹窗
-   */
   showCelebrationModal({ tag, icon, title, subtitle, desc, btnText }) {
     if (!this.modalEl) {
       this.modalEl = document.createElement("div");
@@ -208,6 +195,5 @@ class PetCelebrationManager {
   }
 }
 
-// 挂载全局单例
 window.PetCelebrationManager = PetCelebrationManager;
 window.PetCelebration = new PetCelebrationManager();
