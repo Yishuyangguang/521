@@ -2,12 +2,11 @@
  * 众水不灭 · 雅歌之印
  * 文件名: js/stage-content.js
  * 作用: 
- *   1. 独立管理恋爱期、订婚期、结婚期三大阶段专属的待办清单与舍己特权券数据
- *   2. 提供星轨中枢舞台生命周期管理器 (StageManager)，实现 iOS 滚动锁定、Hash 路由栈、全局事件委托与生命周期广播
+ *   1. 独立管理恋爱期、订婚期、结婚期、孕期前后、婚后进阶 五大阶段专属的待办清单
+ *   2. 提供星轨中枢舞台生命周期管理器 (StageManager)
  */
 
 window.STAGE_CONTENT = {
-  // ================= ❤️ 1. 恋爱期 (Dating Phase) =================
   dating: {
     title: "恋爱期待办清单",
     subtitle: "在尊重与接纳中了解彼此，坚守圣洁",
@@ -47,64 +46,15 @@ window.STAGE_CONTENT = {
       { id: "d_32", title: "[保持完整] 保持自我提升：在恋爱中依然保持对阅读、工作、健康的追求，不指望对方解决你人生的全部空虚。", completed: false }
     ],
     scratchCards: [
-      {
-        id: "d_card_1",
-        title: "绝对倾听接纳卡",
-        content: "放下手机，全心全意听你诉说十分钟的烦恼与委屈，不评判、不说教，只给完全的接纳！",
-        icon: "👂",
-        scratched: false,
-        used: false,
-        usedTime: ""
-      },
-      {
-        id: "d_card_2",
-        title: "情绪降温暂停卡",
-        content: "争执快要爆发时出示此卡，双方无条件暂停争论十分钟，冷静后用最温和的语气对话！",
-        icon: "🕊️",
-        scratched: false,
-        used: false,
-        usedTime: ""
-      },
-      {
-        id: "d_card_3",
-        title: "专属风雨代步券",
-        content: "无论刮风下雨，只要一个消息，带着雨伞与温水准时出现在门口接你！",
-        icon: "🚗",
-        scratched: false,
-        used: false,
-        usedTime: ""
-      },
-      {
-        id: "d_card_4",
-        title: "耐心陪同支援卡",
-        content: "陪逛街、买衣服或看展半天，全程提包支援，保持全程微笑与专注！",
-        icon: "🛍️",
-        scratched: false,
-        used: false,
-        usedTime: ""
-      },
-      {
-        id: "d_card_5",
-        title: "专属水果投喂券",
-        content: "想吃西瓜切块、葡萄剥皮或芒果切丁，负责洗净切好投喂到嘴边！",
-        icon: "🍉",
-        scratched: false,
-        used: false,
-        usedTime: ""
-      },
-      {
-        id: "d_card_6",
-        title: "换位思考聆听卡",
-        content: "发生误解时，先主动复述并理解对方的感受与委屈，不急于为自己辩解！",
-        icon: "💡",
-        scratched: false,
-        used: false,
-        usedTime: ""
-      }
+      { id: "d_card_1", title: "绝对倾听接纳卡", content: "放下手机，全心全意听你诉说十分钟的烦恼与委屈，不评判、不说教，只给完全的接纳！", icon: "👂", scratched: false, used: false, usedTime: "" },
+      { id: "d_card_2", title: "情绪降温暂停卡", content: "争执快要爆发时出示此卡，双方无条件暂停争论十分钟，冷静后用最温和的语气对话！", icon: "🕊️", scratched: false, used: false, usedTime: "" },
+      { id: "d_card_3", title: "专属风雨代步券", content: "无论刮风下雨，只要一个消息，带着雨伞与温水准时出现在门口接你！", icon: "🚗", scratched: false, used: false, usedTime: "" },
+      { id: "d_card_4", title: "耐心陪同支援卡", content: "陪逛街、买衣服或看展半天，全程提包支援，保持全程微笑与专注！", icon: "🛍️", scratched: false, used: false, usedTime: "" },
+      { id: "d_card_5", title: "专属水果投喂券", content: "想吃西瓜切块、葡萄剥皮或芒果切丁，负责洗净切好投喂到嘴边！", icon: "🍉", scratched: false, used: false, usedTime: "" },
+      { id: "d_card_6", title: "换位思考聆听卡", content: "发生误解时，先主动复述并理解对方的感受与委屈，不急于为自己辩解！", icon: "💡", scratched: false, used: false, usedTime: "" }
     ]
   },
 
-  // ================= 💍 2. 订婚期 (Engaged Phase) =================
   engaged: {
     title: "订婚期待办清单",
     subtitle: "为一生一世的盟约做好准备，在磨合中学会舍己",
@@ -125,46 +75,13 @@ window.STAGE_CONTENT = {
       { id: "e_13", title: "[晚年画面] 拿出一个周末，关掉所有喧嚣，两个人静静地手拉手，聊聊你们对“白头偕老、满头银发时依然相爱”的路线规划。", completed: false }
     ],
     scratchCards: [
-      {
-        id: "e_card_1",
-        title: "无条件退让一步卡",
-        content: "在筹备婚礼或面对未来规划分歧时出示，我心甘情愿为你退让一次，你比对错重要！",
-        icon: "🤝",
-        scratched: false,
-        used: false,
-        usedTime: ""
-      },
-      {
-        id: "e_card_2",
-        title: "绝对后盾支撑卡",
-        content: "面对外界压力或感到孤立无援时出示，我将无条件坚定站在你身边做你最坚固的磐石！",
-        icon: "🛡️",
-        scratched: false,
-        used: false,
-        usedTime: ""
-      },
-      {
-        id: "e_card_3",
-        title: "婚前解压放空券",
-        content: "感到筹备压力过大时出示，陪你远离烦扰彻底放空休息半天！",
-        icon: "☕",
-        scratched: false,
-        used: false,
-        usedTime: ""
-      },
-      {
-        id: "e_card_4",
-        title: "繁琐事务代办卡",
-        content: "筹备过程中的繁琐采购与跑腿沟通，全部由我一人包揽搞定！",
-        icon: "📋",
-        scratched: false,
-        used: false,
-        usedTime: ""
-      }
+      { id: "e_card_1", title: "无条件退让一步卡", content: "在筹备婚礼或面对未来规划分歧时出示，我心甘情愿为你退让一次，你比对错重要！", icon: "🤝", scratched: false, used: false, usedTime: "" },
+      { id: "e_card_2", title: "绝对后盾支撑卡", content: "面对外界压力或感到孤立无援时出示，我将无条件坚定站在你身边做你最坚固的磐石！", icon: "🛡️", scratched: false, used: false, usedTime: "" },
+      { id: "e_card_3", title: "婚前解压放空券", content: "感到筹备压力过大时出示，陪你远离烦扰彻底放空休息半天！", icon: "☕", scratched: false, used: false, usedTime: "" },
+      { id: "e_card_4", title: "繁琐事务代办卡", content: "筹备过程中的繁琐采购与跑腿沟通，全部由我一人包揽搞定！", icon: "📋", scratched: false, used: false, usedTime: "" }
     ]
   },
 
-  // ================= 🏠 3. 结婚期 (Married Phase) =================
   married: {
     title: "结婚期待办清单",
     subtitle: "合为一体，同甘共苦，在长相厮守与柴米油盐中践行真爱",
@@ -215,65 +132,93 @@ window.STAGE_CONTENT = {
       { id: "m_43", title: "[穿透岁月] 无论未来的世界如何变迁、社会观念如何解构，你们在心里始终坚守那句承诺：“我们的爱，必能穿透岁月的磨砺，因为我们已经甘心在爱里为对方舍弃了自己。”", completed: false }
     ],
     scratchCards: [
-      {
-        id: "m_card_1",
-        title: "烟火家务全包金牌",
-        content: "今天所有的买菜、做饭、洗碗、拖地等一切家务全由我一人承包，安心当树懒！",
-        icon: "🧹",
-        scratched: false,
-        used: false,
-        usedTime: ""
-      },
-      {
-        id: "m_card_2",
-        title: "十分钟无言深拥卡",
-        content: "受了委屈或感到疲惫时出示此卡，无需任何解释，立刻给你一个十分钟的长久拥抱！",
-        icon: "🫂",
-        scratched: false,
-        used: false,
-        usedTime: ""
-      },
-      {
-        id: "m_card_3",
-        title: "情绪休假 24 小时卡",
-        content: "婚姻里撑不住时出示此卡，拥有 24 小时绝对摆烂权，不用管琐事，家里一切由我顶着！",
-        icon: "🛌",
-        scratched: false,
-        used: false,
-        usedTime: ""
-      },
-      {
-        id: "m_card_4",
-        title: "温柔洗头吹发 VIP",
-        content: "享受专属洗头与吹风机造型护理一次，包含轻柔头部按摩，包君满意！",
-        icon: "💆‍♀️",
-        scratched: false,
-        used: false,
-        usedTime: ""
-      },
-      {
-        id: "m_card_5",
-        title: "深夜外卖买单卡",
-        content: "无论多晚，指定想吃的夜宵或甜品，由对方全额买单并送至手上！",
-        icon: "🍟",
-        scratched: false,
-        used: false,
-        usedTime: ""
-      },
-      {
-        id: "m_card_6",
-        title: "吵架破冰特赦令",
-        content: "无论谁对谁错，亮出此令立刻停止冷战，互相给对方台阶下，紧紧拥抱！",
-        icon: "🕊️",
-        scratched: false,
-        used: false,
-        usedTime: ""
-      }
+      { id: "m_card_1", title: "烟火家务全包金牌", content: "今天所有的买菜、做饭、洗碗、拖地等一切家务全由我一人承包，安心当树懒！", icon: "🧹", scratched: false, used: false, usedTime: "" },
+      { id: "m_card_2", title: "十分钟无言深拥卡", content: "受了委屈或感到疲惫时出示此卡，无需任何解释，立刻给你一个十分钟的长久拥抱！", icon: "🫂", scratched: false, used: false, usedTime: "" },
+      { id: "m_card_3", title: "情绪休假 24 小时卡", content: "婚姻里撑不住时出示此卡，拥有 24 小时绝对摆烂权，不用管琐事，家里一切由我顶着！", icon: "🛌", scratched: false, used: false, usedTime: "" },
+      { id: "m_card_4", title: "温柔洗头吹发 VIP", content: "享受专属洗头与吹风机造型护理一次，包含轻柔头部按摩，包君满意！", icon: "💆‍♀️", scratched: false, used: false, usedTime: "" },
+      { id: "m_card_5", title: "深夜外卖买单卡", content: "无论多晚，指定想吃的夜宵或甜品，由对方全额买单并送至手上！", icon: "🍟", scratched: false, used: false, usedTime: "" },
+      { id: "m_card_6", title: "吵架破冰特赦令", content: "无论谁对谁错，亮出此令立刻停止冷战，互相给对方台阶下，紧紧拥抱！", icon: "🕊️", scratched: false, used: false, usedTime: "" }
     ]
+  },
+
+  // ================= 🍼 4. 孕期前后 (Pregnancy Phase) =================
+  pregnancy: {
+    title: "孕期前后待办清单",
+    subtitle: "共同孕育生命的奇迹，在软弱中彼此扶持",
+    scratchTitle: "孕期前后 · 专属特权",
+    checklist: [
+      { id: "p_1", title: "[解绑数据焦虑]在备孕期间，不把量体温、算排卵期变成冷冰冰的任务和“业绩考核”；在没有成功受孕的日子里，给彼此一个大大的拥抱，确信“我们相爱本身，就已经是最大的圆满”。", completed: false },
+      { id: "p_2", title: "[无声的气味守护]在孕早期她孕吐、恶心最严重的时候，男方默默收起家里所有可能引发孕吐的食物、香水和沐浴露，甚至自己也清淡饮食，毫无怨言地守护她的胃。", completed: false },
+      { id: "p_3", title: "[赞美新生的曲线]当她看着自己身上长出妊娠纹、皮肤变黑、体重不断增加而感到焦虑和自卑时，男方要搂着她，真诚、温柔地看着她的眼睛说：“为了我们的宝宝，你正在付出最美丽的代价。现在的你，比以往任何时候都要伟大和动人。”", completed: false },
+      { id: "p_4", title: "[不做逻辑裁判]面对她因为孕期激素变化而产生的、在外人看来“莫名其妙”的流泪或脾气，男方不讲大道理，不用逻辑分析对错，只坚定地抱紧她，做她最安全的消气桶。", completed: false },
+      { id: "p_5", title: "[共同的“准爸爸”作业]男方主动下载孕期和育儿软件，阅读孕期科普知识，比她更早知道每个阶段胎儿的发育情况和孕妇的生理不适，不把“了解孕期”变成她一个人的脑力负担。", completed: false },
+      { id: "p_6", title: "[每一次的握手守候]每一次产检（尤其是建档、排畸、糖筛等重要关口），男方都尽量请假陪同，在冰冷的医院长廊里，用温热的手心牢牢握住她的手，共同迎接未知的检查结果。", completed: false },
+      { id: "p_7", title: "[深夜的恐惧排毒]在深夜睡前，留出十分钟听她倾诉对分娩痛苦、产后身材恢复、以及能否成为一个好妈妈的最深恐惧，不打岔、不敷衍，用无条件的爱和陪伴去消融她的不安。", completed: false },
+      { id: "p_8", title: "[深夜的跑腿浪漫]当她因为孕期口味奇特，在深夜两点突然极度想吃某种特定食物（如酸草莓、某家特定的热干面）时，男方欢快地出门跑腿，把它当成是一次为爱而行的“深夜大冒险”。", completed: false },
+      { id: "p_9", title: "[重力卸载仪式]在她肚子一天天变大、腰酸背痛、小腿甚至开始水肿的孕中晚期，每天晚上用温水帮她泡脚，用轻柔的手法帮她按摩发胀的双腿和酸痛的后背。", completed: false },
+      { id: "p_10", title: "[我们先于宝宝]即使在准备各种婴儿用品、布置婴儿房的忙碌中，也时刻提醒彼此：“孩子是我们生命的礼物，但我们夫妻彼此守护、相爱，才是一切安全感的源头。”", completed: false },
+      { id: "p_11", title: "[没有中奖时的安慰]当验孕棒上再次出现“一条杠”，面对极大的失望时，男方要及时搂住那个眼眶红红的她，温柔地对她说：“没关系的，我们有彼此，就是最棒的二人世界。我们慢慢来。”", completed: false },
+      { id: "p_12", title: "[育儿账单的降噪]面对网络上铺天盖地的“天价母婴用品”带来的经济焦虑，两个人达成共识：不攀比、不陷入物质虚荣，量入为出地准备必需品，深信“温和快乐的父母，比最昂贵的婴儿车更重要”。", completed: false },
+      { id: "p_13", title: "[主动退步的温柔]当她因为孕期身体极度容易劳累、无法像以前那样精细地照顾家务时，女方学会原谅自己的“无能为力”，大方请求帮助；男方立刻体贴、毫无怨言地全面接管家务。", completed: false },
+      { id: "p_14", title: "[不评判的筑巢探索]在挑选婴儿车、纸尿裤或给宝宝起名字的过程中，即便审美和理念不合，也不指责对方“不会买、不操心”，在欢笑和妥协中享受共同为孩子筑巢的过程。", completed: false },
+      { id: "p_15", title: "[孕妈妈的“放风日”]在身体允许的情况下，男方主动策划，陪她去她最喜欢的公园、餐厅或者看一场温和的电影，不因怀孕而将她彻底禁锢在“保胎”的牢笼里，让她保持舒畅。", completed: false },
+      { id: "p_16", title: "[呼吸的共同练习]在孕晚期，男方陪同女方一起练习呼吸法或产前放松操，不当冷眼旁观的教练，而是用肢体动作陪她一起训练，把“生产”当成两个人并肩上战场的演练。", completed: false },
+      { id: "p_17", title: "[致敬你的肉身舍己]在分娩前夕，男方真诚地写下一封信或者亲口对她说：“谢谢你，为了我们这个新生命，甘愿承受肉体的撕裂与巨大的付出。无论生孩子时发生什么，我都会一直在手术室门外守着你，你永远是第一位的。”", completed: false },
+      { id: "p_18", title: "[产前的断舍离]在宝宝降生前夕，共同整理一次家里的杂物，也在心里做一次“断舍离”：写下我们最不希望带入下一代的坏脾气和相处模式，约定在未来成为父母的日子里，共同警醒。", completed: false },
+      { id: "p_19", title: "[在未知中交托安息]不为未来的生产计划（如是否顺产、是否打无痛、产后去哪里坐月子）制定过于死板、不容改变的方案。保持平和、柔软的心态，明白没有完美的生产，只有在每个未知变化中都互相托底、彼此依靠的我们。", completed: false }
+    ],
+    scratchCards: []
+  },
+
+  // ================= 🚀 5. 婚后进阶 (Advanced Phase) =================
+  advanced: {
+    title: "婚后进阶待办清单",
+    subtitle: "在极度平淡的日常中，练习看见彼此的深沉光芒",
+    scratchTitle: "婚后进阶 · 专属特权",
+    checklist: [
+      { id: "a_1", title: "[温柔的心疼] 当听到对方在另一个房间叹气或翻身时，默默走过去，从背后给一个轻柔的肩膀按摩，问一句：“今天过得很重吧，要不要跟我倒倒苦水？”", completed: false },
+      { id: "a_2", title: "[情绪安全期] 当两个人都极度疲惫、压力爆棚时，主动宣布“今晚进入情绪保护期”：今晚不谈任何重大决定，不解决任何历史矛盾，只允许简单生活、好好睡觉。", completed: false },
+      { id: "a_3", title: "[静音散步] 晚饭后不带手机，拉着手在小区里散步15分钟，不聊工作和账单，就单纯看夜色、听风声、聊聊今天的见闻。", completed: false },
+      { id: "a_4", title: "[云端下午茶] 在知道对方今天工作极其难熬、或者需要疯狂加班的下午，悄悄用外卖软件给对方的工作地点点一杯他最爱的咖啡或甜点，附上一句：“辛苦啦，下班等我。”", completed: false },
+      { id: "a_5", title: "[深夜的暖灯] 当对方因为加班、应酬或出差深夜回家时，在客厅为对方留一盏灯，床头放一杯温水，不让对方走进一个冰冷漆黑的家。", completed: false },
+      { id: "a_6", title: "[偏好备忘录] 把对方的具体饮食偏好（如不吃香菜、咖啡要加几分糖、牛排要几分熟）牢牢记在脑子里，并在点餐和做饭时默默避开，不需要对方每次重复。", completed: false },
+      { id: "a_7", title: "[修复的仪式] 争吵和解之后，用一个极小的行动（如主动洗干净对方的车、或者买他最爱吃的水果）作为“警报完全解除”的物理印记，告诉对方：我们已经完全好了。", completed: false },
+      { id: "a_8", title: "[当众的守护] 如果对方在公共场合或朋友圈聚会时不小心出丑、说错了话，不嘲笑、不纠正，第一时间站在Ta身边，用幽默的方式帮Ta把话兜回来。", completed: false },
+      { id: "a_9", title: "[照顾的默契] 认真摸索并记住对方在生病时最渴望的照顾方式（有人生病时喜欢被时刻陪伴，有人生病时需要绝对安静的黑房间），并精准配合Ta的习惯。", completed: false },
+      { id: "a_10", title: "[无声的接管] 当你发现有一件原本该Ta做的家务（如倒垃圾、洗碗）被Ta因为疲惫或遗忘落下了，默默走过去把它做完，不留任何脸色，也不在事后碎碎念。", completed: false },
+      { id: "a_11", title: "[镜子上的情书] 偶尔用便利贴在洗手间的镜子上，或者对方的电脑屏幕上写下一句具体、真诚的欣赏：“昨晚你耐心听我说话的样子，真的特别迷人。”", completed: false },
+      { id: "a_12", title: "[耐心的倾听] 当对方兴奋地和你分享一件你完全听不懂、也不感兴趣的事（如某项运动、某个游戏或八卦）时，放下手中的事，看着Ta的眼睛，饶有兴致地听满五分钟。", completed: false },
+      { id: "a_13", title: "[体面的退场] 在朋友聚会中，如果你看到对方已经出现了社交疲惫、有些强颜欢笑时，主动站出来扮演那个“想提早回家”的人，体面地带Ta退场。", completed: false },
+      { id: "a_14", title: "[家务的放手] 如果对方今天做了家务，即便Ta拖的地不够干净、衣服折得不够整齐，也只字不提，真诚感谢Ta的付出，并且绝不在Ta面前重新去拖或重新去折。", completed: false },
+      { id: "a_15", title: "[送给Ta家人的心意] 逢年过节或父母生日时，花心思去为对方的父母挑选一份他们真正喜欢、用得上的礼物，甚至比给自己的父母买礼物还要用心。", completed: false },
+      { id: "a_16", title: "[温和的留白] 当对方因为人生挫折陷入情绪低谷或轻微的中年危机时，克制住自己想要“催Ta振作、给Ta指路”的焦虑，温和地给予Ta不被催促的休息时间。", completed: false },
+      { id: "a_17", title: "[台下的掌声] 如果对方在一大群人面前说了一件Ta觉得很得意、但在你看来有些幼稚的事，不当场泼冷水，而是微笑地看着Ta，在台下做Ta最忠实的观众。", completed: false },
+      { id: "a_18", title: "[无声的陪伴] 在客厅或书房里，即便两个人不说话，也保持物理上的接触（如你的腿搭在我的脚上，或者胳膊挨着胳膊），用最基础的皮肤触觉传递陪伴。", completed: false },
+      { id: "a_19", title: "[接纳岁月痕迹] 当对方在你面前抱怨自己长了第一根白头发、长了皱纹或肚子变大时，不用不耐烦的“你想多了”敷衍，而是搂过Ta说：“我很荣幸能陪你一起慢慢变老。”", completed: false },
+      { id: "a_20", title: "[周末的沟通] 每个周末找一个午后，真诚地询问对方：“这周我有什么细节让你觉得委屈或不舒服了吗？如果有，你一定要告诉我，我想听。”", completed: false },
+      { id: "a_21", title: "[财务的坦诚] 买了自己喜欢、但可能稍贵的奢侈品或数码产品时，大方、坦诚地和对方分享，不藏在柜子深处，也不在记账时偷偷抹去，建立百分之百的财务信任。", completed: false },
+      { id: "a_22", title: "[拒绝隐形对比] 绝对不在脑海里和言语中，把配偶的缺点和别人的“优秀配偶”相比，也不把自己的婚姻现状和网络上光鲜亮丽的“神仙爱情”相比，坚守属于你们的独特叙事。", completed: false },
+      { id: "a_23", title: "[不在场的忠诚] 当对方不在你身边（如出差或聚会）时，不论在言行上、面对诱惑时，还是在和同事聊起配偶时，都保持与Ta在场时一模一样的尊重、爱护与底线。", completed: false },
+      { id: "a_24", title: "[默契的“红绿灯”] 共同约定一个暗号（如：今晚我的电量只有10%了），一旦说出这个暗号，意味着今晚对方可以免除一切家务和深度沟通，只进行低能耗的安静休息。", completed: false },
+      { id: "a_25", title: "[摔碎时的拥抱] 当对方不小心打破了昂贵的餐具、撞坏了车、或者搞砸了家里重要的东西时，抢在叹气或质问之前，先走过去抱住Ta问：“你没受伤吧？东西不重要，你没事就好。”", completed: false },
+      { id: "a_26", title: "[换位一天] 每年找一天，完全互换彼此在家庭里的日常角色（如平时不怎么做饭的人做一天饭，平时不管账的人管一天账），亲身体验对方在日常琐碎中的重负。", completed: false },
+      { id: "a_27", title: "[不催促的树洞] 当对方想要向你倾吐深埋在心底的童年伤痛、或者过去的遗憾时，哪怕你听过很多遍，也不打断，静静地听Ta说，给Ta最安全的倾听容器。", completed: false },
+      { id: "a_28", title: "[重温来时路] 在某个平常的周五晚上，找出以前恋爱的老照片、信件或录像，倒两杯饮料一起看，笑着聊聊那些当年傻里傻气却无畏相爱的瞬间。", completed: false },
+      { id: "a_29", title: "[承包Ta最讨厌的事] 主动把对方在生活中最讨厌、最感到头疼的一件小家务（如刷马桶、清理宠物毛发、给售后打电话投诉）长期承包下来，替Ta分担。", completed: false },
+      { id: "a_30", title: "[尊重Ta的朋友圈] 不随意对Ta的朋友圈指手画脚，即便其中有你不太欣赏的人，也尊重Ta保留独立社交圈的自由，不发表任何酸溜溜的评价。", completed: false },
+      { id: "a_31", title: "[虚心的自省] 当对方指出你性格中的某个缺点（如习惯性迟到、脾气急）时，不立即找出Ta的缺点来反击（不玩‘你不也一样’的扯皮），先平静地听完，对自己进行温和的反思。", completed: false },
+      { id: "a_32", title: "[深夜的守候] 如果对方深夜需要独自在雷雨天开车、或者走一段不安全的路回家，保持清醒或留一盏温暖的床头灯守着Ta，让Ta一进门就能看见温度。", completed: false },
+      { id: "a_33", title: "[负重前问一句] 在外受了一肚子委屈、一进家门就想大发牢骚前，先深吸一口气问对方：“我今天在公司快气炸了，特别想吐槽，你现在有精力听我倒垃圾吗？”", completed: false },
+      { id: "a_34", title: "[不评价的眼泪] 当对方因为一些看似莫名其妙的小事落泪或情绪低落时，不用理性的分析去判断Ta“是不是太敏感/矫情”，走过去抱着Ta，让Ta哭个痛快。", completed: false },
+      { id: "a_35", title: "[不抢道德高地] 在争吵中，坚决不用“我平时付出了这么多，你却什么都没做”这种自我高举的词汇。永远记住，在天平的另一端，对方也在你看不到的地方默默付出着。", completed: false },
+      { id: "a_36", title: "[彻底翻篇的宽恕] 一旦某个矛盾在争吵和沟通后达成了和解、说好了“原谅”，就在心里把它彻底埋葬。绝不在下一次吵架时，把它当成武器重新挖出来攻击对方。", completed: false },
+      { id: "a_37", title: "[不求回报的滋润] 把对对方的体贴和照顾，当成是一场甘心乐意的付出，不默默在心里给对方记账（不抱着‘我今天对你好，你明天也必须对我好’的算盘）。", completed: false },
+      { id: "a_38", title: "[无功德相伴] 在每一个极度平淡、甚至有些无聊的黄昏里，看着坐在沙发另一头的Ta，在心里对自己说：“谢谢你，哪怕生活没有任何刺激和风景，只要你在，就是我最大的安息。”", completed: false }
+    ],
+    scratchCards: []
   }
 };
 
-// ================= 2. 星轨中枢舞台生命周期控制器 (StageManager) =================
 class StageManager {
   constructor() {
     this.currentStage = null;
@@ -291,7 +236,6 @@ class StageManager {
     if (this.initialized) return;
     this.initialized = true;
 
-    // 全局事件委托：任意深度的中枢卡片点击均可精准捕获
     document.addEventListener("click", (e) => {
       const openBtn = e.target.closest("[data-open-stage]");
       if (openBtn) {
@@ -345,7 +289,6 @@ class StageManager {
     if (!stageEl || this.isTransitioning) return;
 
     this.isTransitioning = true;
-
     this.lockScroll();
 
     if (pushHistory) {
@@ -366,7 +309,6 @@ class StageManager {
     this.isTransitioning = true;
 
     const closingStageId = this.currentStage;
-
     window.dispatchEvent(new CustomEvent("stage:closing", { detail: { stageId: closingStageId } }));
 
     if (updateHistory && window.location.hash) {
@@ -374,7 +316,6 @@ class StageManager {
     }
 
     this.closeStageDom();
-
     this.unlockScroll();
 
     setTimeout(() => {
