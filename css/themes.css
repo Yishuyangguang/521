@@ -50,7 +50,6 @@
   --drawer-active-title: #fde68a;
 }
 
-/* ================= 🖼️ 全局视口背景与 Body 深度绑定 ================= */
 html,
 body,
 .universe-body {
@@ -131,7 +130,7 @@ body.theme-aurora-night {
   --accent-gold: #a855f7;
 }
 
-/* ================= 👧 女生 6 套浅色唯美高饱和主题 (独立页同步生效) ================= */
+/* ================= 👧 女生 6 套浅色唯美高饱和主题 ================= */
 body.theme-french-cream {
   --bg-primary: #f7eee4;
   --theme-bg-gradient: linear-gradient(180deg, #fdfbf7 0%, #f7eee4 40%, #eddcd0 100%);
@@ -198,7 +197,7 @@ body.theme-orange-sea {
   --accent-gold: #ea580c;
 }
 
-/* ================= 🌟 浅色主题无障碍对比度覆盖 (供子页面卡片继承) ================= */
+/* ================= 🌟 浅色模式全站文字高饱和度穿透规则 ================= */
 body[data-theme-type="light"] {
   --drawer-bg: rgba(255, 255, 255, 0.96);
   --drawer-border: rgba(244, 63, 94, 0.35);
@@ -211,8 +210,15 @@ body[data-theme-type="light"] {
   --drawer-active-title: #881337;
 }
 
+/* 彻底解决第二张图中的中枢大标题白底白字隐形问题 */
+body[data-theme-type="light"] .hub-dock__title {
+  color: #451a03 !important;
+  font-weight: 900 !important;
+  text-shadow: none !important;
+}
+
 body[data-theme-type="light"] .hero-section__names {
-  font-family: "Songti SC", "STSong", "Noto Serif SC", "Source Han Serif SC", -apple-system, serif !important;
+  font-family: "Songti SC", "STSong", "Noto Serif SC", serif !important;
   font-weight: 900 !important;
   letter-spacing: 2.2px !important;
   background: var(--text-hero-gradient) !important;
@@ -227,4 +233,10 @@ body[data-theme-type="light"] .name-connector {
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   filter: drop-shadow(0 2px 8px rgba(234, 88, 12, 0.25)) !important;
+}
+
+body[data-theme-type="light"] .hero-section__subtitle {
+  color: var(--text-subtitle) !important;
+  font-weight: 800 !important;
+  text-shadow: none !important;
 }
