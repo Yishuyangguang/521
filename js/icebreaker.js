@@ -1,7 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印 (Love Universe)
  * 文件名: js/icebreaker.js
- * 作用: 破冰与情感信号箱客户端主控 (自适应智能心跳轮询、浏览器原生系统通知、Web Audio 降噪、握手逻辑)
+ * 作用: 破冰与情感信号箱客户端主控 (乐观 UI 更新、状态机免疫、防抖拦截与 Web Notification)
  */
 
 class IceBreakerManager {
@@ -12,10 +12,13 @@ class IceBreakerManager {
     this.audioContext = null;
     this.currentPosterDataUrl = "";
     
-    // 🌟 核心防打扰标识：记录最新一次弹出系统通知的信号指纹
+    // 防打扰标识：记录最新一次弹出系统通知的信号指纹
     this.lastNotifiedFingerprint = null;
-    // 🌟 事件拦截节流阀：防用户狂点导致无限发请求
+    // 事件拦截节流阀：防用户狂点
     this.lastFetchTime = 0;
+    
+    // 🌟 核心升级 1：状态机免疫黑名单。用于记录本地已经回应过的信号 ID，防僵尸横幅死灰复燃
+    this.handledSignalIds = new Set();
   }
 
   getOrCreateDeviceId() {
@@ -84,7 +87,7 @@ class IceBreakerManager {
     this.bindGlobalEvents();
     this.bindStageLifecycle();
     this.initAudioContext();
-    this.executePoll(); // 立即发起第一次智能心跳查询
+    this.executePoll(); 
     this.fetchAndRenderHistory();
   }
 
@@ -125,7 +128,6 @@ class IceBreakerManager {
         const actionType = btn.getAttribute("data-action-type");
         this.handleSendSignal(actionType);
         
-        // 当用户主动发信号时，顺便申请一次系统弹窗权限，极为自然且不易被浏览器拦截
         if ("Notification" in window && Notification.permission === "default") {
           Notification.requestPermission();
         }
@@ -138,6 +140,14 @@ class IceBreakerManager {
     const perspective = (window.ThemeEngine && window.ThemeEngine.currentPerspective) || "boy";
 
     if (navigator.vibrate) navigator.vibrate([30, 40]);
+
+    // 🌟 核心升级 2：发送方防抖锁死与乐观 UI 更新
+    const allBtns = document.querySelectorAll(".icebreaker-btn");
+    allBtns.forEach(btn => btn.style.pointerEvents = "none"); // 物理断绝重复点击
+
+    if (window.Effects && typeof window.Effects.showMiniToast === "function") {
+      window.Effects.showMiniToast("⏳ 信号发射中，请稍候...");
+    }
 
     try {
       const res = await fetch("/api/love/signal", {
@@ -159,13 +169,19 @@ class IceBreakerManager {
         if (data.status === "mutual_resolved") {
           this.showMutualCelebration(data.signal);
         } else {
+          // 🌟 发送成功极速视觉反馈
           if (window.Effects && typeof window.Effects.showMiniToast === "function") {
-            window.Effects.showMiniToast("🕊️ 情感信笺已飞向对方时空，愿爱包容一切。");
+            window.Effects.showMiniToast("🕊️ 发送成功！破冰信笺已飞向对方时空。");
           }
           this.triggerSendingPulse();
         }
         
-        this.executePoll(); // 发送完毕立即刷新本地状态
+        // 发送的信号立即拉入黑名单，避免自己收到自己的僵尸推送
+        if (data.signal && data.signal.signalId) {
+          this.handledSignalIds.add(data.signal.signalId);
+        }
+        
+        this.executePoll(); 
         this.fetchAndRenderHistory();
       } else if (data.code === "IN_COOLDOWN") {
         alert(`⏳ ${data.message} (还剩 ${data.remainingSeconds} 秒)`);
@@ -174,10 +190,15 @@ class IceBreakerManager {
       }
     } catch (err) {
       console.warn("[信号系统] 网络异常:", err.message);
+      if (window.Effects && typeof window.Effects.showMiniToast === "function") {
+        window.Effects.showMiniToast("⚠️ 网络异常，信号发射失败");
+      }
+    } finally {
+      // 🌟 解锁：无论成功失败，恢复按钮可用性
+      allBtns.forEach(btn => btn.style.pointerEvents = "auto");
     }
   }
 
-  // 🌟 核心引擎 1：自适应智能心跳轮询调度 (Adaptive Smart Polling)
   async executePoll() {
     this.lastFetchTime = Date.now();
     clearTimeout(this.pollTimer);
@@ -190,14 +211,11 @@ class IceBreakerManager {
       }
     } catch (_) {}
 
-    // 智能变频降本策略：前台盯屏时 40 秒查一次，后台锁屏/休眠时降级为 10 分钟查一次
     const nextInterval = document.hidden ? 600000 : 40000;
     this.pollTimer = setTimeout(() => this.executePoll(), nextInterval);
   }
 
-  // 🌟 核心引擎 2：处理系统级原生通知 (Native Notification API)
   triggerSystemNotification(signal) {
-    // 幂等指纹拦截：仅当该信号的该状态从未被通知过时才触发，杜绝死循环打扰
     const fingerprint = `${signal.signalId}_${signal.status}`;
     if (this.lastNotifiedFingerprint === fingerprint) return;
     this.lastNotifiedFingerprint = fingerprint;
@@ -219,7 +237,6 @@ class IceBreakerManager {
        else if (signal.actionType === "warm_hug") body = `${senderTitle}送来一个温暖拥抱...\n“${signal.content}”`;
        else if (signal.actionType === "accompany") body = `${senderTitle}想要陪伴在你身边...\n“${signal.content}”`;
     } else {
-       // 不对冷却中 (cooling) 或已阅 (viewed) 发起系统弹窗
        return; 
     }
 
@@ -229,7 +246,6 @@ class IceBreakerManager {
            body: body, 
            icon: "/favicon-32x32.png" 
          });
-         // 点击通知后唤醒并切回该网页
          notification.onclick = () => {
            window.focus();
            notification.close();
@@ -246,33 +262,40 @@ class IceBreakerManager {
       return;
     }
 
+    // 🌟 核心升级 3：接收方状态机免疫拦截
+    // 如果本地已经标记为处理过该信号，且服务器传来的还是旧状态，彻底拦截并销毁横幅
+    if (this.handledSignalIds.has(active.signalId)) {
+      if (active.status === "active" || active.status === "viewed" || active.status === "cooling") {
+        this.hideBanner();
+        return; 
+      }
+    }
+
     if (active.status === "mutual_resolved") {
       if (!this.currentActiveSignal || this.currentActiveSignal.status !== "mutual_resolved") {
         this.currentActiveSignal = active;
-        this.triggerSystemNotification(active); // 调用原生通知
+        this.triggerSystemNotification(active); 
         this.showMutualCelebration(active);
         this.fetchAndRenderHistory();
       }
       return;
     }
 
-    // 处理发件人是自己的情况
     if (active.senderDeviceId === this.deviceId) {
       if (active.status === "accepted" && (!this.currentActiveSignal || this.currentActiveSignal.status !== "accepted")) {
         this.currentActiveSignal = active;
-        this.triggerSystemNotification(active); // 调用原生通知
+        this.triggerSystemNotification(active); 
         this.showAcceptedCelebration(active);
         this.fetchAndRenderHistory();
       }
       return;
     }
 
-    // 处理收件人情况 (对方发来的新信号)
     if (active.status === "active" || active.status === "viewed" || active.status === "cooling") {
       if (!this.currentActiveSignal || this.currentActiveSignal.status !== active.status) {
         this.currentActiveSignal = active;
         if (active.status === "active") {
-           this.triggerSystemNotification(active); // 仅在全新发来时弹通知
+           this.triggerSystemNotification(active); 
         }
         this.showIncomingBanner(active);
       }
@@ -291,7 +314,7 @@ class IceBreakerManager {
     else if (signal.actionType === "apology") actionTip = `${senderTitle}真诚地向你道歉了...`;
     else if (signal.actionType === "miss_you") actionTip = `${senderTitle}正在深深地想念你...`;
     else if (signal.actionType === "warm_hug") actionTip = `${senderTitle}隔空送来了温暖拥抱...`;
-    else if (signal.actionType === "accompany") actionTip = `${senderTitle}想要陪伴在你身边...`; // 注入新文案
+    else if (signal.actionType === "accompany") actionTip = `${senderTitle}想要陪伴在你身边...`; 
 
     textEl.textContent = `💌 ${actionTip}`;
     banner.classList.add("show");
@@ -347,25 +370,33 @@ class IceBreakerManager {
       const waitBtn = document.getElementById("btn-wait-peace");
       const closeBtn = document.getElementById("btn-close-modal");
 
+      // 🌟 核心升级 4：接收方处理后立即抹除 DOM，打入记忆黑名单，零请求极速响应
       if (acceptBtn) {
         acceptBtn.onclick = () => {
-          this.ackSignal("accept", signal.signalId, "我们和好吧，爱是永不止息。");
+          this.handledSignalIds.add(signal.signalId); // 打入免疫黑名单
+          this.hideBanner();
           this.closeModal();
+          this.ackSignal("accept", signal.signalId, "我们和好吧，爱是永不止息。");
           this.showAcceptedCelebration(signal);
           this.fetchAndRenderHistory();
         };
       }
       if (waitBtn) {
         waitBtn.onclick = () => {
-          this.ackSignal("wait_a_bit", signal.signalId, "还在整理心情，很快就好。");
+          this.handledSignalIds.add(signal.signalId); // 打入免疫黑名单
+          this.hideBanner();
           this.closeModal();
+          this.ackSignal("wait_a_bit", signal.signalId, "还在整理心情，很快就好。");
           if (window.Effects && typeof window.Effects.showMiniToast === "function") {
-            window.Effects.showMiniToast("已通知对方你正在整理心情...");
+            window.Effects.showMiniToast("💖 回应已送达！已通知对方你正在整理心情");
           }
         };
       }
       if (closeBtn) {
-        closeBtn.onclick = () => this.closeModal();
+        closeBtn.onclick = () => {
+          this.hideBanner();
+          this.closeModal();
+        };
       }
     }
 
@@ -817,11 +848,10 @@ class IceBreakerManager {
     }
   }
 
-  // 🌟 核心引擎 3：事件驱动的心跳节流截流机制，交互即唤醒
   bindGlobalEvents() {
     document.addEventListener("visibilitychange", () => {
       if (!document.hidden) {
-        this.executePoll(); // 从后台切回前台时，无条件立即刷新
+        this.executePoll(); 
       }
     });
 
@@ -829,8 +859,6 @@ class IceBreakerManager {
       if ("Notification" in window && Notification.permission === "default") {
         Notification.requestPermission();
       }
-      
-      // 事件唤醒节流：防止用户狂点屏幕发送上百次请求，锁定在 10 秒内只允许一次交互唤醒
       if (Date.now() - (this.lastFetchTime || 0) > 10000) {
          this.executePoll();
       }
