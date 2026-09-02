@@ -7,6 +7,16 @@ let currentConfig = null;
 let currentAdminToken = "";
 let currentDomainHost = "";
 
+// 🌟 核心修复：补齐 XSS 防护与 HTML 实体字符安全转义函数，杜绝 ReferenceError
+function escapeHtml(s) {
+  return String(s || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 function decodePunycodeHost(domainStr) {
   if (!domainStr || typeof domainStr !== "string") return domainStr || "";
   try {
@@ -246,59 +256,63 @@ async function modifyAdminPasswordWithOld() {
 function renderAllForms() {
   if (!currentConfig) return;
 
-  const sec = currentConfig.adminSecurity || {};
-  const hiddenCustomPwd = document.getElementById("admin_customPassword");
-  if (hiddenCustomPwd) hiddenCustomPwd.value = sec.password || "521";
+  try {
+    const sec = currentConfig.adminSecurity || {};
+    const hiddenCustomPwd = document.getElementById("admin_customPassword");
+    if (hiddenCustomPwd) hiddenCustomPwd.value = sec.password || "521";
 
-  const lifecycle = currentConfig.lifecycle || {};
-  document.getElementById("lifecycle_phase").value = lifecycle.currentPhase || "dating";
+    const lifecycle = currentConfig.lifecycle || {};
+    document.getElementById("lifecycle_phase").value = lifecycle.currentPhase || "dating";
 
-  const meta = currentConfig.meta || {};
-  document.getElementById("meta_boyName").value = meta.boyName || "";
-  document.getElementById("meta_girlName").value = meta.girlName || "";
-  document.getElementById("meta_startDate").value = meta.startDate || "";
-  document.getElementById("meta_nextMilestoneTitle").value = meta.nextMilestoneTitle || "";
-  document.getElementById("meta_nextMilestoneDate").value = meta.nextMilestoneDate || "";
-  document.getElementById("meta_siteTitle").value = meta.siteTitle || "";
-  document.getElementById("meta_siteSubtitle").value = meta.siteSubtitle || "";
+    const meta = currentConfig.meta || {};
+    document.getElementById("meta_boyName").value = meta.boyName || "";
+    document.getElementById("meta_girlName").value = meta.girlName || "";
+    document.getElementById("meta_startDate").value = meta.startDate || "";
+    document.getElementById("meta_nextMilestoneTitle").value = meta.nextMilestoneTitle || "";
+    document.getElementById("meta_nextMilestoneDate").value = meta.nextMilestoneDate || "";
+    document.getElementById("meta_siteTitle").value = meta.siteTitle || "";
+    document.getElementById("meta_siteSubtitle").value = meta.siteSubtitle || "";
 
-  const gate = currentConfig.gatekeeper || {};
-  document.getElementById("gatekeeper_enabled").value = String(gate.enabled !== false);
-  document.getElementById("gatekeeper_title").value = gate.title || "";
-  document.getElementById("gatekeeper_question").value = gate.question || "";
-  document.getElementById("gatekeeper_hint").value = gate.hint || "";
-  document.getElementById("gatekeeper_correctAnswer").value = gate.correctAnswer || "";
-  document.getElementById("gatekeeper_voiceVows").value = gate.voiceVows || "";
-  document.getElementById("gatekeeper_errorTips").value = (gate.errorTips || []).join("\n");
+    const gate = currentConfig.gatekeeper || {};
+    document.getElementById("gatekeeper_enabled").value = String(gate.enabled !== false);
+    document.getElementById("gatekeeper_title").value = gate.title || "";
+    document.getElementById("gatekeeper_question").value = gate.question || "";
+    document.getElementById("gatekeeper_hint").value = gate.hint || "";
+    document.getElementById("gatekeeper_correctAnswer").value = gate.correctAnswer || "";
+    document.getElementById("gatekeeper_voiceVows").value = gate.voiceVows || "";
+    document.getElementById("gatekeeper_errorTips").value = (gate.errorTips || []).join("\n");
 
-  const letter = currentConfig.letter || {};
-  document.getElementById("letter_title").value = letter.title || "";
-  document.getElementById("letter_signDate").value = letter.signDate || "";
-  document.getElementById("letter_signature").value = letter.signature || "";
-  document.getElementById("letter_content").value = letter.content || "";
+    const letter = currentConfig.letter || {};
+    document.getElementById("letter_title").value = letter.title || "";
+    document.getElementById("letter_signDate").value = letter.signDate || "";
+    document.getElementById("letter_signature").value = letter.signature || "";
+    document.getElementById("letter_content").value = letter.content || "";
 
-  renderTimelineList();
-  renderAnniversariesList();
-  renderIcebreakerSettings();
-  renderChecklist();
-  renderScratchCards();
+    renderTimelineList();
+    renderAnniversariesList();
+    renderIcebreakerSettings();
+    renderChecklist();
+    renderScratchCards();
 
-  const audio = currentConfig.audio || {};
-  document.getElementById("audio_bgmAutoPlay").value = String(audio.bgmAutoPlay !== false);
-  document.getElementById("audio_playMode").value = audio.playMode || "list-loop";
-  document.getElementById("audio_bgmTitle").value = audio.bgmTitle || "";
-  document.getElementById("audio_bgmArtist").value = audio.bgmArtist || "";
-  document.getElementById("audio_bgmUrl").value = audio.bgmUrl || "";
-  document.getElementById("audio_vinylCover").value = audio.vinylCover || "";
+    const audio = currentConfig.audio || {};
+    document.getElementById("audio_bgmAutoPlay").value = String(audio.bgmAutoPlay !== false);
+    document.getElementById("audio_playMode").value = audio.playMode || "list-loop";
+    document.getElementById("audio_bgmTitle").value = audio.bgmTitle || "";
+    document.getElementById("audio_bgmArtist").value = audio.bgmArtist || "";
+    document.getElementById("audio_bgmUrl").value = audio.bgmUrl || "";
+    document.getElementById("audio_vinylCover").value = audio.vinylCover || "";
 
-  renderPlaylist();
+    renderPlaylist();
 
-  const eggs = currentConfig.easterEggs || [];
-  document.getElementById("egg_1_message").value = eggs[0]?.message || "";
-  document.getElementById("egg_2_message").value = eggs[1]?.message || "";
+    const eggs = currentConfig.easterEggs || [];
+    document.getElementById("egg_1_message").value = eggs[0]?.message || "";
+    document.getElementById("egg_2_message").value = eggs[1]?.message || "";
 
-  renderThemeShowroom();
-  renderLicenseStatus();
+    renderThemeShowroom();
+    renderLicenseStatus();
+  } catch (err) {
+    console.warn("表单渲染警告（已自动兼容容错）：", err);
+  }
 }
 
 function renderLicenseStatus() {
@@ -1307,7 +1321,7 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
   });
 });
 
-// 🌟 核心：页面加载直接嗅探 Token，直通工作台，杜绝弹窗拦截
+// 🌟 核心：页面加载直接嗅探 Token，直通工作台，杜绝弹窗拦截与黑屏
 document.addEventListener("DOMContentLoaded", async () => {
   const token = getAuthToken();
   const layout = document.getElementById("adminLayout");
