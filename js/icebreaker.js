@@ -1,7 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印 (Love Universe)
  * 文件名: js/icebreaker.js
- * 作用: 破冰与情感信号箱客户端主控 (乐观 UI 更新、状态机免疫、防抖拦截与 Web Notification)
+ * 作用: 破冰与情感信号箱客户端主控 (内建独立 Toast 引擎、乐观 UI 更新、状态机免疫、防抖拦截)
  */
 
 class IceBreakerManager {
@@ -12,13 +12,10 @@ class IceBreakerManager {
     this.audioContext = null;
     this.currentPosterDataUrl = "";
     
-    // 防打扰标识：记录最新一次弹出系统通知的信号指纹
     this.lastNotifiedFingerprint = null;
-    // 事件拦截节流阀：防用户狂点
     this.lastFetchTime = 0;
-    
-    // 🌟 核心升级 1：状态机免疫黑名单。用于记录本地已经回应过的信号 ID，防僵尸横幅死灰复燃
     this.handledSignalIds = new Set();
+    this.toastTimeout = null;
   }
 
   getOrCreateDeviceId() {
@@ -79,6 +76,42 @@ class IceBreakerManager {
     }
   }
 
+  // 🌟 核心升级 1：独立、绝不丢失的极速交互 Toast 引擎
+  showToast(msg, type = "info") {
+    let toast = document.getElementById("icebreaker-toast-layer");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "icebreaker-toast-layer";
+      Object.assign(toast.style, {
+        position: "fixed", top: "20px", left: "50%", transform: "translateX(-50%) translateY(-20px)",
+        color: "#fff", padding: "12px 24px", borderRadius: "30px",
+        fontSize: "14px", fontWeight: "800", boxShadow: "0 12px 32px rgba(0,0,0,0.3)",
+        backdropFilter: "blur(12px)", zIndex: "99999", opacity: "0", pointerEvents: "none",
+        transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)", whiteSpace: "nowrap"
+      });
+      document.body.appendChild(toast);
+    }
+
+    if (type === "error" || type === "warning") {
+      toast.style.background = "rgba(220, 38, 38, 0.95)"; // 红色警告
+    } else if (type === "success") {
+      toast.style.background = "rgba(16, 185, 129, 0.95)"; // 绿色成功
+    } else {
+      toast.style.background = "rgba(31, 41, 55, 0.95)"; // 黑色默认
+    }
+
+    toast.innerHTML = msg;
+    void toast.offsetWidth; // 触发重绘
+    toast.style.opacity = "1";
+    toast.style.transform = "translateX(-50%) translateY(0)";
+
+    if (this.toastTimeout) clearTimeout(this.toastTimeout);
+    this.toastTimeout = setTimeout(() => {
+      toast.style.opacity = "0";
+      toast.style.transform = "translateX(-50%) translateY(-20px)";
+    }, 3500);
+  }
+
   init() {
     const container = document.getElementById("icebreaker-container");
     if (!container) return;
@@ -126,7 +159,8 @@ class IceBreakerManager {
       btn.onclick = (e) => {
         e.preventDefault();
         const actionType = btn.getAttribute("data-action-type");
-        this.handleSendSignal(actionType);
+        // 将被点击的按钮实体传入，以便实现动态变色
+        this.handleSendSignal(actionType, btn);
         
         if ("Notification" in window && Notification.permission === "default") {
           Notification.requestPermission();
@@ -135,19 +169,25 @@ class IceBreakerManager {
     });
   }
 
-  async handleSendSignal(actionType) {
+  // 🌟 核心升级 2：按钮动态反馈与彻底移除丑陋的 alert()
+  async handleSendSignal(actionType, clickedBtn) {
     const phase = this.config.lifecycle?.currentPhase || "dating";
     const perspective = (window.ThemeEngine && window.ThemeEngine.currentPerspective) || "boy";
 
     if (navigator.vibrate) navigator.vibrate([30, 40]);
 
-    // 🌟 核心升级 2：发送方防抖锁死与乐观 UI 更新
     const allBtns = document.querySelectorAll(".icebreaker-btn");
-    allBtns.forEach(btn => btn.style.pointerEvents = "none"); // 物理断绝重复点击
+    allBtns.forEach(btn => btn.style.pointerEvents = "none"); 
 
-    if (window.Effects && typeof window.Effects.showMiniToast === "function") {
-      window.Effects.showMiniToast("⏳ 信号发射中，请稍候...");
+    const originalHtml = clickedBtn ? clickedBtn.innerHTML : "";
+    const originalBorder = clickedBtn ? clickedBtn.style.borderColor : "";
+    const originalBg = clickedBtn ? clickedBtn.style.background : "";
+
+    if (clickedBtn) {
+      clickedBtn.innerHTML = `<span class="icebreaker-btn__icon">⏳</span><span class="icebreaker-btn__label" style="color:#f59e0b;">信号发射中...</span>`;
     }
+
+    this.showToast("⏳ 正在飞向对方时空，请稍候...");
 
     try {
       const res = await fetch("/api/love/signal", {
@@ -169,14 +209,15 @@ class IceBreakerManager {
         if (data.status === "mutual_resolved") {
           this.showMutualCelebration(data.signal);
         } else {
-          // 🌟 发送成功极速视觉反馈
-          if (window.Effects && typeof window.Effects.showMiniToast === "function") {
-            window.Effects.showMiniToast("🕊️ 发送成功！破冰信笺已飞向对方时空。");
+          this.showToast("🕊️ 发送成功！破冰信笺已送达对方。", "success");
+          if (clickedBtn) {
+            clickedBtn.innerHTML = `<span class="icebreaker-btn__icon">✓</span><span class="icebreaker-btn__label" style="color:#10b981;">已发送</span>`;
+            clickedBtn.style.borderColor = "#10b981";
+            clickedBtn.style.background = "rgba(16, 185, 129, 0.05)";
           }
           this.triggerSendingPulse();
         }
         
-        // 发送的信号立即拉入黑名单，避免自己收到自己的僵尸推送
         if (data.signal && data.signal.signalId) {
           this.handledSignalIds.add(data.signal.signalId);
         }
@@ -184,18 +225,28 @@ class IceBreakerManager {
         this.executePoll(); 
         this.fetchAndRenderHistory();
       } else if (data.code === "IN_COOLDOWN") {
-        alert(`⏳ ${data.message} (还剩 ${data.remainingSeconds} 秒)`);
+        // 优雅处理 429 冷却状态
+        this.showToast(`⏳ 对方需要时间消化，请等待 ${data.remainingSeconds} 秒后再试`, "warning");
+        if (clickedBtn) clickedBtn.innerHTML = originalHtml;
       } else {
-        alert(`提示: ${data.message || data.error}`);
+        this.showToast(`⚠️ ${data.message || data.error}`, "error");
+        if (clickedBtn) clickedBtn.innerHTML = originalHtml;
       }
     } catch (err) {
       console.warn("[信号系统] 网络异常:", err.message);
-      if (window.Effects && typeof window.Effects.showMiniToast === "function") {
-        window.Effects.showMiniToast("⚠️ 网络异常，信号发射失败");
-      }
+      this.showToast("⚠️ 网络异常，信号发射失败", "error");
+      if (clickedBtn) clickedBtn.innerHTML = originalHtml;
     } finally {
-      // 🌟 解锁：无论成功失败，恢复按钮可用性
       allBtns.forEach(btn => btn.style.pointerEvents = "auto");
+      
+      // 3 秒后还原按钮样式
+      if (clickedBtn) {
+        setTimeout(() => {
+          clickedBtn.innerHTML = originalHtml;
+          clickedBtn.style.borderColor = originalBorder;
+          clickedBtn.style.background = originalBg;
+        }, 3000);
+      }
     }
   }
 
@@ -262,8 +313,6 @@ class IceBreakerManager {
       return;
     }
 
-    // 🌟 核心升级 3：接收方状态机免疫拦截
-    // 如果本地已经标记为处理过该信号，且服务器传来的还是旧状态，彻底拦截并销毁横幅
     if (this.handledSignalIds.has(active.signalId)) {
       if (active.status === "active" || active.status === "viewed" || active.status === "cooling") {
         this.hideBanner();
@@ -370,10 +419,9 @@ class IceBreakerManager {
       const waitBtn = document.getElementById("btn-wait-peace");
       const closeBtn = document.getElementById("btn-close-modal");
 
-      // 🌟 核心升级 4：接收方处理后立即抹除 DOM，打入记忆黑名单，零请求极速响应
       if (acceptBtn) {
         acceptBtn.onclick = () => {
-          this.handledSignalIds.add(signal.signalId); // 打入免疫黑名单
+          this.handledSignalIds.add(signal.signalId); 
           this.hideBanner();
           this.closeModal();
           this.ackSignal("accept", signal.signalId, "我们和好吧，爱是永不止息。");
@@ -383,13 +431,11 @@ class IceBreakerManager {
       }
       if (waitBtn) {
         waitBtn.onclick = () => {
-          this.handledSignalIds.add(signal.signalId); // 打入免疫黑名单
+          this.handledSignalIds.add(signal.signalId); 
           this.hideBanner();
           this.closeModal();
           this.ackSignal("wait_a_bit", signal.signalId, "还在整理心情，很快就好。");
-          if (window.Effects && typeof window.Effects.showMiniToast === "function") {
-            window.Effects.showMiniToast("💖 回应已送达！已通知对方你正在整理心情");
-          }
+          this.showToast("💖 回应已送达！已通知对方你正在整理心情", "success");
         };
       }
       if (closeBtn) {
@@ -427,12 +473,10 @@ class IceBreakerManager {
 
   showMutualCelebration(signal) {
     this.playGentleChime();
+    this.showToast("✨ 奇妙的默契！你们在同一刻选择了彼此与和好！💖", "success");
     if (window.Effects) {
       if (typeof window.Effects.fireConfetti === "function") window.Effects.fireConfetti();
       if (typeof window.Effects.fireFireworks === "function") window.Effects.fireFireworks();
-      if (typeof window.Effects.showMiniToast === "function") {
-        window.Effects.showMiniToast("✨ 奇妙的默契！你们在同一刻选择了彼此与和好！💖");
-      }
     }
 
     window.dispatchEvent(new CustomEvent("achievement:trigger", {
@@ -451,12 +495,10 @@ class IceBreakerManager {
 
   showAcceptedCelebration(signal) {
     this.playGentleChime();
+    this.showToast("🎉 破冰成功！爱是恒久忍耐又有恩慈，愿爱永不止息。", "success");
     if (window.Effects) {
       if (typeof window.Effects.fireConfetti === "function") window.Effects.fireConfetti();
       if (typeof window.Effects.fireFireworks === "function") window.Effects.fireFireworks();
-      if (typeof window.Effects.showMiniToast === "function") {
-        window.Effects.showMiniToast("🎉 破冰成功！爱是恒久忍耐又有恩慈，愿爱永不止息。");
-      }
     }
 
     window.dispatchEvent(new CustomEvent("achievement:trigger", {
