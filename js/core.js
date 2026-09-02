@@ -1,7 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印 (Love Universe) 前台核心主控
  * 文件名: js/core.js
- * 作用: 门禁鉴权、软键盘失焦防白屏、打字机、彩蛋、专属姓名连接符美化、灵宠解锁广播协同与 300DPI 标准几何中心拍立得海报生成
+ * 作用: 门禁鉴权、高定版控制台密码入口、软键盘失焦防白屏、打字机、彩蛋协同
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -82,7 +82,8 @@ document.addEventListener("DOMContentLoaded", () => {
     posterPreviewBox: document.getElementById("poster-preview-box"),
     downloadPosterBtn: document.getElementById("download-poster-btn"),
     closePosterBtn: document.getElementById("close-poster-btn"),
-    universeFooterText: document.querySelector(".universe-footer__text")
+    universeFooterText: document.querySelector(".universe-footer__text"),
+    adminAuthModal: document.getElementById("hq-admin-auth-modal") // 🌟 挂载高级弹窗 DOM
   };
 
   function mergeWithDefaultConfig(cloudCfg) {
@@ -107,7 +108,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  // 🌟 新增：挂载旁路解锁事件监听，供前端引擎层触发免密跳过
   window.addEventListener('gatekeeper:bypass', () => {
     unlockMainUniverse(true);
   });
@@ -118,35 +118,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function initGatekeeperUI() {
     const gateCfg = config.gatekeeper || {};
-
     if (dom.gatekeeperTitle) dom.gatekeeperTitle.textContent = gateCfg.title || "🔒 验证恒久契约";
     if (dom.gatekeeperQuestion) dom.gatekeeperQuestion.textContent = gateCfg.question || "请输入纪念日口令，或点击麦克风念出誓言：";
     if (dom.gatekeeperHint) dom.gatekeeperHint.textContent = gateCfg.hint || "提示：包容与接纳，爱是永不止息";
-
     if (dom.gatekeeperBtn) {
-      dom.gatekeeperBtn.onclick = (e) => {
-        e.preventDefault();
-        verifyPassword(dom.gatekeeperInput ? dom.gatekeeperInput.value.trim() : "");
-      };
+      dom.gatekeeperBtn.onclick = (e) => { e.preventDefault(); verifyPassword(dom.gatekeeperInput ? dom.gatekeeperInput.value.trim() : ""); };
     }
-
     if (dom.gatekeeperInput) {
-      dom.gatekeeperInput.onkeydown = (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          verifyPassword(dom.gatekeeperInput.value.trim());
-        }
-      };
+      dom.gatekeeperInput.onkeydown = (e) => { if (e.key === "Enter") { e.preventDefault(); verifyPassword(dom.gatekeeperInput.value.trim()); } };
     }
-
     if (dom.voiceUnlockBtn) {
-      dom.voiceUnlockBtn.onclick = (e) => {
-        e.preventDefault();
-        startVoiceRecognition();
-      };
+      dom.voiceUnlockBtn.onclick = (e) => { e.preventDefault(); startVoiceRecognition(); };
     }
   }
 
+  // 🌟 核心升级：废弃丑陋原生 prompt，调用高定 DOM 弹窗拦截密码输入
   function initAdminPortalTrigger() {
     if (!dom.heroNames) return;
     
@@ -154,32 +140,91 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       e.stopPropagation();
       
-      const pwd = prompt("⚙️ 雅歌时空控制台：请输入管理员密钥：");
+      const pwd = await showAdminAuthModal();
       if (!pwd) return;
 
       try {
         const res = await fetch("/api/love/verify-gatekeeper", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password: pwd.trim() })
+          body: JSON.stringify({ password: pwd })
         });
         const result = await res.json();
         
         if (result.success && result.isAdmin) {
           location.href = "admin.html";
-        } else if (pwd.trim() === "521") {
+        } else if (pwd === "521") {
           location.href = "admin.html";
         } else {
-          alert("❌ 密钥验证失败，您无权访问控制台。");
+          showAuthError("❌ 密钥验证失败，您无权访问控制台。");
         }
       } catch (_) {
-        if (pwd.trim() === "521") {
+        if (pwd === "521") {
           location.href = "admin.html";
         } else {
-          alert("❌ 网络或密钥错误，鉴权失败。");
+          showAuthError("❌ 网络异常或鉴权失败，请重试。");
         }
       }
     });
+  }
+
+  // 🌟 全新异步 DOM 弹窗引擎
+  function showAdminAuthModal() {
+    return new Promise((resolve) => {
+      if (!dom.adminAuthModal) return resolve(null);
+      
+      const inputEl = document.getElementById("hq-admin-input");
+      const confirmBtn = document.getElementById("hq-admin-confirm");
+      const cancelBtn = document.getElementById("hq-admin-cancel");
+      const errorMsg = document.getElementById("hq-admin-error");
+      
+      if (inputEl) inputEl.value = "";
+      if (errorMsg) errorMsg.style.display = "none";
+      dom.adminAuthModal.style.display = "flex";
+      
+      // 动画淡入
+      setTimeout(() => dom.adminAuthModal.classList.add("active"), 10);
+      if (inputEl) inputEl.focus();
+
+      const cleanup = () => {
+        dom.adminAuthModal.classList.remove("active");
+        setTimeout(() => dom.adminAuthModal.style.display = "none", 300);
+        if (inputEl) inputEl.blur(); // 防键盘残留
+        confirmBtn.onclick = null;
+        cancelBtn.onclick = null;
+        inputEl.onkeydown = null;
+      };
+
+      confirmBtn.onclick = () => {
+        const val = inputEl ? inputEl.value.trim() : "";
+        if (!val) {
+          if (errorMsg) { errorMsg.textContent = "请输入密钥"; errorMsg.style.display = "block"; }
+          return;
+        }
+        cleanup();
+        resolve(val);
+      };
+
+      cancelBtn.onclick = () => {
+        cleanup();
+        resolve(null);
+      };
+
+      inputEl.onkeydown = (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          confirmBtn.click();
+        }
+      };
+    });
+  }
+
+  function showAuthError(msg) {
+    if (window.Effects && typeof window.Effects.showMiniToast === "function") {
+      window.Effects.showMiniToast(msg);
+    } else {
+      alert(msg);
+    }
   }
 
   function startVoiceRecognition() {
@@ -330,10 +375,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     initLicenseActivationTrigger();
-
-    // 🌟 核心拦截重构：在这里我们仅仅同步数据，【严禁】在此处强制销毁门禁和树。
-    // 如果 config.gatekeeper.enabled === false，我们会在前台的 #rose-click-overlay 点击事件中读取它并直接跳转。
-    // 这样完美保留了“无论门禁开关，必须先看动画并点击一下”的设计哲学。
   }
 
   async function verifyPassword(inputVal) {
@@ -444,18 +485,14 @@ document.addEventListener("DOMContentLoaded", () => {
       timelineMgr.init();
     }
 
-    // 🌟 广播时空解锁事件 (驱动右下角灵宠平滑淡入呈现，并让繁花树引擎感知销毁释放内存)
     window.dispatchEvent(new CustomEvent("universe:unlocked"));
 
     startTypewriter();
 
-    // 🌟 严格修复 BGM 自动播放导致的 Autoplay 报错问题
     if (config.audio && config.audio.bgmAutoPlay !== false && window.Effects) {
       try {
         window.Effects.playBgm();
       } catch (e) {
-        // 如果依然被浏览器拦截，挂载一次隐形的全局重试监听
-        console.warn("BGM 自动播放被系统阻断，挂载降级用户交互恢复器...");
         const fallbackPlay = () => {
           try { window.Effects.playBgm(); } catch (err) {}
           document.removeEventListener('click', fallbackPlay);
@@ -557,7 +594,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ================= 📸 300DPI 标准拍立得海报生成引擎 =================
   let exportedPosterDataUrl = "";
   if (dom.generatePosterBtn) {
     dom.generatePosterBtn.onclick = () => {
