@@ -26,7 +26,7 @@
   --badge-border: rgba(245, 158, 11, 0.35);
   --badge-text: #fde68a;
 
-  /* 深色模式计时器基础变量 (调整为更通透的毛玻璃底色) */
+  /* 深色模式计时器基础变量 (毛玻璃底色) */
   --timer-unit-bg: rgba(15, 23, 42, 0.45);
   --timer-unit-border: rgba(255, 255, 255, 0.12);
   --timer-num-color: #fde68a;
@@ -132,7 +132,7 @@ body.theme-aurora-night {
   --accent-gold: #a855f7;
 }
 
-/* ================= 👧 女生 6 套浅色唯美高饱和主题 ================= */
+/* ================= 👧 女生 6 套浅色唯美高饱和高对比度主题 ================= */
 body.theme-french-cream {
   --bg-primary: #f7eee4;
   --theme-bg-gradient: linear-gradient(180deg, #fdfbf7 0%, #f7eee4 40%, #eddcd0 100%);
@@ -154,6 +154,9 @@ body.theme-sakura-romance {
   --theme-bg-gradient: linear-gradient(180deg, #fff1f2 0%, #fce7f3 45%, #fbcfe8 100%);
   --bg-card: rgba(255, 255, 255, 0.95);
   --border-card: rgba(225, 29, 72, 0.35);
+  --text-hero: #881337;
+  --text-hero-gradient: linear-gradient(135deg, #881337 0%, #be123c 50%, #e11d48 100%);
+  --text-subtitle: #9f1239;
   --text-main: #881337;
   --text-sub: #9f1239;
   --accent-gold: #e11d48;
@@ -164,6 +167,9 @@ body.theme-monet-garden {
   --theme-bg-gradient: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 45%, #bbf7d0 100%);
   --bg-card: rgba(255, 255, 255, 0.95);
   --border-card: rgba(22, 101, 52, 0.35);
+  --text-hero: #14532d;
+  --text-hero-gradient: linear-gradient(135deg, #14532d 0%, #166534 50%, #15803d 100%);
+  --text-subtitle: #166534;
   --text-main: #14532d;
   --text-sub: #166534;
   --accent-gold: #15803d;
@@ -174,16 +180,23 @@ body.theme-morning-dew {
   --theme-bg-gradient: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 45%, #e2e8f0 100%);
   --bg-card: rgba(255, 255, 255, 0.96);
   --border-card: rgba(71, 85, 105, 0.35);
+  --text-hero: #0f172a;
+  --text-hero-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  --text-subtitle: #1e293b;
   --text-main: #0f172a;
   --text-sub: #334155;
   --accent-gold: #d97706;
 }
 
+/* 🌟 针对当前截图：甜梦紫色高饱和清晰配色体系 */
 body.theme-sunset-blush {
   --bg-primary: #f3e8ff;
   --theme-bg-gradient: linear-gradient(180deg, #faf5ff 0%, #f3e8ff 45%, #e9d5ff 100%);
   --bg-card: rgba(255, 255, 255, 0.95);
   --border-card: rgba(147, 51, 234, 0.35);
+  --text-hero: #581c87;
+  --text-hero-gradient: linear-gradient(135deg, #581c87 0%, #7e22ce 50%, #c026d3 100%);
+  --text-subtitle: #6b21a8;
   --text-main: #581c87;
   --text-sub: #6b21a8;
   --accent-gold: #9333ea;
@@ -194,12 +207,15 @@ body.theme-orange-sea {
   --theme-bg-gradient: linear-gradient(180deg, #fff7ed 0%, #ffedd5 45%, #fed7aa 100%);
   --bg-card: rgba(255, 255, 255, 0.95);
   --border-card: rgba(234, 88, 12, 0.35);
+  --text-hero: #7c2d12;
+  --text-hero-gradient: linear-gradient(135deg, #7c2d12 0%, #c2410c 50%, #ea580c 100%);
+  --text-subtitle: #9a3412;
   --text-main: #7c2d12;
   --text-sub: #9a3412;
   --accent-gold: #ea580c;
 }
 
-/* ================= 🌟 浅色模式全站文字高饱和度穿透规则 ================= */
+/* ================= 🌟 浅色模式全站高饱和度穿透兜底 ================= */
 body[data-theme-type="light"] {
   --drawer-bg: rgba(255, 255, 255, 0.96);
   --drawer-border: rgba(244, 63, 94, 0.35);
@@ -211,59 +227,74 @@ body[data-theme-type="light"] {
   --drawer-active-border: #f43f5e;
   --drawer-active-title: #881337;
 
-  /* 注入浅色模式专属的计时器与徽章变量 (彻底解决不融洽与辨识度低的问题) */
-  --badge-bg: rgba(255, 255, 255, 0.7);
+  --badge-bg: rgba(255, 255, 255, 0.85);
   --badge-border: rgba(244, 63, 94, 0.45);
   --badge-text: #e11d48;
   
   --timer-unit-bg: rgba(255, 255, 255, 0.55);
   --timer-unit-border: rgba(255, 255, 255, 0.9);
-  /* 数字和单位使用高对比度的深色调 */
-  --timer-num-color: #881337; 
-  --timer-label-color: #9f1239;
+  --timer-num-color: var(--text-main); 
+  --timer-label-color: var(--text-sub);
 }
 
-/* 彻底解决第二张图中的中枢大标题白底白字隐形问题 */
 body[data-theme-type="light"] .hub-dock__title {
   color: #451a03 !important;
   font-weight: 900 !important;
   text-shadow: none !important;
 }
 
-body[data-theme-type="light"] .hero-section__names {
+/* ================= 🌟 核心接管：名字与契约誓言副标题高可用重构 ================= */
+/* 
+ * 采用双轨选择器（data-theme-type="light" + 具体类名）：
+ * 彻底消除漫反射白光模糊，确保在浅色背景下笔画锐利、高对比立显。
+ */
+body[data-theme-type="light"] .hero-section__names,
+body.theme-french-cream .hero-section__names,
+body.theme-sakura-romance .hero-section__names,
+body.theme-monet-garden .hero-section__names,
+body.theme-morning-dew .hero-section__names,
+body.theme-sunset-blush .hero-section__names,
+body.theme-orange-sea .hero-section__names {
   font-family: "Songti SC", "STSong", "Noto Serif SC", serif !important;
   font-weight: 900 !important;
-  letter-spacing: 2.2px !important;
+  letter-spacing: 2px !important;
   background: var(--text-hero-gradient) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   text-shadow: none !important;
-  /* 核心：使用多重纯白色的 drop-shadow 形成物理保护圈，杜绝文字边缘被浅色背景“吃掉” */
-  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 1)) 
-          drop-shadow(0 0 5px rgba(255, 255, 255, 0.9)) 
-          drop-shadow(0 6px 16px rgba(190, 18, 60, 0.16)) !important;
+  /* 摒弃发白发虚的纯白扩散晕轮，使用微距柔和深色阴影勾勒字形 */
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08)) drop-shadow(0 4px 14px rgba(88, 28, 135, 0.12)) !important;
 }
 
-body[data-theme-type="light"] .name-connector {
+body[data-theme-type="light"] .name-connector,
+body.theme-french-cream .name-connector,
+body.theme-sakura-romance .name-connector,
+body.theme-monet-garden .name-connector,
+body.theme-morning-dew .name-connector,
+body.theme-sunset-blush .name-connector,
+body.theme-orange-sea .name-connector {
   background: linear-gradient(135deg, #d97706 0%, #ea580c 50%, #e11d48 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
-  filter: drop-shadow(0 2px 8px rgba(234, 88, 12, 0.25)) !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.08)) !important;
 }
 
-body[data-theme-type="light"] .hero-section__subtitle {
+/* 契约誓言副标题接管：强制绑定高对比度深色变量，字重强化至 800 */
+body[data-theme-type="light"] .hero-section__subtitle,
+body.theme-french-cream .hero-section__subtitle,
+body.theme-sakura-romance .hero-section__subtitle,
+body.theme-monet-garden .hero-section__subtitle,
+body.theme-morning-dew .hero-section__subtitle,
+body.theme-sunset-blush .hero-section__subtitle,
+body.theme-orange-sea .hero-section__subtitle {
   color: var(--text-subtitle) !important;
   font-weight: 800 !important;
   text-shadow: none !important;
+  opacity: 0.96 !important;
+  letter-spacing: 0.6px !important;
 }
 
-/* ================= 🌟 核心强制接管：Hero 区域 UI 玻璃拟态与高可用重构 ================= */
-/* 
- * 强制接管原组件样式，使顶部组件物理绑定上方的动态主题变量，
- * 无论处于什么背景，都自动运用毛玻璃质感并维持高对比度。
- */
-
-/* 1. THE ETERNAL SEAL 胶囊徽章接管 */
+/* ================= 🌟 胶囊徽章与计时器玻璃拟态接管 ================= */
 .hero-section__badge {
   background: var(--badge-bg) !important;
   border: 1px solid var(--badge-border) !important;
@@ -278,7 +309,6 @@ body[data-theme-type="light"] .hero-section__subtitle {
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-/* 2. 计时器方块接管 (彻底摒弃原有的工业风深色实体方块) */
 .love-timer__unit {
   background: var(--timer-unit-bg) !important;
   border: 1px solid var(--timer-unit-border) !important;
