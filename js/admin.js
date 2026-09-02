@@ -127,11 +127,10 @@ function mergeWithDefaultConfig(cloudCfg) {
   };
 }
 
-// 🌟 核心引擎：动态同步控制台背景主题
+// 🌟 核心引擎：动态同步控制台背景主题，实现所见即所得
 function syncAdminBackgroundTheme() {
   if (!currentConfig || !currentConfig.theme) return;
   
-  // 侦测前台遗留视角，默认男生视角
   const perspective = localStorage.getItem('love_perspective') || 'boy';
   let themeId = 'sunset-twilight';
   let customBg = '';
@@ -144,7 +143,6 @@ function syncAdminBackgroundTheme() {
     customBg = currentConfig.theme.customBgUrlBoy || currentConfig.theme.customBgUrl || '';
   }
 
-  // 获取深色/浅色属性以挂载
   let themeType = 'dark';
   const presets = window.THEME_PRESETS || { boy: [], girl: [] };
   const allPresets = [...presets.boy, ...presets.girl];
@@ -153,11 +151,9 @@ function syncAdminBackgroundTheme() {
     themeType = foundTheme.themeType || 'dark';
   }
 
-  // 挂载 CSS 变量体系
   document.body.className = `theme-${themeId}`;
   document.body.setAttribute('data-theme-type', themeType);
 
-  // 渲染底层背景图或渐变
   const bgLayer = document.getElementById('universe-bg-layer');
   if (bgLayer) {
     if (customBg) {
@@ -201,7 +197,7 @@ async function fetchConfigFromCloud(tokenOverride) {
         currentAdminToken = token;
         localStorage.setItem("love_admin_token", token);
         renderAllForms();
-        syncAdminBackgroundTheme(); // 🌟 数据就绪，立即刷入同步主题
+        syncAdminBackgroundTheme(); 
         return true;
       }
     }
@@ -218,7 +214,7 @@ function fallbackLocalAuth(token) {
     currentAdminToken = token;
     localStorage.setItem("love_admin_token", token);
     renderAllForms();
-    syncAdminBackgroundTheme(); // 🌟 数据就绪，立即刷入同步主题
+    syncAdminBackgroundTheme(); 
     return true;
   }
   return false;
@@ -243,10 +239,7 @@ async function modifyAdminPasswordWithOld() {
 
   if (oldPwd !== activePwd) {
     alert("❌ 原管理密码验证失败！旧密码错误，无法修改。");
-    if (oldPwdInput) {
-      oldPwdInput.value = "";
-      oldPwdInput.focus();
-    }
+    if (oldPwdInput) { oldPwdInput.value = ""; oldPwdInput.focus(); }
     return;
   }
 
@@ -264,10 +257,7 @@ async function modifyAdminPasswordWithOld() {
 
   if (newPwd !== confirmPwd) {
     alert("❌ 两次输入的新管理密码不一致，请重新核对！");
-    if (confirmPwdInput) {
-      confirmPwdInput.value = "";
-      confirmPwdInput.focus();
-    }
+    if (confirmPwdInput) { confirmPwdInput.value = ""; confirmPwdInput.focus(); }
     return;
   }
 
@@ -276,9 +266,7 @@ async function modifyAdminPasswordWithOld() {
     return;
   }
 
-  if (!confirm(`确认将后台管理密码修改为【${newPwd}】吗？\n\n请务必牢记新密码，修改后旧密码将立即失效！`)) {
-    return;
-  }
+  if (!confirm(`确认将后台管理密码修改为【${newPwd}】吗？\n\n请务必牢记新密码，修改后旧密码将立即失效！`)) return;
 
   if (!currentConfig.adminSecurity) currentConfig.adminSecurity = {};
   currentConfig.adminSecurity.password = newPwd;
@@ -353,7 +341,7 @@ function renderAllForms() {
     renderThemeShowroom();
     renderLicenseStatus();
   } catch (err) {
-    console.warn("表单渲染警告（已自动兼容容错）：", err);
+    console.warn("表单渲染兼容模式：", err);
   }
 }
 
@@ -400,7 +388,7 @@ function renderAnniversariesList() {
   const list = currentConfig.anniversaries;
 
   if (list.length === 0) {
-    container.innerHTML = `<div style="color:#94a3b8; font-size:12.5px; text-align:center; padding:18px;">🍃 暂无纪念日数据，可点击上方快捷模板一键添加，或点击【➕ 自定义新增】。</div>`;
+    container.innerHTML = `<div style="text-align:center; padding:18px;">🍃 暂无纪念日数据，可点击上方快捷模板一键添加，或点击【➕ 自定义新增】。</div>`;
     return;
   }
 
@@ -428,34 +416,33 @@ function renderAnniversariesList() {
 
     const card = document.createElement("div");
     card.className = "item-card";
-    card.style.border = isPinned ? "1.5px solid #f59e0b" : "1px solid var(--border-card)";
-    card.style.boxShadow = isPinned ? "0 0 16px rgba(245, 158, 11, 0.25)" : "none";
+    if (isPinned) card.classList.add("theme-card--selected");
 
     card.innerHTML = `
-      <div class="item-card-header" style="flex-wrap:wrap; gap:8px;">
+      <div class="item-card-header">
         <span class="item-card-title">
           ${escapeHtml(item.icon || "💖")} #${idx + 1} - ${escapeHtml(item.title || "未命名纪念日")}
-          ${isPinned ? '<span style="font-size:10.5px; background:linear-gradient(135deg, #f59e0b, #d97706); color:#fff; padding:2px 8px; border-radius:10px; margin-left:6px; font-weight:800;">👑 首页主打倒数</span>' : ''}
-          ${previewMetrics ? `<span style="font-size:11px; color:#7dd3fc; margin-left:8px; font-weight:700;">[ ${previewMetrics} ]</span>` : ''}
+          ${isPinned ? '<span class="highlight-text" style="font-size:10.5px; padding:2px 8px; border-radius:10px; margin-left:6px;">👑 首页主打倒数</span>' : ''}
+          ${previewMetrics ? `<span style="font-size:11px; margin-left:8px;">[ ${previewMetrics} ]</span>` : ''}
         </span>
-        <div style="display:flex; gap:6px;">
-          <button class="btn-tool" style="padding:3px 8px; font-size:11px; ${isPinned ? 'background:#f59e0b; color:#fff;' : ''}" onclick="togglePinAnniversaryToHero(${idx})" title="设为首页顶部主打倒数">${isPinned ? '★ 已主打' : '☆ 设为主打'}</button>
-          <button class="btn-tool" style="padding:3px 8px; font-size:11px;" onclick="moveAnniversaryItem(${idx}, -1)" ${idx === 0 ? "disabled" : ""}>⬆️</button>
-          <button class="btn-tool" style="padding:3px 8px; font-size:11px;" onclick="moveAnniversaryItem(${idx}, 1)" ${idx === list.length - 1 ? "disabled" : ""}>⬇️</button>
-          <button class="btn-del" style="padding:3px 8px; font-size:11px;" onclick="deleteAnniversaryItem(${idx})">🗑️ 删除</button>
+        <div>
+          <button class="btn-tool" onclick="togglePinAnniversaryToHero(${idx})">${isPinned ? '★ 已主打' : '☆ 设为主打'}</button>
+          <button class="btn-tool" onclick="moveAnniversaryItem(${idx}, -1)" ${idx === 0 ? "disabled" : ""}>⬆️</button>
+          <button class="btn-tool" onclick="moveAnniversaryItem(${idx}, 1)" ${idx === list.length - 1 ? "disabled" : ""}>⬇️</button>
+          <button class="btn-del" onclick="deleteAnniversaryItem(${idx})">🗑️ 删除</button>
         </div>
       </div>
       <div class="form-grid">
         <div class="form-group"><label>纪念日名称</label><input type="text" class="admin-input" id="anni_title_${idx}" value="${escapeHtml(item.title || "")}" oninput="currentConfig.anniversaries[${idx}].title=this.value"></div>
         <div class="form-group"><label>图标 Emoji</label><input type="text" class="admin-input" id="anni_icon_${idx}" value="${escapeHtml(item.icon || "💖")}" oninput="currentConfig.anniversaries[${idx}].icon=this.value"></div>
-        <div class="form-group"><label>分类阶段标签 (如: 专属诞辰 / 恋爱起点)</label><input type="text" class="admin-input" id="anni_tag_${idx}" value="${escapeHtml(item.tag || "")}" oninput="currentConfig.anniversaries[${idx}].tag=this.value"></div>
+        <div class="form-group"><label>分类标签</label><input type="text" class="admin-input" id="anni_tag_${idx}" value="${escapeHtml(item.tag || "")}" oninput="currentConfig.anniversaries[${idx}].tag=this.value"></div>
         
         <div class="form-group">
           <label>度量模式</label>
           <select class="admin-select" id="anni_type_${idx}" onchange="currentConfig.anniversaries[${idx}].type=this.value; renderAnniversariesList();">
-            <option value="countdown" ${isCountdown ? 'selected' : ''}>🔁 每年重复倒数 (生日 / 周年纪念)</option>
-            <option value="countup" ${isCountup ? 'selected' : ''}>⏳ 累积同行天数 (恋爱确认 / 领证结婚)</option>
-            <option value="target" ${isTarget ? 'selected' : ''}>🎯 未来单次目标 (求婚 / 婚礼预定)</option>
+            <option value="countdown" ${isCountdown ? 'selected' : ''}>🔁 每年重复倒数 (生日/周年)</option>
+            <option value="countup" ${isCountup ? 'selected' : ''}>⏳ 累积同行天数 (恋爱/领证)</option>
+            <option value="target" ${isTarget ? 'selected' : ''}>🎯 未来单次目标 (求婚/预定)</option>
           </select>
         </div>
 
@@ -476,28 +463,28 @@ function renderAnniversariesList() {
         </div>
 
         <div class="form-group" style="grid-column: 1 / -1;">
-          <label>设定日期 (格式: YYYY-MM-DD${isLunar ? '，例如 1998-04-15 代表农历四月十五' : ''})</label>
-          <input type="text" class="admin-input" id="anni_date_${idx}" value="${escapeHtml(item.date || "")}" placeholder="例如: 2024-05-20" oninput="currentConfig.anniversaries[${idx}].date=this.value">
+          <label>设定日期 (格式: YYYY-MM-DD)</label>
+          <input type="text" class="admin-input" id="anni_date_${idx}" value="${escapeHtml(item.date || "")}" oninput="currentConfig.anniversaries[${idx}].date=this.value">
         </div>
 
         <div class="form-group" style="grid-column: 1 / -1;">
-          <label>专属情书寄语 (Love Memo · 展卷动画呈现)</label>
-          <textarea class="admin-textarea" rows="2" id="anni_memo_${idx}" placeholder="写下一句专属私密寄语..." oninput="currentConfig.anniversaries[${idx}].memo=this.value">${escapeHtml(item.memo || "")}</textarea>
+          <label>专属情书寄语</label>
+          <textarea class="admin-textarea" rows="2" id="anni_memo_${idx}" oninput="currentConfig.anniversaries[${idx}].memo=this.value">${escapeHtml(item.memo || "")}</textarea>
         </div>
 
         <div class="form-group" style="grid-column: 1 / -1;">
-          <label>专属回忆照片 (长按卡片暗纹浮现与拍立得海报呈现)</label>
+          <label>专属回忆照片直链</label>
           <div class="upload-input-group">
-            <input type="text" class="admin-input" id="anni_bg_${idx}" value="${escapeHtml(item.bgImg || "")}" placeholder="输入图片直链或点击右侧上传..." oninput="currentConfig.anniversaries[${idx}].bgImg=this.value">
+            <input type="text" class="admin-input" id="anni_bg_${idx}" value="${escapeHtml(item.bgImg || "")}" oninput="currentConfig.anniversaries[${idx}].bgImg=this.value">
             <button class="btn-upload" onclick="triggerDirectUpload('anni_bg_${idx}', 'image/*', (url)=>{ currentConfig.anniversaries[${idx}].bgImg=url; })">🖼️ 上传照片</button>
           </div>
         </div>
 
         <div class="form-group" style="grid-column: 1 / -1;">
-          <label style="color:#fbcfe8; font-weight:800;">🎙️ 专属 10 秒声纹录音直链 (微播放胶囊呈现)</label>
+          <label>🎙️ 专属录音音频直链 (10秒微胶囊)</label>
           <div class="upload-input-group">
-            <input type="text" class="admin-input" id="anni_voice_${idx}" value="${escapeHtml(item.voiceAudio || "")}" placeholder="输入音频直链或点击右侧上传 MP3 录音..." oninput="currentConfig.anniversaries[${idx}].voiceAudio=this.value">
-            <button class="btn-upload" style="background:linear-gradient(135deg, #f43f5e 0%, #be123c 100%); color:#fff; border-color:rgba(255,255,255,0.3);" onclick="triggerDirectUpload('anni_voice_${idx}', 'audio/*', (url)=>{ currentConfig.anniversaries[${idx}].voiceAudio=url; })">🎙️ 上传录音</button>
+            <input type="text" class="admin-input" id="anni_voice_${idx}" value="${escapeHtml(item.voiceAudio || "")}" oninput="currentConfig.anniversaries[${idx}].voiceAudio=this.value">
+            <button class="btn-upload" onclick="triggerDirectUpload('anni_voice_${idx}', 'audio/*', (url)=>{ currentConfig.anniversaries[${idx}].voiceAudio=url; })">🎙️ 上传录音</button>
           </div>
         </div>
       </div>
@@ -509,19 +496,8 @@ function renderAnniversariesList() {
 function addCustomAnniversaryItem() {
   if (!currentConfig.anniversaries) currentConfig.anniversaries = [];
   currentConfig.anniversaries.push({
-    id: "anni_" + Date.now(),
-    title: "新美好纪念日",
-    type: "countdown",
-    isLunar: false,
-    isLeapMonth: false,
-    date: "2026-05-20",
-    annualRepeat: true,
-    icon: "💖",
-    tag: "专属印记",
-    memo: "在时光的长河里，每一刻都值得铭记。",
-    bgImg: "",
-    voiceAudio: "",
-    pinToHero: false
+    id: "anni_" + Date.now(), title: "新美好纪念日", type: "countdown", isLunar: false, isLeapMonth: false,
+    date: "2026-05-20", annualRepeat: true, icon: "💖", tag: "专属印记", memo: "每一刻都值得铭记。", bgImg: "", voiceAudio: "", pinToHero: false
   });
   renderAnniversariesList();
   showToast("✓ 已添加自定义纪念日");
@@ -530,119 +506,30 @@ function addCustomAnniversaryItem() {
 function addPresetAnniversaryTemplate(templateKey) {
   if (!currentConfig.anniversaries) currentConfig.anniversaries = [];
   const templates = {
-    birthday_girl: {
-      title: "她的农历生日",
-      type: "countdown",
-      isLunar: true,
-      isLeapMonth: false,
-      date: "1998-04-15",
-      annualRepeat: true,
-      icon: "🎂",
-      tag: "专属诞辰",
-      memo: "愿你一生被爱，眼里常有星辰大海，笑里全是不染尘埃的纯真。",
-      bgImg: "assets/images/photo_02.jpg",
-      voiceAudio: "",
-      pinToHero: false
-    },
-    birthday_boy: {
-      title: "他的公历生日",
-      type: "countdown",
-      isLunar: false,
-      isLeapMonth: false,
-      date: "1996-10-24",
-      annualRepeat: true,
-      icon: "🪐",
-      tag: "先生生辰",
-      memo: "感谢你的坚毅与温柔，做我们小家庭永远遮风挡雨的港湾。",
-      bgImg: "",
-      voiceAudio: "",
-      pinToHero: false
-    },
-    love_start: {
-      title: "初次牵手 · 恋爱起点",
-      type: "countup",
-      isLunar: false,
-      isLeapMonth: false,
-      date: "2024-05-20",
-      annualRepeat: false,
-      icon: "💖",
-      tag: "恋爱起点",
-      memo: "那一天的晚风很温柔，牵起你手的那一刻，我知道余生有了归宿。",
-      bgImg: "assets/images/photo_01.jpg",
-      voiceAudio: "",
-      pinToHero: true
-    },
-    engaged: {
-      title: "神圣订婚盟约之日",
-      type: "countup",
-      isLunar: false,
-      isLeapMonth: false,
-      date: "2025-05-20",
-      annualRepeat: false,
-      icon: "💍",
-      tag: "盟约确立",
-      memo: "愿得一人心，白首不相离。在爱中彼此坚固。",
-      bgImg: "assets/images/photo_03.jpg",
-      voiceAudio: "",
-      pinToHero: false
-    },
-    married: {
-      title: "领证结婚 · 合为一体",
-      type: "countup",
-      isLunar: false,
-      isLeapMonth: false,
-      date: "2026-10-01",
-      annualRepeat: false,
-      icon: "🏠",
-      tag: "神圣婚典",
-      memo: "在上帝与众人见证下，缔结一生一世不可分开的神圣盟约。",
-      bgImg: "assets/images/photo_03.jpg",
-      voiceAudio: "",
-      pinToHero: false
-    },
-    travel: {
-      title: "海边日落旅行之约",
-      type: "target",
-      isLunar: false,
-      isLeapMonth: false,
-      date: "2026-12-25",
-      annualRepeat: false,
-      icon: "✈️",
-      tag: "浪漫之约",
-      memo: "一起去向往的远方，看最美的海浪与星辰。",
-      bgImg: "assets/images/photo_02.jpg",
-      voiceAudio: "",
-      pinToHero: false
-    }
+    birthday_girl: { title: "她的农历生日", type: "countdown", isLunar: true, isLeapMonth: false, date: "1998-04-15", annualRepeat: true, icon: "🎂", tag: "专属诞辰", memo: "愿你一生被爱，眼里常有星辰大海。", bgImg: "", voiceAudio: "", pinToHero: false },
+    birthday_boy: { title: "他的公历生日", type: "countdown", isLunar: false, isLeapMonth: false, date: "1996-10-24", annualRepeat: true, icon: "🪐", tag: "先生生辰", memo: "做我们小家庭永远遮风挡雨的港湾。", bgImg: "", voiceAudio: "", pinToHero: false },
+    love_start: { title: "初次牵手 · 恋爱起点", type: "countup", isLunar: false, isLeapMonth: false, date: "2024-05-20", annualRepeat: false, icon: "💖", tag: "恋爱起点", memo: "牵起你手的那一刻，我知道余生有了归宿。", bgImg: "", voiceAudio: "", pinToHero: true },
+    engaged: { title: "神圣订婚盟约之日", type: "countup", isLunar: false, isLeapMonth: false, date: "2025-05-20", annualRepeat: false, icon: "💍", tag: "盟约确立", memo: "愿得一人心，白首不相离。", bgImg: "", voiceAudio: "", pinToHero: false },
+    married: { title: "领证结婚 · 合为一体", type: "countup", isLunar: false, isLeapMonth: false, date: "2026-10-01", annualRepeat: false, icon: "🏠", tag: "神圣婚典", memo: "缔结一生一世不可分开的神圣盟约。", bgImg: "", voiceAudio: "", pinToHero: false },
+    travel: { title: "旅行之约", type: "target", isLunar: false, isLeapMonth: false, date: "2026-12-25", annualRepeat: false, icon: "✈️", tag: "浪漫之约", memo: "一起去向往的远方。", bgImg: "", voiceAudio: "", pinToHero: false }
   };
-
   const chosen = templates[templateKey];
   if (!chosen) return;
-
-  currentConfig.anniversaries.push({
-    id: "anni_" + Date.now(),
-    ...chosen
-  });
-
+  currentConfig.anniversaries.push({ id: "anni_" + Date.now(), ...chosen });
   renderAnniversariesList();
-  showToast(`✓ 已成功添加【${chosen.title}】模板！`);
+  showToast(`✓ 已成功添加【${chosen.title}】`);
 }
 
 function togglePinAnniversaryToHero(idx) {
   if (!currentConfig.anniversaries) return;
   const targetState = !currentConfig.anniversaries[idx].pinToHero;
-  currentConfig.anniversaries.forEach((item, i) => {
-    item.pinToHero = (i === idx) ? targetState : false;
-  });
+  currentConfig.anniversaries.forEach((item, i) => { item.pinToHero = (i === idx) ? targetState : false; });
   renderAnniversariesList();
-  showToast(targetState ? `✓ 已将 #${idx + 1} 设为首页主打倒数` : "✓ 已取消首页主打倒数");
+  showToast(targetState ? `✓ 已设为首页主打倒数` : "✓ 已取消首页主打");
 }
 
 function deleteAnniversaryItem(idx) {
-  if (confirm("确定删除该纪念日事件吗？")) {
-    currentConfig.anniversaries.splice(idx, 1);
-    renderAnniversariesList();
-  }
+  if (confirm("确定删除该纪念日事件吗？")) { currentConfig.anniversaries.splice(idx, 1); renderAnniversariesList(); }
 }
 
 function moveAnniversaryItem(idx, direction) {
@@ -658,25 +545,18 @@ function moveAnniversaryItem(idx, direction) {
 function renderIcebreakerSettings() {
   if (!currentConfig) return;
   const ib = currentConfig.icebreaker || {};
-  const enabledSelect = document.getElementById("icebreaker_enabled");
-  const cooldownInput = document.getElementById("icebreaker_cooldownMinutes");
-  const cooldownValText = document.getElementById("icebreaker_cooldown_val");
-  const soundSelect = document.getElementById("icebreaker_soundEnabled");
-
-  if (enabledSelect) enabledSelect.value = String(ib.enabled !== false);
-  if (cooldownInput) {
-    cooldownInput.value = ib.cooldownMinutes || 15;
-    if (cooldownValText) cooldownValText.textContent = `${ib.cooldownMinutes || 15} 分钟`;
-  }
-  if (soundSelect) soundSelect.value = String(ib.soundEnabled !== false);
+  document.getElementById("icebreaker_enabled").value = String(ib.enabled !== false);
+  document.getElementById("icebreaker_cooldownMinutes").value = ib.cooldownMinutes || 15;
+  document.getElementById("icebreaker_cooldown_val").textContent = `${ib.cooldownMinutes || 15} 分钟`;
+  document.getElementById("icebreaker_soundEnabled").value = String(ib.soundEnabled !== false);
 
   const container = document.getElementById("icebreakerActionsContainer");
   if (!container) return;
 
   const stages = [
-    { key: "dating", name: "🌿 恋爱期 (坚守圣洁界限 · 严禁同居与室内私密行为引导)", color: "#38bdf8" },
-    { key: "engaged", name: "💍 订婚期 (盟约预备 · 化解现实筹备焦虑)", color: "#f59e0b" },
-    { key: "married", name: "🏠 结婚期 (合为一体 · 实体避风港 · 不可含怒到日落)", color: "#f43f5e" }
+    { key: "dating", name: "🌿 恋爱期 (严禁越界)" },
+    { key: "engaged", name: "💍 订婚期 (盟约预备)" },
+    { key: "married", name: "🏠 结婚期 (合为一体)" }
   ];
 
   const actionsData = ib.actions || window.LOVE_CONFIG?.icebreaker?.actions || {};
@@ -684,19 +564,19 @@ function renderIcebreakerSettings() {
   container.innerHTML = stages.map(st => {
     const list = actionsData[st.key] || [];
     return `
-      <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:16px; margin-bottom:14px;">
-        <div style="font-size:14px; font-weight:900; color:${st.color}; margin-bottom:12px;">${st.name}</div>
+      <div class="item-card highlight-panel" style="margin-bottom:14px; padding:16px;">
+        <div class="highlight-text" style="font-size:14px; margin-bottom:12px;">${st.name}</div>
         <div style="display:flex; flex-direction:column; gap:10px;">
           ${list.map((act, actIdx) => `
-            <div style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:12px;">
+            <div style="background:rgba(0,0,0,0.1); border:1px solid var(--timer-unit-border); border-radius:12px; padding:12px;">
               <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
                 <span style="font-size:18px;">${act.icon || "💖"}</span>
-                <span style="font-size:13px; font-weight:800; color:#fff;">${escapeHtml(act.label || "动作名称")}</span>
-                <span style="font-size:11px; color:#94a3b8; margin-left:auto;">[类型: ${act.type}]</span>
+                <span style="font-size:13px; font-weight:800;">${escapeHtml(act.label || "动作名称")}</span>
+                <span style="font-size:11px; margin-left:auto;">[类型: ${act.type}]</span>
               </div>
               <div class="form-group" style="margin-bottom:0;">
-                <label style="font-size:11px;">自定义温情提示与和解台阶文案</label>
-                <textarea class="admin-textarea" rows="2" id="ib_${st.key}_${act.type}_desc" oninput="updateIcebreakerActionText('${st.key}', '${act.type}', this.value)">${escapeHtml(act.desc || "")}</textarea>
+                <label style="font-size:11px;">自定义台阶文案</label>
+                <textarea class="admin-textarea" rows="2" oninput="updateIcebreakerActionText('${st.key}', '${act.type}', this.value)">${escapeHtml(act.desc || "")}</textarea>
               </div>
             </div>
           `).join("")}
@@ -714,9 +594,7 @@ function updateIcebreakerActionText(stageKey, actionType, val) {
     currentConfig.icebreaker.actions[stageKey] = JSON.parse(JSON.stringify(baseActions));
   }
   const target = currentConfig.icebreaker.actions[stageKey].find(a => a.type === actionType);
-  if (target) {
-    target.desc = val;
-  }
+  if (target) target.desc = val;
 }
 
 async function clearIcebreakerHistory() {
@@ -749,7 +627,7 @@ async function executeOnlineMusicSearch() {
   const listContainer = document.getElementById("onlineSearchResultList");
   if (!kw) return alert("请输入要搜索的歌名或歌手！");
 
-  listContainer.innerHTML = `<div style="color:#fde68a; font-size:12px; padding:10px; text-align:center;">⏳ 正在检索全网高保真音频流...</div>`;
+  listContainer.innerHTML = `<div style="text-align:center; padding:10px;">⏳ 正在检索全网高保真音频流...</div>`;
 
   try {
     const res = await fetch(`/api/love/music-search?keyword=${encodeURIComponent(kw)}`);
@@ -757,23 +635,23 @@ async function executeOnlineMusicSearch() {
 
     if (data.success && Array.isArray(data.songs) && data.songs.length > 0) {
       listContainer.innerHTML = data.songs.map((song, idx) => `
-        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.06); padding:10px 14px; border-radius:12px; border:1px solid rgba(255,255,255,0.1);">
+        <div class="item-card" style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; margin-bottom:8px;">
           <div style="flex:1; overflow:hidden; margin-right:10px;">
-            <div style="font-size:13.5px; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(song.title)}</div>
-            <div style="font-size:11.5px; color:#94a3b8;">${escapeHtml(song.artist)}</div>
+            <div style="font-size:13.5px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(song.title)}</div>
+            <div style="font-size:11.5px;">${escapeHtml(song.artist)}</div>
           </div>
           <div style="display:flex; gap:6px; flex-shrink:0;">
-            <button class="btn-tool preview-play-btn" id="prev_btn_${idx}" style="padding:5px 10px; font-size:11.5px;" onclick="testPreviewAudio('${song.url}', 'prev_btn_${idx}', '${escapeHtml(song.title)}')">🎧 试听</button>
-            <button class="btn-tool" style="background:rgba(56, 189, 248, 0.2); color:#7dd3fc; border-color:rgba(56,189,248,0.35); padding:5px 10px; font-size:11.5px;" onclick="addSongToPlaylist('${escapeHtml(song.title)}', '${escapeHtml(song.artist)}', '${song.url}', '')">➕ 加歌单</button>
-            <button class="btn-tool" style="background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:#fff; padding:5px 10px; font-size:11.5px;" onclick="setAsSingleBGM('${escapeHtml(song.title)}', '${escapeHtml(song.artist)}', '${song.url}')">👑 设为主打</button>
+            <button class="btn-tool preview-play-btn" id="prev_btn_${idx}" onclick="testPreviewAudio('${song.url}', 'prev_btn_${idx}', '${escapeHtml(song.title)}')">🎧 试听</button>
+            <button class="btn-tool" onclick="addSongToPlaylist('${escapeHtml(song.title)}', '${escapeHtml(song.artist)}', '${song.url}', '')">➕ 加歌单</button>
+            <button class="btn-tool" onclick="setAsSingleBGM('${escapeHtml(song.title)}', '${escapeHtml(song.artist)}', '${song.url}')">👑 主打</button>
           </div>
         </div>
       `).join("");
     } else {
-      listContainer.innerHTML = `<div style="color:#fca5a5; font-size:12px; padding:10px; text-align:center;">🍃 未找到可用音频，建议点击下方【上传MP3】直接上传歌曲文件</div>`;
+      listContainer.innerHTML = `<div style="text-align:center; padding:10px;">🍃 未找到可用音频，建议直传MP3文件</div>`;
     }
   } catch (_) {
-    listContainer.innerHTML = `<div style="color:#fca5a5; font-size:12px; padding:10px; text-align:center;">❌ 检索超时，请检查网络</div>`;
+    listContainer.innerHTML = `<div style="text-align:center; padding:10px;">❌ 检索超时，请检查网络</div>`;
   }
 }
 
@@ -790,27 +668,17 @@ function setAsSingleBGM(title, artist, url) {
     currentConfig.audio.playlist.unshift({ id: "song_" + Date.now(), title, artist, url, cover: "" });
     renderPlaylist();
   }
-  showToast(`✓ 已将《${title}》设为主打歌，请点击右上角【💾 立即发布生效】！`);
+  showToast(`✓ 已将《${title}》设为主打歌，请点击立即发布生效！`);
 }
 
 function addSongToPlaylist(title, artist, url, cover) {
   if (!currentConfig.audio) currentConfig.audio = {};
   if (!Array.isArray(currentConfig.audio.playlist)) currentConfig.audio.playlist = [];
+  if (currentConfig.audio.playlist.length >= 30) return alert("⚠️ 播放列表最多可添加 30 首音乐！");
 
-  if (currentConfig.audio.playlist.length >= 30) {
-    return alert("⚠️ 播放列表最多可添加 30 首音乐，请删除部分曲目后再添加！");
-  }
-
-  currentConfig.audio.playlist.push({
-    id: "song_" + Date.now(),
-    title: title || "新添加曲目",
-    artist: artist || "精选歌手",
-    url: url || "",
-    cover: cover || ""
-  });
-
+  currentConfig.audio.playlist.push({ id: "song_" + Date.now(), title: title || "新添加曲目", artist: artist || "精选歌手", url: url || "", cover: cover || "" });
   renderPlaylist();
-  showToast(`✓ 已将《${title}》加入播放列表 (${currentConfig.audio.playlist.length}/30)`);
+  showToast(`✓ 已将《${title}》加入播放列表`);
 }
 
 function renderPlaylist() {
@@ -822,12 +690,10 @@ function renderPlaylist() {
   const list = currentConfig?.audio?.playlist || [];
   const localCount = getLocalSongCount();
 
-  if (countBadge) {
-    countBadge.textContent = `(${list.length} / 30 首 · 本地已传 ${localCount} / 5)`;
-  }
+  if (countBadge) countBadge.textContent = `(${list.length} / 30 首 · 本地已传 ${localCount} / 5)`;
 
   if (list.length === 0) {
-    container.innerHTML = `<div style="color:#94a3b8; font-size:12.5px; text-align:center; padding:18px;">🍃 暂无列表曲目，可在上方搜索歌曲一键【➕ 加歌单】或点击上方【📤 传本地MP3】。</div>`;
+    container.innerHTML = `<div style="text-align:center; padding:18px;">🍃 暂无曲目，请先搜索或上传。</div>`;
     return;
   }
 
@@ -840,13 +706,13 @@ function renderPlaylist() {
       <div class="item-card-header">
         <span class="item-card-title">
           🎵 #${idx + 1} - ${escapeHtml(song.title || "未命名曲目")}
-          ${isLocal ? '<span style="font-size:10px; background:rgba(56,189,248,0.2); color:#38bdf8; padding:2px 6px; border-radius:8px; margin-left:6px;">本地文件</span>' : ''}
+          ${isLocal ? '<span class="highlight-text" style="font-size:10px; padding:2px 6px; border-radius:8px; margin-left:6px;">本地文件</span>' : ''}
         </span>
-        <div style="display:flex; gap:6px;">
-          <button class="btn-tool preview-play-btn" id="pl_prev_${idx}" style="padding:3px 8px; font-size:11px;" onclick="testPreviewAudio('${song.url}', 'pl_prev_${idx}', '${escapeHtml(song.title)}')">🎧 试听</button>
-          <button class="btn-tool" style="padding:3px 8px; font-size:11px;" onclick="movePlaylistSong(${idx}, -1)" ${idx === 0 ? "disabled" : ""}>⬆️</button>
-          <button class="btn-tool" style="padding:3px 8px; font-size:11px;" onclick="movePlaylistSong(${idx}, 1)" ${idx === list.length - 1 ? "disabled" : ""}>⬇️</button>
-          <button class="btn-del" style="padding:3px 8px; font-size:11px;" onclick="deletePlaylistSong(${idx})">🗑️</button>
+        <div>
+          <button class="btn-tool preview-play-btn" id="pl_prev_${idx}" onclick="testPreviewAudio('${song.url}', 'pl_prev_${idx}', '${escapeHtml(song.title)}')">🎧 试听</button>
+          <button class="btn-tool" onclick="movePlaylistSong(${idx}, -1)" ${idx === 0 ? "disabled" : ""}>⬆️</button>
+          <button class="btn-tool" onclick="movePlaylistSong(${idx}, 1)" ${idx === list.length - 1 ? "disabled" : ""}>⬇️</button>
+          <button class="btn-del" onclick="deletePlaylistSong(${idx})">🗑️ 删除</button>
         </div>
       </div>
       <div class="form-grid">
@@ -855,14 +721,14 @@ function renderPlaylist() {
         <div class="form-group" style="grid-column: 1 / -1;">
           <label>音频直链地址</label>
           <div class="upload-input-group">
-            <input type="text" id="pl_url_${idx}" value="${escapeHtml(song.url || "")}" oninput="currentConfig.audio.playlist[${idx}].url=this.value">
+            <input type="text" class="admin-input" id="pl_url_${idx}" value="${escapeHtml(song.url || "")}" oninput="currentConfig.audio.playlist[${idx}].url=this.value">
             <button class="btn-upload" onclick="triggerDirectUploadSongItem(${idx})">📤 上传MP3</button>
           </div>
         </div>
         <div class="form-group" style="grid-column: 1 / -1;">
           <label>专属黑胶中心封面 (可选)</label>
           <div class="upload-input-group">
-            <input type="text" id="pl_cover_${idx}" value="${escapeHtml(song.cover || "")}" oninput="currentConfig.audio.playlist[${idx}].cover=this.value">
+            <input type="text" class="admin-input" id="pl_cover_${idx}" value="${escapeHtml(song.cover || "")}" oninput="currentConfig.audio.playlist[${idx}].cover=this.value">
             <button class="btn-upload" onclick="triggerDirectUpload('pl_cover_${idx}', 'image/*', (url)=>{ currentConfig.audio.playlist[${idx}].cover=url; })">🖼️ 上传封面</button>
           </div>
         </div>
@@ -875,69 +741,38 @@ function renderPlaylist() {
 function addCustomPlaylistItem() {
   if (!currentConfig.audio) currentConfig.audio = {};
   if (!Array.isArray(currentConfig.audio.playlist)) currentConfig.audio.playlist = [];
-
-  if (currentConfig.audio.playlist.length >= 30) {
-    return alert("⚠️ 播放列表最多可添加 30 首音乐！");
-  }
-
-  currentConfig.audio.playlist.push({
-    id: "song_" + Date.now(),
-    title: "自定义新音乐",
-    artist: "歌手",
-    url: "",
-    cover: ""
-  });
+  if (currentConfig.audio.playlist.length >= 30) return alert("⚠️ 播放列表已满！");
+  currentConfig.audio.playlist.push({ id: "song_" + Date.now(), title: "新音乐", artist: "歌手", url: "", cover: "" });
   renderPlaylist();
 }
 
 function triggerDirectUploadLocalSong() {
   if (!currentConfig.audio) currentConfig.audio = {};
   if (!Array.isArray(currentConfig.audio.playlist)) currentConfig.audio.playlist = [];
-
-  if (currentConfig.audio.playlist.length >= 30) {
-    return alert("⚠️ 播放列表最多可容纳 30 首音乐！请先删除部分歌曲。");
-  }
-
-  const localCount = getLocalSongCount();
-  if (localCount >= 5) {
-    return alert(`⚠️ 存储空间保护机制生效：\n每个站点最多支持上传 5 首本地专属 MP3 音频（当前已上传 ${localCount} 首）。\n\n💡 建议方案：\n请使用上方【🔍 在线搜索云端音乐】功能，支持全网数百万首歌曲无损直连，0 占用本地存储！`);
-  }
+  if (currentConfig.audio.playlist.length >= 30) return alert("⚠️ 播放列表最多容纳 30 首！");
+  if (getLocalSongCount() >= 5) return alert("⚠️ 本地存储最多支持 5 首 MP3，请在线搜索或替换已有文件！");
 
   triggerDirectUpload(null, "audio/*", (url, file) => {
     const meta = parseSongFilename(file.name);
-    currentConfig.audio.playlist.push({
-      id: "song_" + Date.now(),
-      title: meta.title,
-      artist: meta.artist,
-      url: url,
-      cover: ""
-    });
+    currentConfig.audio.playlist.push({ id: "song_" + Date.now(), title: meta.title, artist: meta.artist, url: url, cover: "" });
     renderPlaylist();
-    showToast(`✓ 已成功上传《${meta.title}》并加入播放列表！`);
+    showToast(`✓ 已成功上传《${meta.title}》`);
   });
 }
 
 function triggerDirectUploadSongItem(idx) {
   const currentUrl = currentConfig.audio.playlist[idx]?.url || "";
   const isAlreadyLocal = currentUrl.startsWith("/raw/") || currentUrl.includes("/assets/");
-  
-  if (!isAlreadyLocal && getLocalSongCount() >= 5) {
-    return alert(`⚠️ 存储空间保护机制生效：\n每个站点最多支持上传 5 首本地专属 MP3 音频。\n请使用在线搜索，或将已有本地歌曲替换！`);
-  }
+  if (!isAlreadyLocal && getLocalSongCount() >= 5) return alert("⚠️ 本地存储已满 5 首限制！");
 
   triggerDirectUpload(`pl_url_${idx}`, "audio/*", (url, file) => {
     currentConfig.audio.playlist[idx].url = url;
     const titleInput = document.getElementById(`pl_title_${idx}`);
     const artistInput = document.getElementById(`pl_artist_${idx}`);
-    
-    if (titleInput && (!titleInput.value || titleInput.value === "自定义新音乐")) {
+    if (titleInput && (!titleInput.value || titleInput.value === "新音乐")) {
       const meta = parseSongFilename(file.name);
-      titleInput.value = meta.title;
-      currentConfig.audio.playlist[idx].title = meta.title;
-      if (artistInput && (!artistInput.value || artistInput.value === "歌手")) {
-        artistInput.value = meta.artist;
-        currentConfig.audio.playlist[idx].artist = meta.artist;
-      }
+      titleInput.value = meta.title; currentConfig.audio.playlist[idx].title = meta.title;
+      if (artistInput) { artistInput.value = meta.artist; currentConfig.audio.playlist[idx].artist = meta.artist; }
     }
     renderPlaylist();
   });
@@ -946,42 +781,33 @@ function triggerDirectUploadSongItem(idx) {
 function triggerDirectUploadSingleBgm() {
   triggerDirectUpload("audio_bgmUrl", "audio/*", (url, file) => {
     const meta = parseSongFilename(file.name);
-    const titleInput = document.getElementById("audio_bgmTitle");
-    const artistInput = document.getElementById("audio_bgmArtist");
-    if (titleInput) titleInput.value = meta.title;
-    if (artistInput) artistInput.value = meta.artist;
-    showToast(`✓ 主打歌音频已上传，自动解析为《${meta.title}》`);
+    if (document.getElementById("audio_bgmTitle")) document.getElementById("audio_bgmTitle").value = meta.title;
+    if (document.getElementById("audio_bgmArtist")) document.getElementById("audio_bgmArtist").value = meta.artist;
+    showToast(`✓ 主打歌音频已上传，解析为《${meta.title}》`);
   });
 }
 
-// 🌟 核心：更新背景恢复默认事件并实时渲染
 function clearCustomBg(gender) {
   if (!currentConfig) return;
   if (!currentConfig.theme) currentConfig.theme = {};
-
   if (gender === 'boy') {
-    const input = document.getElementById("theme_customBgUrlBoy");
-    if (input) input.value = "";
+    if (document.getElementById("theme_customBgUrlBoy")) document.getElementById("theme_customBgUrlBoy").value = "";
     currentConfig.theme.customBgUrlBoy = "";
     currentConfig.theme.customBgUrl = "";
     localStorage.setItem('love_perspective', 'boy');
     syncAdminBackgroundTheme();
-    showToast("✓ 已清除男生视角自定义壁纸，恢复自带主题！");
+    showToast("✓ 已清除男生视角壁纸！");
   } else if (gender === 'girl') {
-    const input = document.getElementById("theme_customBgUrlGirl");
-    if (input) input.value = "";
+    if (document.getElementById("theme_customBgUrlGirl")) document.getElementById("theme_customBgUrlGirl").value = "";
     currentConfig.theme.customBgUrlGirl = "";
     localStorage.setItem('love_perspective', 'girl');
     syncAdminBackgroundTheme();
-    showToast("✓ 已清除女生视角自定义壁纸，恢复自带主题！");
+    showToast("✓ 已清除女生视角壁纸！");
   }
 }
 
 function deletePlaylistSong(idx) {
-  if (confirm("确定从播放列表中移除该歌曲吗？")) {
-    currentConfig.audio.playlist.splice(idx, 1);
-    renderPlaylist();
-  }
+  if (confirm("确定移除该歌曲吗？")) { currentConfig.audio.playlist.splice(idx, 1); renderPlaylist(); }
 }
 
 function movePlaylistSong(idx, direction) {
@@ -999,37 +825,26 @@ let currentPreviewBtnId = null;
 
 function testPreviewAudio(url, btnId, songTitle) {
   const currentBtn = document.getElementById(btnId);
-
   if (previewAudioObj && currentPreviewBtnId === btnId && !previewAudioObj.paused) {
     previewAudioObj.pause();
     if (currentBtn) currentBtn.textContent = "🎧 试听";
     showToast("⏸️ 已暂停试听");
     return;
   }
-
   document.querySelectorAll(".preview-play-btn").forEach(b => b.textContent = "🎧 试听");
-
-  if (previewAudioObj) {
-    previewAudioObj.pause();
-    previewAudioObj = null;
-  }
-
+  if (previewAudioObj) { previewAudioObj.pause(); previewAudioObj = null; }
   currentPreviewBtnId = btnId;
   if (currentBtn) currentBtn.textContent = "⏳ 缓冲中";
 
   previewAudioObj = new Audio(url);
-
   previewAudioObj.play().then(() => {
     if (currentBtn) currentBtn.textContent = "⏸️ 暂停";
     showToast(`🎵 正在试听: ${songTitle || "选定曲目"}`);
   }).catch(() => {
     if (currentBtn) currentBtn.textContent = "🎧 试听";
-    alert(`⚠️ 《${songTitle || "该歌曲"}》因平台 VIP 版权风控无法在线解析。\n\n💡 完美解决方案：\n请使用下方【📤 传本地MP3】按钮，直接上传您本地下载好的原版 MP3 文件，100% 永久稳定可播！`);
+    alert(`⚠️ 《${songTitle}》无法在线解析，建议上传本地MP3文件。`);
   });
-
-  previewAudioObj.onended = () => {
-    if (currentBtn) currentBtn.textContent = "🎧 试听";
-  };
+  previewAudioObj.onended = () => { if (currentBtn) currentBtn.textContent = "🎧 试听"; };
 }
 
 function renderThemeShowroom() {
@@ -1045,14 +860,15 @@ function renderThemeShowroom() {
       const isSel = item.id === curBoy;
       return `
         <div class="theme-card ${isSel ? 'theme-card--selected' : ''}" onclick="selectBoyTheme('${item.id}')"
-          style="background: ${isSel ? 'rgba(56, 189, 248, 0.22)' : 'rgba(3, 7, 18, 0.6)'}; border: 1.5px solid ${isSel ? '#38bdf8' : 'rgba(255,255,255,0.1)'}; box-shadow: ${isSel ? '0 0 16px rgba(56, 189, 248, 0.35)' : 'none'}; border-radius: 14px; padding: 14px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between;">
+          style="border-radius: 14px; padding: 14px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between;">
           <div>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <span style="font-size:14px; font-weight:900; color:#fff;">${item.name}</span><span style="font-size:10px; font-weight:800; background:rgba(255,255,255,0.1); color:#7dd3fc; padding:2px 6px; border-radius:10px;">${item.tag}</span>
+              <span style="font-size:14px; font-weight:900;">${item.name}</span>
+              <span class="highlight-text" style="font-size:10px; padding:2px 6px; border-radius:10px;">${item.tag}</span>
             </div>
-            <p style="font-size:11.5px; color:#94a3b8; line-height:1.4; margin-bottom:10px;">${item.desc}</p>
+            <p style="font-size:11.5px; line-height:1.4; margin-bottom:10px;">${item.desc}</p>
           </div>
-          <div style="font-size:11.5px; font-weight:800; color:${isSel ? '#38bdf8' : '#64748b'}; text-align:right;">${isSel ? '✓ 当前选定' : '点击选定'}</div>
+          <div style="font-size:11.5px; font-weight:800; text-align:right;">${isSel ? '✓ 当前选定' : '点击选定'}</div>
         </div>
       `;
     }).join("");
@@ -1063,14 +879,15 @@ function renderThemeShowroom() {
       const isSel = item.id === curGirl;
       return `
         <div class="theme-card ${isSel ? 'theme-card--selected' : ''}" onclick="selectGirlTheme('${item.id}')"
-          style="background: ${isSel ? 'rgba(244, 114, 182, 0.22)' : 'rgba(3, 7, 18, 0.6)'}; border: 1.5px solid ${isSel ? '#f472b6' : 'rgba(255,255,255,0.1)'}; box-shadow: ${isSel ? '0 0 16px rgba(244, 114, 182, 0.35)' : 'none'}; border-radius: 14px; padding: 14px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between;">
+          style="border-radius: 14px; padding: 14px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between;">
           <div>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <span style="font-size:14px; font-weight:900; color:#fff;">${item.name}</span><span style="font-size:10px; font-weight:800; background:rgba(255,255,255,0.1); color:#fbcfe8; padding:2px 6px; border-radius:10px;">${item.tag}</span>
+              <span style="font-size:14px; font-weight:900;">${item.name}</span>
+              <span class="highlight-text" style="font-size:10px; padding:2px 6px; border-radius:10px;">${item.tag}</span>
             </div>
-            <p style="font-size:11.5px; color:#94a3b8; line-height:1.4; margin-bottom:10px;">${item.desc}</p>
+            <p style="font-size:11.5px; line-height:1.4; margin-bottom:10px;">${item.desc}</p>
           </div>
-          <div style="font-size:11.5px; font-weight:800; color:${isSel ? '#f472b6' : '#64748b'}; text-align:right;">${isSel ? '✓ 当前选定' : '点击选定'}</div>
+          <div style="font-size:11.5px; font-weight:800; text-align:right;">${isSel ? '✓ 当前选定' : '点击选定'}</div>
         </div>
       `;
     }).join("");
@@ -1080,7 +897,6 @@ function renderThemeShowroom() {
   if (document.getElementById("theme_customBgUrlGirl")) document.getElementById("theme_customBgUrlGirl").value = currentConfig.theme?.customBgUrlGirl || "";
 }
 
-// 🌟 核心：更新主题选择事件，触发实时渲染背景
 function selectBoyTheme(themeId) { 
   if (!currentConfig.theme) currentConfig.theme = {}; 
   currentConfig.theme.currentThemeBoy = themeId; 
@@ -1088,7 +904,7 @@ function selectBoyTheme(themeId) {
   localStorage.setItem('love_perspective', 'boy');
   renderThemeShowroom(); 
   syncAdminBackgroundTheme();
-  showToast(`✓ 已选定男生视角主题【${themeId}】`); 
+  showToast(`✓ 已选定男生主题【${themeId}】`); 
 }
 function selectGirlTheme(themeId) { 
   if (!currentConfig.theme) currentConfig.theme = {}; 
@@ -1096,7 +912,7 @@ function selectGirlTheme(themeId) {
   localStorage.setItem('love_perspective', 'girl');
   renderThemeShowroom(); 
   syncAdminBackgroundTheme();
-  showToast(`✓ 已选定女生视角主题【${themeId}】`); 
+  showToast(`✓ 已选定女生主题【${themeId}】`); 
 }
 
 function renderTimelineList() {
@@ -1107,7 +923,10 @@ function renderTimelineList() {
     const card = document.createElement("div");
     card.className = "item-card";
     card.innerHTML = `
-      <div class="item-card-header"><span class="item-card-title">节点 #${idx + 1} - ${escapeHtml(item.title || "未命名")}</span><button class="btn-del" onclick="deleteTimelineNode(${idx})">🗑️ 删除</button></div>
+      <div class="item-card-header">
+        <span class="item-card-title">节点 #${idx + 1} - ${escapeHtml(item.title || "未命名")}</span>
+        <div><button class="btn-del" onclick="deleteTimelineNode(${idx})">🗑️ 删除</button></div>
+      </div>
       <div class="form-grid">
         <div class="form-group"><label>日期</label><input type="text" class="admin-input" id="tl_date_${idx}" value="${escapeHtml(item.date || "")}"></div>
         <div class="form-group"><label>标签</label><input type="text" class="admin-input" id="tl_tag_${idx}" value="${escapeHtml(item.tag || "")}"></div>
@@ -1116,20 +935,26 @@ function renderTimelineList() {
         <div class="form-group" style="grid-column: 1 / -1;"><label>正面描述</label><textarea class="admin-textarea" id="tl_desc_${idx}" rows="2">${escapeHtml(item.desc || "")}</textarea></div>
         <div class="form-group" style="grid-column: 1 / -1;"><label>背面留言</label><textarea class="admin-textarea" id="tl_back_${idx}" rows="2">${escapeHtml(item.backText || "")}</textarea></div>
         <div class="form-group" style="grid-column: 1 / -1;">
-          <label style="color:#fbcfe8; font-weight:800;">🎙️ 背面专属录音/语音直链 (60秒以内美好声音记录)</label>
+          <label>🎙️ 背面专属录音直链 (60秒内)</label>
           <div class="upload-input-group">
-            <input type="text" class="admin-input" id="tl_voice_${idx}" value="${escapeHtml(item.voiceAudio || "")}" placeholder="输入音频直链或点击右侧上传 MP3/M4A 录音..." oninput="if(currentConfig.timeline[${idx}]) currentConfig.timeline[${idx}].voiceAudio=this.value">
-            <button class="btn-upload" style="background:linear-gradient(135deg, #f43f5e 0%, #be123c 100%); color:#fff; border-color:rgba(255,255,255,0.3);" onclick="triggerDirectUpload('tl_voice_${idx}', 'audio/*', (url)=>{ if(currentConfig.timeline[${idx}]) currentConfig.timeline[${idx}].voiceAudio=url; })">🎙️ 上传录音</button>
+            <input type="text" class="admin-input" id="tl_voice_${idx}" value="${escapeHtml(item.voiceAudio || "")}" oninput="if(currentConfig.timeline[${idx}]) currentConfig.timeline[${idx}].voiceAudio=this.value">
+            <button class="btn-upload" onclick="triggerDirectUpload('tl_voice_${idx}', 'audio/*', (url)=>{ if(currentConfig.timeline[${idx}]) currentConfig.timeline[${idx}].voiceAudio=url; })">🎙️ 上传录音</button>
           </div>
         </div>
-        <div class="form-group" style="grid-column: 1 / -1;"><label>正面照片直链</label><div class="upload-input-group"><input type="text" class="admin-input" id="tl_img_${idx}" value="${escapeHtml(item.frontImg || "")}"><button class="btn-upload" onclick="triggerDirectUpload('tl_img_${idx}', 'image/*')">🖼️ 上传照片</button></div></div>
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label>正面照片直链</label>
+          <div class="upload-input-group">
+            <input type="text" class="admin-input" id="tl_img_${idx}" value="${escapeHtml(item.frontImg || "")}">
+            <button class="btn-upload" onclick="triggerDirectUpload('tl_img_${idx}', 'image/*')">🖼️ 上传照片</button>
+          </div>
+        </div>
       </div>
     `;
     container.appendChild(card);
   });
 }
-function addTimelineNode() { if (!currentConfig.timeline) currentConfig.timeline = []; currentConfig.timeline.push({ id: "node_" + Date.now(), date: "2026.05.20", tag: "甜蜜日常", title: "新美好瞬间", desc: "记录下这一天的感动...", location: "📍 幸福角落", frontImg: "assets/images/photo_01.jpg", backText: "翻转看到的独家留言...", voiceAudio: "" }); renderTimelineList(); }
-function deleteTimelineNode(idx) { if (confirm("确定删除该时光节点吗？")) { currentConfig.timeline.splice(idx, 1); renderTimelineList(); } }
+function addTimelineNode() { if (!currentConfig.timeline) currentConfig.timeline = []; currentConfig.timeline.push({ id: "node_" + Date.now(), date: "2026.05.20", tag: "甜蜜日常", title: "新瞬间", desc: "记录下这一天...", location: "📍 幸福角落", frontImg: "assets/images/photo_01.jpg", backText: "独家留言...", voiceAudio: "" }); renderTimelineList(); }
+function deleteTimelineNode(idx) { if (confirm("确定删除该节点吗？")) { currentConfig.timeline.splice(idx, 1); renderTimelineList(); } }
 
 function renderChecklist() {
   const container = document.getElementById("checklistItemsContainer");
@@ -1139,7 +964,10 @@ function renderChecklist() {
     const card = document.createElement("div");
     card.className = "item-card";
     card.innerHTML = `
-      <div class="item-card-header"><span class="item-card-title">小事 #${item.id || (idx + 1)}</span><button class="btn-del" onclick="deleteChecklistItem(${idx})">🗑️ 删除</button></div>
+      <div class="item-card-header">
+        <span class="item-card-title">小事 #${item.id || (idx + 1)}</span>
+        <div><button class="btn-del" onclick="deleteChecklistItem(${idx})">🗑️ 删除</button></div>
+      </div>
       <div class="form-grid">
         <div class="form-group" style="grid-column: 1 / 3;"><label>名称</label><input type="text" class="admin-input" value="${escapeHtml(item.title || "")}" oninput="currentConfig.checklist100[${idx}].title=this.value"></div>
         <div class="form-group">
@@ -1169,7 +997,10 @@ function renderScratchCards() {
     const card = document.createElement("div");
     card.className = "item-card";
     card.innerHTML = `
-      <div class="item-card-header"><span class="item-card-title">${escapeHtml(item.icon||"🎁")} ${escapeHtml(item.title||"特权券")}</span><button class="btn-del" onclick="deleteScratchCard(${idx})">🗑️</button></div>
+      <div class="item-card-header">
+        <span class="item-card-title">${escapeHtml(item.icon||"🎁")} ${escapeHtml(item.title||"特权券")}</span>
+        <div><button class="btn-del" onclick="deleteScratchCard(${idx})">🗑️</button></div>
+      </div>
       <div class="form-grid">
         <div class="form-group"><label>图标</label><input type="text" class="admin-input" value="${escapeHtml(item.icon||"🎁")}" oninput="currentConfig.scratchCards[${idx}].icon=this.value"></div>
         <div class="form-group"><label>名称</label><input type="text" class="admin-input" value="${escapeHtml(item.title||"")}" oninput="currentConfig.scratchCards[${idx}].title=this.value"></div>
@@ -1206,16 +1037,13 @@ function triggerDirectUpload(targetInputId, acceptType, callback) {
 document.getElementById("globalUploader").addEventListener("change", async (e) => {
   const file = e.target.files[0];
   if (!file) return;
-
   const maxBytes = 15 * 1024 * 1024;
   if (file.size > maxBytes) {
     e.target.value = "";
-    return alert(`⚠️ 文件体积过大 (${(file.size / (1024 * 1024)).toFixed(1)} MB)！\n为了保证移动端秒开与存储负载，单个文件请限制在 15 MB 以内。`);
+    return alert(`⚠️ 文件过大！请限制在 15 MB 以内。`);
   }
-
-  showToast("⏳ 正在极速上传到独立空间...");
-  const formData = new FormData();
-  formData.append("file", file);
+  showToast("⏳ 极速上传中...");
+  const formData = new FormData(); formData.append("file", file);
 
   try {
     const token = getAuthToken();
@@ -1228,15 +1056,9 @@ document.getElementById("globalUploader").addEventListener("change", async (e) =
     if (data.success && data.url) {
       if (activeUploadInputId) {
         const targetInput = document.getElementById(activeUploadInputId);
-        if (targetInput) {
-          targetInput.value = data.url;
-          targetInput.dispatchEvent(new Event("input"));
-        }
+        if (targetInput) { targetInput.value = data.url; targetInput.dispatchEvent(new Event("input")); }
       }
-      if (activeUploadCallback) {
-        activeUploadCallback(data.url, file);
-      }
-      // 🌟 核心：更新自定义壁纸立即刷新控制台视图
+      if (activeUploadCallback) activeUploadCallback(data.url, file);
       if (activeUploadInputId === "theme_customBgUrlBoy" && currentConfig) {
         if (!currentConfig.theme) currentConfig.theme = {};
         currentConfig.theme.customBgUrlBoy = data.url;
@@ -1249,26 +1071,18 @@ document.getElementById("globalUploader").addEventListener("change", async (e) =
         localStorage.setItem('love_perspective', 'girl');
         syncAdminBackgroundTheme();
       }
-      showToast("✓ 上传成功！直链已自动同步");
+      showToast("✓ 上传成功！直链已同步");
     } else {
-      alert("❌ 上传失败: " + (data.error || "服务端拒绝接收"));
+      alert("❌ 上传失败: " + (data.error || "服务端拒绝"));
     }
-  } catch (err) {
-    alert("❌ 上传异常: " + err.message);
-  } finally {
-    e.target.value = "";
-  }
+  } catch (err) { alert("❌ 上传异常: " + err.message); } finally { e.target.value = ""; }
 });
 
 async function saveAllConfigToCloud(overrideToken) {
   if (!currentConfig) return;
   const activePassword = overrideToken || (currentConfig.adminSecurity?.password || "521").trim();
   
-  currentConfig.adminSecurity = {
-    password: activePassword,
-    updatedAt: new Date().toISOString()
-  };
-
+  currentConfig.adminSecurity = { password: activePassword, updatedAt: new Date().toISOString() };
   currentConfig.lifecycle = { currentPhase: document.getElementById("lifecycle_phase").value };
   currentConfig.meta = {
     boyName: document.getElementById("meta_boyName").value.trim(),
@@ -1308,18 +1122,14 @@ async function saveAllConfigToCloud(overrideToken) {
   };
 
   (currentConfig.timeline || []).forEach((node, idx) => {
-    node.date = document.getElementById(`tl_date_${idx}`)?.value || "";
-    node.tag = document.getElementById(`tl_tag_${idx}`)?.value || "";
-    node.title = document.getElementById(`tl_title_${idx}`)?.value || "";
-    node.location = document.getElementById(`tl_loc_${idx}`)?.value || "";
-    node.desc = document.getElementById(`tl_desc_${idx}`)?.value || "";
-    node.backText = document.getElementById(`tl_back_${idx}`)?.value || "";
-    node.voiceAudio = document.getElementById(`tl_voice_${idx}`)?.value?.trim() || "";
-    node.frontImg = document.getElementById(`tl_img_${idx}`)?.value || "";
+    node.date = document.getElementById(`tl_date_${idx}`)?.value || ""; node.tag = document.getElementById(`tl_tag_${idx}`)?.value || "";
+    node.title = document.getElementById(`tl_title_${idx}`)?.value || ""; node.location = document.getElementById(`tl_loc_${idx}`)?.value || "";
+    node.desc = document.getElementById(`tl_desc_${idx}`)?.value || ""; node.backText = document.getElementById(`tl_back_${idx}`)?.value || "";
+    node.voiceAudio = document.getElementById(`tl_voice_${idx}`)?.value?.trim() || ""; node.frontImg = document.getElementById(`tl_img_${idx}`)?.value || "";
   });
 
   (currentConfig.anniversaries || []).forEach((item, idx) => {
-    item.title = document.getElementById(`anni_title_${idx}`)?.value.trim() || item.title || "契约纪念日";
+    item.title = document.getElementById(`anni_title_${idx}`)?.value.trim() || item.title || "纪念日";
     item.icon = document.getElementById(`anni_icon_${idx}`)?.value.trim() || item.icon || "💖";
     item.tag = document.getElementById(`anni_tag_${idx}`)?.value.trim() || item.tag || "";
     item.type = document.getElementById(`anni_type_${idx}`)?.value || item.type || "countdown";
@@ -1341,8 +1151,8 @@ async function saveAllConfigToCloud(overrideToken) {
 
   const playlistToSave = (currentConfig.audio?.playlist || []).map((song, idx) => ({
     id: song.id || ("song_" + idx),
-    title: document.getElementById(`pl_title_${idx}`)?.value.trim() || song.title || "背景音乐",
-    artist: document.getElementById(`pl_artist_${idx}`)?.value.trim() || song.artist || "精选歌手",
+    title: document.getElementById(`pl_title_${idx}`)?.value.trim() || song.title || "音乐",
+    artist: document.getElementById(`pl_artist_${idx}`)?.value.trim() || song.artist || "歌手",
     url: document.getElementById(`pl_url_${idx}`)?.value.trim() || song.url || "",
     cover: document.getElementById(`pl_cover_${idx}`)?.value.trim() || song.cover || ""
   }));
@@ -1362,22 +1172,16 @@ async function saveAllConfigToCloud(overrideToken) {
   const token = overrideToken || getAuthToken();
   try {
     const res = await fetch(`/api/love/config?auth=${encodeURIComponent(token)}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-admin-auth": token, "Authorization": `Bearer ${token}` },
-      body: JSON.stringify({ config: currentConfig })
+      method: "POST", headers: { "Content-Type": "application/json", "x-admin-auth": token, "Authorization": `Bearer ${token}` }, body: JSON.stringify({ config: currentConfig })
     });
     const data = await res.json();
     if (data.success) {
       currentAdminToken = activePassword;
       localStorage.setItem("love_admin_token", activePassword);
       sessionStorage.setItem("universe_admin_auth", "true");
-      showToast("✨ 全部配置与管理密码已成功发布并生效！");
-    } else {
-      alert("❌ 保存失败: " + (data.error || "未授权"));
-    }
-  } catch (err) {
-    alert("❌ 保存失败: " + err.message);
-  }
+      showToast("✨ 全部配置发布并生效！");
+    } else { alert("❌ 保存失败: " + (data.error || "未授权")); }
+  } catch (err) { alert("❌ 保存失败: " + err.message); }
 }
 
 document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -1393,11 +1197,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const token = getAuthToken();
   const layout = document.getElementById("adminLayout");
 
-  if (!token) {
-    alert("⚠️ 未授权访问：请先在主页时空控制台中输入管理密钥！");
-    location.href = "index.html";
-    return;
-  }
+  if (!token) { alert("⚠️ 未授权访问"); location.href = "index.html"; return; }
 
   const success = await fetchConfigFromCloud(token);
   if (success) {
@@ -1406,7 +1206,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   } else {
     localStorage.removeItem("love_admin_token");
     sessionStorage.removeItem("universe_admin_auth");
-    alert("❌ 口令失效或未授权！请返回主页重新验证。");
-    location.href = "index.html";
+    alert("❌ 口令失效或未授权！"); location.href = "index.html";
   }
 });
