@@ -129,8 +129,6 @@
     }
     .gatekeeper__dialog { transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) !important; }
     .gatekeeper__dialog--hidden { opacity: 0 !important; pointer-events: none !important; transform: scale(0.9) translateY(20px) !important; }
-
-    /* 🌟 核心：为陈列室新增严格强制对称防溢出的 CSS 网格引擎 */
     .grace-badge-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
@@ -141,10 +139,42 @@
     }
     @media (max-width: 480px) {
       .grace-badge-grid {
-        grid-template-columns: repeat(3, 1fr) !important; /* 手机端绝对锁定 3 列对称，禁止溢出 */
+        grid-template-columns: repeat(3, 1fr) !important;
         gap: 8px;
       }
     }
+
+    /* 🌟 高定管理鉴权弹窗 CSS 引擎 */
+    .hq-auth-modal {
+      position: fixed; inset: 0; z-index: 999999; display: none; align-items: center; justify-content: center;
+      background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      opacity: 0; transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hq-auth-modal.active { opacity: 1; }
+    .hq-auth-dialog {
+      background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+      border: 1.5px solid rgba(245, 158, 11, 0.35); border-radius: 24px; padding: 32px 24px 24px;
+      width: 90%; max-width: 380px; text-align: center;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      transform: scale(0.95) translateY(10px); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hq-auth-modal.active .hq-auth-dialog { transform: scale(1) translateY(0); }
+    .hq-auth-icon { font-size: 42px; margin-bottom: 12px; line-height: 1; text-shadow: 0 4px 16px rgba(245, 158, 11, 0.5); }
+    .hq-auth-title { font-size: 19px; font-weight: 900; color: #f8fafc; margin-bottom: 8px; letter-spacing: 0.5px; }
+    .hq-auth-desc { font-size: 13px; color: #94a3b8; margin-bottom: 24px; line-height: 1.5; }
+    .hq-auth-input {
+      width: 100%; background: rgba(0, 0, 0, 0.3); border: 1.5px solid rgba(255, 255, 255, 0.15);
+      border-radius: 14px; padding: 14px; font-size: 15px; color: #fff; text-align: center; outline: none;
+      transition: all 0.3s ease; font-family: ui-monospace, monospace; letter-spacing: 2px; margin-bottom: 20px;
+    }
+    .hq-auth-input:focus { border-color: #f59e0b; background: rgba(0, 0, 0, 0.5); box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15); }
+    .hq-auth-actions { display: flex; gap: 12px; width: 100%; }
+    .hq-btn-cancel, .hq-btn-confirm { flex: 1; padding: 14px; border-radius: 16px; font-size: 15px; font-weight: 800; cursor: pointer; transition: all 0.2s; border: none; }
+    .hq-btn-cancel { background: rgba(255, 255, 255, 0.08); color: #cbd5e1; }
+    .hq-btn-cancel:active { background: rgba(255, 255, 255, 0.12); }
+    .hq-btn-confirm { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #fff; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
+    .hq-btn-confirm:active { transform: scale(0.97); }
+    .hq-auth-error { color: #f43f5e; font-size: 12px; font-weight: 700; margin-top: -10px; margin-bottom: 16px; display: none; }
   </style>
 </head>
 <body class="universe-body">
@@ -231,7 +261,6 @@
         <span class="hub-dock__badge">SACRED ARCHIVES</span>
         <h2 class="hub-dock__title">星轨功能中枢 · 契约秘境</h2>
       </div>
-      <!-- 🌟 已补齐 8 个模块，达成极致对称 -->
       <div class="hub-grid">
         <div class="hub-btn" data-open-stage="timeline" onclick="if(window.StageManager) window.StageManager.openStage('timeline')">
           <div class="hub-btn__glow"></div>
@@ -278,7 +307,6 @@
           </div>
         </div>
 
-        <!-- 🌟 新增：全站成就系统与 15 勋章荣誉陈列室入口 -->
         <div class="hub-btn" data-open-stage="badges" onclick="if(window.StageManager) window.StageManager.openStage('badges')">
           <div class="hub-btn__glow"></div>
           <span class="hub-btn__icon">🎖️</span>
@@ -316,7 +344,6 @@
   <div id="stage-modal-overlay" class="stage-overlay" onclick="if(window.StageManager) window.StageManager.closeStage()"></div>
   <div id="stage-modal-container" class="stage-container">
 
-    <!-- 🌟 新增：独立的全站圣约印记荣誉陈列室弹窗 -->
     <section id="stage-badges" class="stage-modal">
       <div class="stage-modal__header">
         <div class="stage-modal__title-box">
@@ -329,7 +356,6 @@
         <div class="section-title">
           <span class="section-title__desc" style="color:#94a3b8;" id="grace-badges-unlocked-count">已解锁 0 / 15 勋章</span>
         </div>
-        <!-- 容器 ID 与 pet.js 中的 updateUI 完全匹配，底层会跨页面自动挂载刷新数据 -->
         <div class="grace-badge-grid" id="grace-badge-grid-container"></div>
       </div>
     </section>
@@ -486,6 +512,21 @@
         <p class="poster-modal__tip">长按上方图片或点击下方按钮保存</p>
         <button class="btn-universe btn-universe--primary" id="download-icebreaker-poster-btn" onclick="if(window.IceBreakerInstance && window.IceBreakerInstance.currentPosterDataUrl){ const a=document.createElement('a'); a.download=`和好圣约纪念_${Date.now()}.jpg`; a.href=window.IceBreakerInstance.currentPosterDataUrl; a.click(); }">📥 保存和好海报至相册</button>
         <button class="btn-universe btn-universe--secondary" onclick="document.getElementById('icebreaker-poster-modal').style.display='none';">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🌟 新增：高级控制台密钥鉴权弹窗 -->
+  <div id="hq-admin-auth-modal" class="hq-auth-modal">
+    <div class="hq-auth-dialog">
+      <div class="hq-auth-icon">⚙️</div>
+      <h3 class="hq-auth-title">雅歌时空控制台</h3>
+      <p class="hq-auth-desc">请输入管理员密钥以进行操作鉴证：</p>
+      <input type="password" id="hq-admin-input" class="hq-auth-input" placeholder="••••••" maxlength="32">
+      <div class="hq-auth-error" id="hq-admin-error"></div>
+      <div class="hq-auth-actions">
+        <button class="hq-btn-cancel" id="hq-admin-cancel">取消</button>
+        <button class="hq-btn-confirm" id="hq-admin-confirm">验证</button>
       </div>
     </div>
   </div>
