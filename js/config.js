@@ -178,144 +178,42 @@ window.LOVE_CONFIG = {
     }
   ],
 
-  // ================= 🌟 8. 破冰与情感信号箱 (注入“我会陪伴你”卡片) =================
+  // ================= 8. 破冰与情感信号箱 =================
   icebreaker: {
     enabled: true,
-    cooldownMinutes: 15, // 情绪冷静期冷却时长
+    cooldownMinutes: 15,
     soundEnabled: true,
     actions: {
       dating: [
-        {
-          id: "calm_down",
-          type: "calm_down",
-          label: "我需要冷静",
-          icon: "🌧️",
-          desc: "我有些情绪，需要安静片刻，但请放心，我不会走开，待会儿通个电话好吗？"
-        },
-        {
-          id: "break_ice",
-          type: "break_ice",
-          label: "我想和好",
-          icon: "🟡",
-          desc: "今天天气很好，我们不吵了好不好？待会儿一起去散散步。"
-        },
-        {
-          id: "apology",
-          type: "apology",
-          label: "真诚道歉",
-          icon: "🙇‍♂️",
-          desc: "刚才是我态度不好、太急躁了，对不起，我愿意安静听你的感受。"
-        },
-        {
-          id: "miss_you",
-          type: "miss_you",
-          label: "我很想你",
-          icon: "💖",
-          desc: "即使有分歧，我心里依然全是你，想念你的笑容。"
-        },
-        {
-          id: "warm_hug",
-          type: "warm_hug",
-          label: "隔空抱抱",
-          icon: "☁️",
-          desc: "隔空送你一朵云朵拥抱和一杯热可可，不要再生气啦。"
-        },
-        {
-          id: "accompany",
-          type: "accompany",
-          label: "我会陪伴你",
-          icon: "🫂",
-          desc: "不论你的压力有多大，我都会跟你一起面对，你还有我。"
-        }
+        { id: "calm_down", type: "calm_down", label: "我需要冷静", icon: "🌧️", desc: "我有些情绪，需要安静片刻，但请放心，我不会走开，待会儿通个电话好吗？" },
+        { id: "break_ice", type: "break_ice", label: "我想和好", icon: "🟡", desc: "今天天气很好，我们不吵了好不好？待会儿一起去散散步。" },
+        { id: "apology", type: "apology", label: "真诚道歉", icon: "🙇‍♂️", desc: "刚才是我态度不好、太急躁了，对不起，我愿意安静听你的感受。" },
+        { id: "miss_you", type: "miss_you", label: "我很想你", icon: "💖", desc: "即使有分歧，我心里依然全是你，想念你的笑容。" },
+        { id: "warm_hug", type: "warm_hug", label: "隔空抱抱", icon: "☁️", desc: "隔空送你一朵云朵拥抱和一杯热可可，不要再生气啦。" },
+        { id: "accompany", type: "accompany", label: "我会陪伴你", icon: "🫂", desc: "不论你的压力有多大，我都会跟你一起面对，你还有我。" }
       ],
       engaged: [
-        {
-          id: "calm_down",
-          type: "calm_down",
-          label: "暂停冷静",
-          icon: "☕",
-          desc: "筹备有些心力交瘁，我们先冷静下来，喝杯咖啡，别伤了彼此的初心。"
-        },
-        {
-          id: "break_ice",
-          type: "break_ice",
-          label: "递个台阶",
-          icon: "📜",
-          desc: "比起眼前的分歧，我们的约定更珍贵。今晚开个视频对齐想法好吗？"
-        },
-        {
-          id: "apology",
-          type: "apology",
-          label: "诚恳道歉",
-          icon: "🙇‍♂️",
-          desc: "我对不起你，刚才把现实的焦虑迁怒到了你身上，我向你道歉。"
-        },
-        {
-          id: "miss_you",
-          type: "miss_you",
-          label: "重温誓言",
-          icon: "💍",
-          desc: "我们是一体的，无论面对多大挑战，我都坚定选择与你同行。"
-        },
-        {
-          id: "warm_hug",
-          type: "warm_hug",
-          label: "坚定支持",
-          icon: "🤝",
-          desc: "再多繁杂的事情我们一起扛，别怕，有我在你身边。"
-        },
-        {
-          id: "accompany",
-          type: "accompany",
-          label: "我会陪伴你",
-          icon: "🫂",
-          desc: "不论你的压力有多大，我都会跟你一起面对，你还有我。"
-        }
+        { id: "calm_down", type: "calm_down", label: "暂停冷静", icon: "☕", desc: "筹备有些心力交瘁，我们先冷静下来，喝杯咖啡，别伤了彼此的初心。" },
+        { id: "break_ice", type: "break_ice", label: "递个台阶", icon: "📜", desc: "比起眼前的分歧，我们的约定更珍贵。今晚开个视频对齐想法好吗？" },
+        { id: "apology", type: "apology", label: "诚恳道歉", icon: "🙇‍♂️", desc: "我对不起你，刚才把现实的焦虑迁怒到了你身上，我向你道歉。" },
+        { id: "miss_you", type: "miss_you", label: "重温誓言", icon: "💍", desc: "我们是一体的，无论面对多大挑战，我都坚定选择与你同行。" },
+        { id: "warm_hug", type: "warm_hug", label: "坚定支持", icon: "🤝", desc: "再多繁杂的事情我们一起扛，别怕，有我在你身边。" },
+        { id: "accompany", type: "accompany", label: "我会陪伴你", icon: "🫂", desc: "不论你的压力有多大，我都会跟你一起面对，你还有我。" }
       ],
       married: [
-        {
-          id: "calm_down",
-          type: "calm_down",
-          label: "情绪降温",
-          icon: "📖",
-          desc: "我先在书房安静一会儿，不可含怒到日落，待会儿就出来抱你。"
-        },
-        {
-          id: "break_ice",
-          type: "break_ice",
-          label: "我想和好",
-          icon: "🍎",
-          desc: "家是讲爱的地方不是讲理的地方。厨房有切好的水果和温水，我们谈谈心。"
-        },
-        {
-          id: "apology",
-          type: "apology",
-          label: "放下固执",
-          icon: "🙇‍♂️",
-          desc: "在这个家里你才是最重要的，我放下我的固执，对不起，过来抱一下。"
-        },
-        {
-          id: "miss_you",
-          type: "miss_you",
-          label: "你是唯一",
-          icon: "💖",
-          desc: "柴米油盐是你，风花雪月也是你，执子之手，与子偕老。"
-        },
-        {
-          id: "warm_hug",
-          type: "warm_hug",
-          label: "避风港湾",
-          icon: "🏠",
-          desc: "风雨再大，这里永远是你的避风港，我一直在。"
-        },
-        {
-          id: "accompany",
-          type: "accompany",
-          label: "我会陪伴你",
-          icon: "🫂",
-          desc: "不论你的压力有多大，我都会跟你一起面对，你还有我。"
-        }
+        { id: "calm_down", type: "calm_down", label: "情绪降温", icon: "📖", desc: "我先在书房安静一会儿，不可含怒到日落，待会儿就出来抱你。" },
+        { id: "break_ice", type: "break_ice", label: "我想和好", icon: "🍎", desc: "家是讲爱的地方不是讲理的地方。厨房有切好的水果和温水，我们谈谈心。" },
+        { id: "apology", type: "apology", label: "放下固执", icon: "🙇‍♂️", desc: "在这个家里你才是最重要的，我放下我的固执，对不起，过来抱一下。" },
+        { id: "miss_you", type: "miss_you", label: "你是唯一", icon: "💖", desc: "柴米油盐是你，风花雪月也是你，执子之手，与子偕老。" },
+        { id: "warm_hug", type: "warm_hug", label: "避风港湾", icon: "🏠", desc: "风雨再大，这里永远是你的避风港，我一直在。" },
+        { id: "accompany", type: "accompany", label: "我会陪伴你", icon: "🫂", desc: "不论你的压力有多大，我都会跟你一起面对，你还有我。" }
       ]
     }
+  },
+
+  // ================= 9. 🔐 核心安全控制台口令 (默认 521) =================
+  adminSecurity: {
+    password: "521",
+    updatedAt: "2026-05-20T00:00:00.000Z"
   }
 };
