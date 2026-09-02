@@ -1,10 +1,13 @@
 /**
  * 众水不灭 · 雅歌之印
  * 文件名: js/stage-content.js
- * 作用: 独立管理恋爱期、订婚期、结婚期、孕期前后、婚后进阶 五大阶段专属的待办清单数据字典
+ * 作用: 
+ *   1. 完整管理恋爱期、订婚期、结婚期、孕期前后、婚后进阶 5 大阶段清单与舍己特权券
+ *   2. 完整提供星轨中枢舞台控制器 (StageManager)，驱动主页弹窗系统运转
  */
 
 window.STAGE_CONTENT = {
+  // ================= ❤️ 1. 恋爱期 =================
   dating: {
     title: "恋爱期待办清单",
     subtitle: "在尊重与接纳中了解彼此，坚守圣洁",
@@ -53,6 +56,7 @@ window.STAGE_CONTENT = {
     ]
   },
 
+  // ================= 💍 2. 订婚期 =================
   engaged: {
     title: "订婚期待办清单",
     subtitle: "为一生一世的盟约做好准备，在磨合中学会舍己",
@@ -80,6 +84,7 @@ window.STAGE_CONTENT = {
     ]
   },
 
+  // ================= 🏠 3. 结婚期 =================
   married: {
     title: "结婚期待办清单",
     subtitle: "合为一体，同甘共苦，在长相厮守与柴米油盐中践行真爱",
@@ -139,6 +144,7 @@ window.STAGE_CONTENT = {
     ]
   },
 
+  // ================= 🍼 4. 孕期前后 =================
   pregnancy: {
     title: "孕期前后待办清单",
     subtitle: "共同孕育生命的奇迹，在软弱中彼此扶持",
@@ -167,6 +173,7 @@ window.STAGE_CONTENT = {
     scratchCards: []
   },
 
+  // ================= 🚀 5. 婚后进阶 =================
   advanced: {
     title: "婚后进阶待办清单",
     subtitle: "在极度平淡的日常中，练习看见彼此的深沉光芒",
@@ -214,3 +221,159 @@ window.STAGE_CONTENT = {
     scratchCards: []
   }
 };
+
+// ================= 🌟 核心舞台控制器 (必须完整存在，驱动主页弹窗) =================
+class StageManager {
+  constructor() {
+    this.currentStage = null;
+    this.lockedScrollY = 0;
+    this.container = null;
+    this.overlay = null;
+    this.isTransitioning = false;
+    this.initialized = false;
+  }
+
+  init() {
+    this.container = document.getElementById("stage-modal-container");
+    this.overlay = document.getElementById("stage-modal-overlay");
+
+    if (this.initialized) return;
+    this.initialized = true;
+
+    // 全局事件委托
+    document.addEventListener("click", (e) => {
+      const openBtn = e.target.closest("[data-open-stage]");
+      if (openBtn) {
+        e.preventDefault();
+        const stageId = openBtn.getAttribute("data-open-stage");
+        this.openStage(stageId);
+        return;
+      }
+
+      const closeBtn = e.target.closest(".stage-modal__close-btn, [data-close-stage]");
+      if (closeBtn) {
+        e.preventDefault();
+        this.closeStage();
+        return;
+      }
+
+      if (this.overlay && (e.target === this.overlay || e.target.id === "stage-modal-container")) {
+        this.closeStage();
+      }
+    });
+
+    window.addEventListener("popstate", (e) => {
+      if (e.state && e.state.stage) {
+        this.showStageDom(e.state.stage);
+      } else if (this.currentStage) {
+        this.closeStageDom();
+      }
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && this.currentStage) {
+        this.closeStage();
+      }
+    });
+
+    const initialHash = window.location.hash.replace("#", "");
+    if (initialHash && document.getElementById(`stage-${initialHash}`)) {
+      setTimeout(() => {
+        this.openStage(initialHash, false);
+      }, 300);
+    }
+  }
+
+  openStage(stageId, pushHistory = true) {
+    if (!this.container || !this.overlay) {
+      this.container = document.getElementById("stage-modal-container");
+      this.overlay = document.getElementById("stage-modal-overlay");
+    }
+
+    const stageEl = document.getElementById(`stage-${stageId}`);
+    if (!stageEl || this.isTransitioning) return;
+
+    this.isTransitioning = true;
+    this.lockScroll();
+
+    if (pushHistory) {
+      window.history.pushState({ stage: stageId }, "", `#${stageId}`);
+    }
+
+    this.showStageDom(stageId);
+
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("stage:opened", { detail: { stageId } }));
+      window.dispatchEvent(new Event("resize"));
+      this.isTransitioning = false;
+    }, 280);
+  }
+
+  closeStage(updateHistory = true) {
+    if (!this.currentStage || this.isTransitioning) return;
+    this.isTransitioning = true;
+
+    const closingStageId = this.currentStage;
+    window.dispatchEvent(new CustomEvent("stage:closing", { detail: { stageId: closingStageId } }));
+
+    if (updateHistory && window.location.hash) {
+      window.history.pushState(null, "", window.location.pathname + window.location.search);
+    }
+
+    this.closeStageDom();
+    this.unlockScroll();
+
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("stage:closed", { detail: { stageId: closingStageId } }));
+      this.isTransitioning = false;
+    }, 280);
+  }
+
+  showStageDom(stageId) {
+    document.querySelectorAll(".stage-modal").forEach(el => {
+      el.classList.remove("stage-modal--active");
+    });
+
+    const targetEl = document.getElementById(`stage-${stageId}`);
+    if (targetEl) {
+      if (this.container) this.container.classList.add("stage-container--active");
+      if (this.overlay) this.overlay.classList.add("stage-overlay--active");
+      targetEl.classList.add("stage-modal--active");
+      this.currentStage = stageId;
+
+      const bodyWrapper = targetEl.querySelector(".stage-modal__body");
+      if (bodyWrapper) bodyWrapper.scrollTop = 0;
+    }
+  }
+
+  closeStageDom() {
+    if (this.container) this.container.classList.remove("stage-container--active");
+    if (this.overlay) this.overlay.classList.remove("stage-overlay--active");
+    document.querySelectorAll(".stage-modal").forEach(el => {
+      el.classList.remove("stage-modal--active");
+    });
+    this.currentStage = null;
+  }
+
+  lockScroll() {
+    this.lockedScrollY = window.scrollY || window.pageYOffset || 0;
+    document.body.classList.add("body--locked");
+    document.body.style.top = `-${this.lockedScrollY}px`;
+  }
+
+  unlockScroll() {
+    document.body.classList.remove("body--locked");
+    document.body.style.top = "";
+    window.scrollTo(0, this.lockedScrollY);
+  }
+}
+
+window.StageManager = new StageManager();
+window.openStage = (id) => window.StageManager.openStage(id);
+window.closeStage = () => window.StageManager.closeStage();
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => window.StageManager.init());
+} else {
+  window.StageManager.init();
+}
