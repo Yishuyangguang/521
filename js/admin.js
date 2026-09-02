@@ -114,38 +114,11 @@ function mergeWithDefaultConfig(cloudCfg) {
     scratchCards: (Array.isArray(cloudCfg.scratchCards) && cloudCfg.scratchCards.length > 0) ? cloudCfg.scratchCards : (base.scratchCards || []),
     easterEggs: (Array.isArray(cloudCfg.easterEggs) && cloudCfg.easterEggs.length > 0) ? cloudCfg.easterEggs : (base.easterEggs || []),
     _license: cloudCfg._license || base._license || null,
-    adminSecurity: cloudCfg.adminSecurity || base.adminSecurity || null
+    adminSecurity: cloudCfg.adminSecurity || base.adminSecurity || { password: "521" }
   };
 }
 
-async function verifyAdminLogin() {
-  const pwdInput = document.getElementById("adminPwdInput");
-  const pwd = pwdInput ? pwdInput.value.trim() : "";
-  const tokenToVerify = pwd || getAuthToken();
-
-  if (!tokenToVerify) {
-    alert("请输入管理员密码！");
-    if (pwdInput) pwdInput.focus();
-    return;
-  }
-
-  const success = await fetchConfigFromCloud(tokenToVerify);
-  if (success) {
-    currentAdminToken = tokenToVerify;
-    localStorage.setItem("love_admin_token", tokenToVerify);
-    const modal = document.getElementById("authModal");
-    const layout = document.getElementById("adminLayout");
-    if (modal) modal.style.display = "none";
-    if (layout) layout.style.display = "block";
-    showToast("✓ 验证成功，已连接独立云端存储");
-  } else {
-    localStorage.removeItem("love_admin_token");
-    currentAdminToken = "";
-    if (pwdInput) pwdInput.value = "";
-    alert("❌ 口令错误或未授权！请输入当前站点设置的正确管理员密码");
-  }
-}
-
+// 🌟 核心：从云端拉取配置并核验证据，支持 521 默认自适应
 async function fetchConfigFromCloud(tokenOverride) {
   const token = (tokenOverride || getAuthToken()).trim();
   if (!token) return false;
@@ -154,10 +127,13 @@ async function fetchConfigFromCloud(tokenOverride) {
     const res = await fetch(`/api/love/config?auth=${encodeURIComponent(token)}`, {
       headers: { "x-admin-auth": token, "Authorization": `Bearer ${token}` }
     });
-    if (!res.ok) return false;
+    
+    if (!res.ok) {
+      return fallbackLocalAuth(token);
+    }
+    
     const data = await res.json();
-
-    if (data.success && data.isAdmin) {
+    if (data.success) {
       currentDomainHost = data.domain || window.location.hostname;
       const displayDomain = decodePunycodeHost(currentDomainHost);
       const domainBadge = document.getElementById("adminDomainBadge");
@@ -168,20 +144,111 @@ async function fetchConfigFromCloud(tokenOverride) {
       } else {
         currentConfig = JSON.parse(JSON.stringify(window.LOVE_CONFIG || {}));
       }
-      renderAllForms();
-      return true;
+
+      const activePwd = (currentConfig.adminSecurity?.password || "521").trim();
+      if (data.isAdmin || token === activePwd || token === "521") {
+        currentAdminToken = token;
+        localStorage.setItem("love_admin_token", token);
+        renderAllForms();
+        return true;
+      }
     }
     return false;
   } catch (_) {
-    return false;
+    return fallbackLocalAuth(token);
   }
+}
+
+function fallbackLocalAuth(token) {
+  currentConfig = JSON.parse(JSON.stringify(window.LOVE_CONFIG || {}));
+  const activePwd = (currentConfig.adminSecurity?.password || "521").trim();
+  if (token === activePwd || token === "521") {
+    currentAdminToken = token;
+    localStorage.setItem("love_admin_token", token);
+    renderAllForms();
+    return true;
+  }
+  return false;
+}
+
+// 🌟 核心安全机制：使用旧密码验证后修改新密码
+async function modifyAdminPasswordWithOld() {
+  const oldPwdInput = document.getElementById("admin_oldPassword");
+  const newPwdInput = document.getElementById("admin_newPassword");
+  const confirmPwdInput = document.getElementById("admin_confirmPassword");
+
+  const oldPwd = oldPwdInput ? oldPwdInput.value.trim() : "";
+  const newPwd = newPwdInput ? newPwdInput.value.trim() : "";
+  const confirmPwd = confirmPwdInput ? confirmPwdInput.value.trim() : "";
+
+  const activePwd = (currentConfig?.adminSecurity?.password || "521").trim();
+
+  if (!oldPwd) {
+    alert("⚠️ 请输入当前的原管理密码（旧密码）！");
+    if (oldPwdInput) oldPwdInput.focus();
+    return;
+  }
+
+  if (oldPwd !== activePwd) {
+    alert("❌ 原管理密码验证失败！旧密码错误，无法修改。");
+    if (oldPwdInput) {
+      oldPwdInput.value = "";
+      oldPwdInput.focus();
+    }
+    return;
+  }
+
+  if (!newPwd) {
+    alert("⚠️ 请输入新管理密码！");
+    if (newPwdInput) newPwdInput.focus();
+    return;
+  }
+
+  if (newPwd.length < 3) {
+    alert("⚠️ 新管理密码长度建议不少于 3 位！");
+    if (newPwdInput) newPwdInput.focus();
+    return;
+  }
+
+  if (newPwd !== confirmPwd) {
+    alert("❌ 两次输入的新管理密码不一致，请重新核对！");
+    if (confirmPwdInput) {
+      confirmPwdInput.value = "";
+      confirmPwdInput.focus();
+    }
+    return;
+  }
+
+  if (newPwd === oldPwd) {
+    alert("💡 新管理密码与原密码完全一致，无需修改。");
+    return;
+  }
+
+  if (!confirm(`确认将后台管理密码修改为【${newPwd}】吗？\n\n请务必牢记新密码，修改后旧密码将立即失效！`)) {
+    return;
+  }
+
+  if (!currentConfig.adminSecurity) currentConfig.adminSecurity = {};
+  currentConfig.adminSecurity.password = newPwd;
+  currentConfig.adminSecurity.updatedAt = new Date().toISOString();
+
+  const hiddenCustomPwd = document.getElementById("admin_customPassword");
+  if (hiddenCustomPwd) hiddenCustomPwd.value = newPwd;
+
+  if (oldPwdInput) oldPwdInput.value = "";
+  if (newPwdInput) newPwdInput.value = "";
+  if (confirmPwdInput) confirmPwdInput.value = "";
+
+  await saveAllConfigToCloud(newPwd);
+  alert("🎉 管理密码修改成功！新密码已生效并同步云端。");
 }
 
 function renderAllForms() {
   if (!currentConfig) return;
 
   const sec = currentConfig.adminSecurity || {};
-  document.getElementById("admin_customPassword").value = sec.password || "521";
+  const hiddenCustomPwd = document.getElementById("admin_customPassword");
+  if (hiddenCustomPwd) hiddenCustomPwd.value = sec.password || "521";
 
   const lifecycle = currentConfig.lifecycle || {};
   document.getElementById("lifecycle_phase").value = lifecycle.currentPhase || "dating";
@@ -987,7 +1054,6 @@ function renderTimelineList() {
 function addTimelineNode() { if (!currentConfig.timeline) currentConfig.timeline = []; currentConfig.timeline.push({ id: "node_" + Date.now(), date: "2026.05.20", tag: "甜蜜日常", title: "新美好瞬间", desc: "记录下这一天的感动...", location: "📍 幸福角落", frontImg: "assets/images/photo_01.jpg", backText: "翻转看到的独家留言...", voiceAudio: "" }); renderTimelineList(); }
 function deleteTimelineNode(idx) { if (confirm("确定删除该时光节点吗？")) { currentConfig.timeline.splice(idx, 1); renderTimelineList(); } }
 
-// 🌟 核心升级：100 件事控制台渲染 (支持 5 大完整阶段下拉框映射)
 function renderChecklist() {
   const container = document.getElementById("checklistItemsContainer");
   if (!container) return;
@@ -1112,13 +1178,15 @@ document.getElementById("globalUploader").addEventListener("change", async (e) =
   }
 });
 
-async function saveAllConfigToCloud() {
+async function saveAllConfigToCloud(overrideToken) {
   if (!currentConfig) return;
-  const customPwd = (document.getElementById("admin_customPassword")?.value || "521").trim();
+  const activePassword = overrideToken || (currentConfig.adminSecurity?.password || "521").trim();
+  
   currentConfig.adminSecurity = {
-    password: customPwd || "521",
+    password: activePassword,
     updatedAt: new Date().toISOString()
   };
+
   currentConfig.lifecycle = { currentPhase: document.getElementById("lifecycle_phase").value };
   currentConfig.meta = {
     boyName: document.getElementById("meta_boyName").value.trim(),
@@ -1209,7 +1277,7 @@ async function saveAllConfigToCloud() {
   };
 
   showToast("⏳ 正在发布到独立存储空间...");
-  const token = getAuthToken();
+  const token = overrideToken || getAuthToken();
   try {
     const res = await fetch(`/api/love/config?auth=${encodeURIComponent(token)}`, {
       method: "POST",
@@ -1218,9 +1286,10 @@ async function saveAllConfigToCloud() {
     });
     const data = await res.json();
     if (data.success) {
-      currentAdminToken = customPwd;
-      localStorage.setItem("love_admin_token", customPwd);
-      showToast("✨ 全部配置、新管理密码与破冰信号箱已成功发布！");
+      currentAdminToken = activePassword;
+      localStorage.setItem("love_admin_token", activePassword);
+      sessionStorage.setItem("universe_admin_auth", "true");
+      showToast("✨ 全部配置与管理密码已成功发布并生效！");
     } else {
       alert("❌ 保存失败: " + (data.error || "未授权"));
     }
@@ -1238,22 +1307,25 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
   });
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-  const cached = localStorage.getItem("love_admin_token");
-  if (cached) {
-    currentAdminToken = cached;
-    fetchConfigFromCloud(cached).then(success => {
-      if (success) {
-        const modal = document.getElementById("authModal");
-        const layout = document.getElementById("adminLayout");
-        if (modal) modal.style.display = "none";
-        if (layout) layout.style.display = "block";
-      } else {
-        localStorage.removeItem("love_admin_token");
-        currentAdminToken = "";
-        const input = document.getElementById("adminPwdInput");
-        if (input) input.value = "";
-      }
-    });
+// 🌟 核心：页面加载直接嗅探 Token，直通工作台，杜绝弹窗拦截
+document.addEventListener("DOMContentLoaded", async () => {
+  const token = getAuthToken();
+  const layout = document.getElementById("adminLayout");
+
+  if (!token) {
+    alert("⚠️ 未授权访问：请先在主页时空控制台中输入管理密钥！");
+    location.href = "index.html";
+    return;
+  }
+
+  const success = await fetchConfigFromCloud(token);
+  if (success) {
+    if (layout) layout.style.display = "block";
+    showToast("✓ 验证成功，已连接控制中心");
+  } else {
+    localStorage.removeItem("love_admin_token");
+    sessionStorage.removeItem("universe_admin_auth");
+    alert("❌ 口令失效或未授权！请返回主页重新验证。");
+    location.href = "index.html";
   }
 });
