@@ -7,7 +7,6 @@ let currentConfig = null;
 let currentAdminToken = "";
 let currentDomainHost = "";
 
-// 🌟 核心修复：补齐 XSS 防护与 HTML 实体字符安全转义函数，杜绝 ReferenceError
 function escapeHtml(s) {
   return String(s || "")
     .replace(/&/g, "&amp;")
@@ -128,7 +127,49 @@ function mergeWithDefaultConfig(cloudCfg) {
   };
 }
 
-// 🌟 核心：从云端拉取配置并核验证据，支持 521 默认自适应
+// 🌟 核心引擎：动态同步控制台背景主题
+function syncAdminBackgroundTheme() {
+  if (!currentConfig || !currentConfig.theme) return;
+  
+  // 侦测前台遗留视角，默认男生视角
+  const perspective = localStorage.getItem('love_perspective') || 'boy';
+  let themeId = 'sunset-twilight';
+  let customBg = '';
+
+  if (perspective === 'girl') {
+    themeId = currentConfig.theme.currentThemeGirl || 'french-cream';
+    customBg = currentConfig.theme.customBgUrlGirl || '';
+  } else {
+    themeId = currentConfig.theme.currentThemeBoy || currentConfig.theme.currentTheme || 'sunset-twilight';
+    customBg = currentConfig.theme.customBgUrlBoy || currentConfig.theme.customBgUrl || '';
+  }
+
+  // 获取深色/浅色属性以挂载
+  let themeType = 'dark';
+  const presets = window.THEME_PRESETS || { boy: [], girl: [] };
+  const allPresets = [...presets.boy, ...presets.girl];
+  const foundTheme = allPresets.find(t => t.id === themeId);
+  if (foundTheme) {
+    themeType = foundTheme.themeType || 'dark';
+  }
+
+  // 挂载 CSS 变量体系
+  document.body.className = `theme-${themeId}`;
+  document.body.setAttribute('data-theme-type', themeType);
+
+  // 渲染底层背景图或渐变
+  const bgLayer = document.getElementById('universe-bg-layer');
+  if (bgLayer) {
+    if (customBg) {
+      bgLayer.style.backgroundImage = `url('${customBg}')`;
+      bgLayer.style.backgroundSize = 'cover';
+      bgLayer.style.backgroundPosition = 'center';
+    } else {
+      bgLayer.style.backgroundImage = 'var(--theme-bg-gradient)';
+    }
+  }
+}
+
 async function fetchConfigFromCloud(tokenOverride) {
   const token = (tokenOverride || getAuthToken()).trim();
   if (!token) return false;
@@ -160,6 +201,7 @@ async function fetchConfigFromCloud(tokenOverride) {
         currentAdminToken = token;
         localStorage.setItem("love_admin_token", token);
         renderAllForms();
+        syncAdminBackgroundTheme(); // 🌟 数据就绪，立即刷入同步主题
         return true;
       }
     }
@@ -176,12 +218,12 @@ function fallbackLocalAuth(token) {
     currentAdminToken = token;
     localStorage.setItem("love_admin_token", token);
     renderAllForms();
+    syncAdminBackgroundTheme(); // 🌟 数据就绪，立即刷入同步主题
     return true;
   }
   return false;
 }
 
-// 🌟 核心安全机制：使用旧密码验证后修改新密码
 async function modifyAdminPasswordWithOld() {
   const oldPwdInput = document.getElementById("admin_oldPassword");
   const newPwdInput = document.getElementById("admin_newPassword");
@@ -912,6 +954,7 @@ function triggerDirectUploadSingleBgm() {
   });
 }
 
+// 🌟 核心：更新背景恢复默认事件并实时渲染
 function clearCustomBg(gender) {
   if (!currentConfig) return;
   if (!currentConfig.theme) currentConfig.theme = {};
@@ -921,11 +964,15 @@ function clearCustomBg(gender) {
     if (input) input.value = "";
     currentConfig.theme.customBgUrlBoy = "";
     currentConfig.theme.customBgUrl = "";
+    localStorage.setItem('love_perspective', 'boy');
+    syncAdminBackgroundTheme();
     showToast("✓ 已清除男生视角自定义壁纸，恢复自带主题！");
   } else if (gender === 'girl') {
     const input = document.getElementById("theme_customBgUrlGirl");
     if (input) input.value = "";
     currentConfig.theme.customBgUrlGirl = "";
+    localStorage.setItem('love_perspective', 'girl');
+    syncAdminBackgroundTheme();
     showToast("✓ 已清除女生视角自定义壁纸，恢复自带主题！");
   }
 }
@@ -1033,8 +1080,24 @@ function renderThemeShowroom() {
   if (document.getElementById("theme_customBgUrlGirl")) document.getElementById("theme_customBgUrlGirl").value = currentConfig.theme?.customBgUrlGirl || "";
 }
 
-function selectBoyTheme(themeId) { if (!currentConfig.theme) currentConfig.theme = {}; currentConfig.theme.currentThemeBoy = themeId; currentConfig.theme.currentTheme = themeId; renderThemeShowroom(); showToast(`✓ 已选定男生视角主题【${themeId}】`); }
-function selectGirlTheme(themeId) { if (!currentConfig.theme) currentConfig.theme = {}; currentConfig.theme.currentThemeGirl = themeId; renderThemeShowroom(); showToast(`✓ 已选定女生视角主题【${themeId}】`); }
+// 🌟 核心：更新主题选择事件，触发实时渲染背景
+function selectBoyTheme(themeId) { 
+  if (!currentConfig.theme) currentConfig.theme = {}; 
+  currentConfig.theme.currentThemeBoy = themeId; 
+  currentConfig.theme.currentTheme = themeId; 
+  localStorage.setItem('love_perspective', 'boy');
+  renderThemeShowroom(); 
+  syncAdminBackgroundTheme();
+  showToast(`✓ 已选定男生视角主题【${themeId}】`); 
+}
+function selectGirlTheme(themeId) { 
+  if (!currentConfig.theme) currentConfig.theme = {}; 
+  currentConfig.theme.currentThemeGirl = themeId; 
+  localStorage.setItem('love_perspective', 'girl');
+  renderThemeShowroom(); 
+  syncAdminBackgroundTheme();
+  showToast(`✓ 已选定女生视角主题【${themeId}】`); 
+}
 
 function renderTimelineList() {
   const container = document.getElementById("timelineListContainer");
@@ -1173,13 +1236,18 @@ document.getElementById("globalUploader").addEventListener("change", async (e) =
       if (activeUploadCallback) {
         activeUploadCallback(data.url, file);
       }
+      // 🌟 核心：更新自定义壁纸立即刷新控制台视图
       if (activeUploadInputId === "theme_customBgUrlBoy" && currentConfig) {
         if (!currentConfig.theme) currentConfig.theme = {};
         currentConfig.theme.customBgUrlBoy = data.url;
+        localStorage.setItem('love_perspective', 'boy');
+        syncAdminBackgroundTheme();
       }
       if (activeUploadInputId === "theme_customBgUrlGirl" && currentConfig) {
         if (!currentConfig.theme) currentConfig.theme = {};
         currentConfig.theme.customBgUrlGirl = data.url;
+        localStorage.setItem('love_perspective', 'girl');
+        syncAdminBackgroundTheme();
       }
       showToast("✓ 上传成功！直链已自动同步");
     } else {
@@ -1321,7 +1389,6 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
   });
 });
 
-// 🌟 核心：页面加载直接嗅探 Token，直通工作台，杜绝弹窗拦截与黑屏
 document.addEventListener("DOMContentLoaded", async () => {
   const token = getAuthToken();
   const layout = document.getElementById("adminLayout");
