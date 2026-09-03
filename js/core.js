@@ -1,16 +1,18 @@
 /**
  * 众水不灭 · 雅歌之印 (Love Universe) 前台核心主控
  * 文件名: js/core.js
- * 作用: 门禁鉴权、高定版控制台密码入口、软键盘失焦防白屏、打字机、彩蛋协同
+ * 作用: 门禁鉴权、异步竞态锁防闪烁、高定版控制台密码入口、软键盘失焦防白屏
  */
 
 document.addEventListener("DOMContentLoaded", () => {
   let config = window.LOVE_CONFIG || {};
 
-  // 🌟 第 0 毫秒侦测会话穿透烙印：如果本会话已解锁，直接物理跳过所有动画
   if (sessionStorage.getItem("universe_unlocked") === "true") {
     setTimeout(() => unlockMainUniverse(false), 50);
   }
+
+  // 🌟 核心修复1：创建一个 Promise，让其承载拉取远程配置的使命
+  const cloudSyncPromise = syncCloudData();
 
   function escapeHtml(s) {
     return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -118,8 +120,30 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   initGatekeeperUI();
-  syncCloudData();
   initAdminPortalTrigger(); 
+
+  // 🌟 核心修复2：接管玫瑰点击事件，利用 Await 同步锁彻底解决竞态弹窗问题
+  const roseOverlay = document.getElementById('rose-click-overlay');
+  if (roseOverlay) {
+    roseOverlay.addEventListener('click', async () => {
+      // 点击瞬间立即隐藏玫瑰，提供即时反馈，防止重复点击
+      roseOverlay.style.pointerEvents = 'none';
+      roseOverlay.style.display = 'none';
+      
+      // 【关键阻塞锁】等待云端配置全部获取完毕，再判断门禁状态。绝对摒弃陈旧缓存猜测。
+      await cloudSyncPromise;
+      
+      const isGatekeeperEnabled = config.gatekeeper && typeof config.gatekeeper.enabled !== 'undefined' 
+        ? config.gatekeeper.enabled 
+        : true;
+      
+      if (isGatekeeperEnabled) {
+        if (dom.gatekeeperDialog) dom.gatekeeperDialog.classList.remove('gatekeeper__dialog--hidden');
+      } else {
+        unlockMainUniverse(true);
+      }
+    });
+  }
 
   function initGatekeeperUI() {
     const gateCfg = config.gatekeeper || {};
@@ -137,7 +161,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // 🌟 核心：单次验证直达后台，写入共享 Token 杜绝二次验证
   function initAdminPortalTrigger() {
     if (!dom.heroNames) return;
     
@@ -354,6 +377,7 @@ document.addEventListener("DOMContentLoaded", () => {
         config = mergeWithDefaultConfig(data.config);
         window.LOVE_CONFIG = config;
         
+        // 此处的 LocalStorage snapshot 可留作边缘降级兜底，主逻辑已不再受其影响
         const isGatekeeperEnabled = config.gatekeeper ? config.gatekeeper.enabled !== false : true;
         localStorage.setItem("love_gatekeeper_enabled_snapshot", isGatekeeperEnabled ? "true" : "false");
 
