@@ -1,7 +1,7 @@
 /**
- * 众水不灭 · 雅歌之印
- * 文件名: css/icebreaker.css
- * 作用: 破冰信号箱的长文本自适应排版、响应式降级与移动端单列信笺流引擎
+ * 众水不灭 · 雅歌之印[cite: 1]
+ * 文件名: css/icebreaker.css[cite: 1]
+ * 作用: 破冰信号箱的长文本自适应排版、响应式降级与移动端单列信笺流引擎[cite: 1]
  */
 
 /* ---------------- 基础网格引擎 ---------------- */
@@ -76,7 +76,8 @@
 .icebreaker-btn__label {
   font-size: 15.5px;
   font-weight: 800;
-  color: var(--text-main, #f8fafc);
+  /* 🎯 修复：使用深暖咖色，防止主题变量导致的暗紫色发虚问题，保障浅底清晰度 */
+  color: #3D2B1F !important;
   margin-bottom: 8px;
   letter-spacing: 0.5px;
   display: block;
@@ -89,7 +90,8 @@
   /* 放大行高，增加阅读呼吸感 */
   line-height: 1.6;
   letter-spacing: 0.5px;
-  color: var(--text-sub, #94a3b8);
+  /* 🎯 修复：使用暖深褐灰，既温润又清晰柔和，完美契合破冰语义 */
+  color: #5C4638 !important;
   font-weight: 600;
   width: 100%;
   text-align: justify;
@@ -203,7 +205,8 @@
 .icebreaker-modal__title {
   font-size: 20px;
   font-weight: 900;
-  color: var(--text-hero, #fff);
+  /* 🎯 修复：主标题采用霞光粉暖白，在深色暗夜背景下实现高亮温润展示 */
+  color: #FCE4EC !important;
   margin-bottom: 24px;
 }
 
@@ -220,7 +223,8 @@
 .icebreaker-letter__quote {
   font-size: 14.5px;
   line-height: 1.7;
-  color: var(--text-main, #f8fafc);
+  /* 🎯 修复：正文采用羊皮纸暖白/暖杏米白，拉升对比度至 10:1 以上，呈现信笺治愈感 */
+  color: #FFF3E0 !important;
   font-style: italic;
   font-weight: 600;
   text-align: left;
@@ -258,7 +262,8 @@
 .icebreaker-btn-secondary {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text-sub, #94a3b8);
+  /* 🎯 修复：将紫黑色按钮文字提亮为柔浅灰紫/淡暖白，使其按钮轮廓与文字界限分明 */
+  color: #E2D8F0 !important;
 }
 
 .icebreaker-btn-secondary:active {
