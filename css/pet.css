@@ -4,7 +4,7 @@
  * 作用: 恩典灵宠悬浮挂件、5阶神圣形态光环、晋阶进度条与连胜互动弹窗样式 (门禁解锁平滑淡入隔离)
  */
 
-/* ================= 1. 悬浮灵宠微标 (默认隐藏，门禁解锁后淡入) ================= */
+/* ================= 1. 悬浮灵宠微标 ================= */
 .grace-pet-widget {
   position: fixed;
   bottom: 96px;
@@ -60,14 +60,14 @@
 
 .grace-pet-badge {
   margin-top: 4px;
-  background: rgba(3, 7, 18, 0.88);
-  border: 1px solid rgba(245, 158, 11, 0.45);
-  color: #fde68a;
+  background: var(--bg-card, rgba(3, 7, 18, 0.88));
+  border: 1px solid var(--accent-gold, rgba(245, 158, 11, 0.45));
+  color: var(--accent-gold, #fde68a);
   font-size: 10px;
   font-weight: 900;
   padding: 2px 8px;
   border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--card-shadow, 0 4px 10px rgba(0, 0, 0, 0.4));
   letter-spacing: 0.5px;
   white-space: nowrap;
 }
@@ -99,13 +99,14 @@
 .grace-pet-dialog {
   width: 100%;
   max-width: 480px;
-  background: linear-gradient(180deg, #131b2e 0%, #090d16 100%);
-  border: 1.5px solid rgba(245, 158, 11, 0.35);
+  /* 🎯 修复: 弹窗背景彻底由全局 CSS 变量接管，实现黑夜白昼一秒切换 */
+  background: var(--bg-card, linear-gradient(180deg, #131b2e 0%, #090d16 100%));
+  border: 1.5px solid var(--border-card, rgba(245, 158, 11, 0.35));
   border-radius: 26px;
   padding: 26px 22px;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.75), 0 0 35px rgba(245, 158, 11, 0.25);
+  box-shadow: var(--card-shadow, 0 25px 50px rgba(0, 0, 0, 0.75));
   position: relative;
-  color: #f8fafc;
+  color: var(--text-main, #f8fafc);
   max-height: 85vh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -117,7 +118,7 @@
   right: 18px;
   background: none;
   border: none;
-  color: #94a3b8;
+  color: var(--text-sub, #94a3b8);
   font-size: 20px;
   cursor: pointer;
   padding: 4px 8px;
@@ -125,7 +126,7 @@
   transition: color 0.2s;
 }
 
-.grace-pet-dialog-close:hover { color: #fff; }
+.grace-pet-dialog-close:hover { color: var(--text-main, #fff); }
 
 .grace-pet-card-header {
   text-align: center;
@@ -154,25 +155,26 @@
   border-radius: 20px;
   border: 1px solid currentColor;
   margin-bottom: 6px;
+  color: var(--accent-gold, #fbbf24);
 }
 
 .grace-pet-name {
   font-size: 19px;
   font-weight: 900;
-  color: #ffffff;
+  color: var(--text-hero, #ffffff);
   margin-bottom: 4px;
 }
 
 .grace-pet-sub {
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--text-sub, #94a3b8);
   line-height: 1.4;
 }
 
 /* ================= 3. 5阶进化进度条 ================= */
 .grace-level-progress-box {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-overlay, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border-card, rgba(255, 255, 255, 0.08));
   border-radius: 14px;
   padding: 12px 14px;
   margin-bottom: 16px;
@@ -184,14 +186,14 @@
   align-items: center;
   font-size: 11.5px;
   font-weight: 800;
-  color: #fde68a;
+  color: var(--accent-gold, #fde68a);
   margin-bottom: 6px;
 }
 
 .grace-level-progress-bar {
   width: 100%;
   height: 8px;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -213,8 +215,8 @@
 }
 
 .grace-stat-box {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-overlay, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border-card, rgba(255, 255, 255, 0.08));
   border-radius: 12px;
   padding: 8px 4px;
   text-align: center;
@@ -223,20 +225,20 @@
 .grace-stat-val {
   font-size: 14px;
   font-weight: 900;
-  color: #fde68a;
+  color: var(--accent-gold, #fde68a);
   margin-bottom: 2px;
 }
 
 .grace-stat-lbl {
   font-size: 9.5px;
-  color: #94a3b8;
+  color: var(--text-sub, #94a3b8);
   font-weight: 700;
 }
 
 /* ================= 5. 喂养与舍己操作舱 ================= */
 .grace-action-section {
-  background: rgba(3, 7, 18, 0.6);
-  border: 1px solid rgba(245, 158, 11, 0.2);
+  background: var(--bg-overlay, rgba(3, 7, 18, 0.6));
+  border: 1px solid var(--border-card, rgba(245, 158, 11, 0.2));
   border-radius: 16px;
   padding: 14px;
   margin-bottom: 16px;
@@ -245,7 +247,7 @@
 .grace-action-title {
   font-size: 13px;
   font-weight: 800;
-  color: #fde68a;
+  color: var(--accent-gold, #fde68a);
   margin-bottom: 8px;
   display: flex;
   justify-content: space-between;
@@ -257,18 +259,18 @@
   font-weight: 900;
   background: rgba(245, 158, 11, 0.15);
   border: 1px solid rgba(245, 158, 11, 0.35);
-  color: #fde68a;
+  color: var(--accent-gold, #fde68a);
   padding: 2px 8px;
   border-radius: 10px;
 }
 
 .grace-textarea {
   width: 100%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: var(--bg-input, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border-card, rgba(255, 255, 255, 0.15));
   border-radius: 12px;
   padding: 10px;
-  color: #fff;
+  color: var(--text-main, #fff);
   font-size: 13px;
   resize: none;
   box-sizing: border-box;
@@ -277,7 +279,7 @@
 
 .grace-textarea:focus {
   outline: none;
-  border-color: #f59e0b;
+  border-color: var(--accent-gold, #f59e0b);
 }
 
 .grace-feed-btn {
@@ -309,7 +311,7 @@
   cursor: pointer;
   transition: all 0.2s;
 }
-
+[data-theme-type="light"] .grace-sacrifice-btn { color: #e11d48; background: rgba(225, 29, 72, 0.1); }
 .grace-sacrifice-btn:hover {
   background: rgba(244, 63, 94, 0.25);
   color: #fff;
@@ -326,23 +328,23 @@
 }
 
 .grace-log-item {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--bg-overlay, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--border-card, rgba(255, 255, 255, 0.06));
   border-radius: 10px;
   padding: 8px 12px;
   font-size: 12px;
-  color: #cbd5e1;
+  color: var(--text-main, #cbd5e1);
   line-height: 1.4;
 }
 
 .grace-log-item span {
   display: block;
   font-size: 10px;
-  color: #64748b;
+  color: var(--text-sub, #64748b);
   margin-top: 2px;
 }
 
-/* ================= 7. 移动端适配 ================= */
+/* ================= 7. 移动端适配 (自动 2x2 排列，防溢出) ================= */
 @media (max-width: 640px) {
   .grace-pet-widget {
     bottom: 84px;
@@ -357,6 +359,7 @@
     padding: 20px 16px;
     border-radius: 22px;
   }
+  /* 确保弹窗内的 4 个格子也折叠为 2x2，保护极限情况下的长数字 */
   .grace-stats-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 6px;
