@@ -1,7 +1,7 @@
 /**
- * 众水不灭 · 雅歌之印[cite: 1]
- * 文件名: css/icebreaker.css[cite: 1]
- * 作用: 破冰信号箱的长文本自适应排版、响应式降级与移动端单列信笺流引擎[cite: 1]
+ * 众水不灭 · 雅歌之印
+ * 文件名: css/icebreaker.css
+ * 作用: 破冰信号箱的长文本自适应排版、响应式降级与移动端单列信笺流引擎
  */
 
 /* ---------------- 基础网格引擎 ---------------- */
@@ -27,8 +27,9 @@
 
 /* ---------------- 卡片内部排版体系 ---------------- */
 .icebreaker-btn {
-  background: rgba(3, 7, 18, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  /* 🎯 修复：背景色接入主题变量，确保浅色主题变亮、深色主题变暗 */
+  background: var(--bg-card, rgba(3, 7, 18, 0.4));
+  border: 1px solid var(--border-card, rgba(255, 255, 255, 0.1));
   border-radius: 16px;
   /* 将定高改为 min-height，让超长文本自然撑开，绝不溢出！ */
   min-height: 140px;
@@ -44,13 +45,16 @@
   
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  /* 光学毛玻璃滤镜 */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   /* 确保苹果端点击无高亮，整张卡片都是触发区 */
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
 
 .icebreaker-btn:hover {
-  background: rgba(3, 7, 18, 0.65);
+  background: var(--bg-card-hover, rgba(3, 7, 18, 0.65));
   border-color: var(--accent-gold, #f59e0b);
   transform: translateY(-3px);
   box-shadow: 0 8px 24px var(--accent-gold-glow, rgba(245, 158, 11, 0.2));
@@ -76,8 +80,9 @@
 .icebreaker-btn__label {
   font-size: 15.5px;
   font-weight: 800;
-  /* 🎯 修复：使用深暖咖色，防止主题变量导致的暗紫色发虚问题，保障浅底清晰度 */
-  color: #3D2B1F !important;
+  /* 🎯 修复：回归主题变量。配合 text-shadow 消除边缘发虚，极大地增强全主题辨识度 */
+  color: var(--text-main, #f8fafc);
+  text-shadow: 0 1px 2px var(--shadow-color, rgba(0, 0, 0, 0.1));
   margin-bottom: 8px;
   letter-spacing: 0.5px;
   display: block;
@@ -90,8 +95,9 @@
   /* 放大行高，增加阅读呼吸感 */
   line-height: 1.6;
   letter-spacing: 0.5px;
-  /* 🎯 修复：使用暖深褐灰，既温润又清晰柔和，完美契合破冰语义 */
-  color: #5C4638 !important;
+  /* 🎯 修复：回归主题副色变量，通过字重保障阅读体验 */
+  color: var(--text-sub, #cbd5e1);
+  text-shadow: 0 1px 2px var(--shadow-color, rgba(0, 0, 0, 0.05));
   font-weight: 600;
   width: 100%;
   text-align: justify;
@@ -162,14 +168,15 @@
 
 /* 🌟 核心：移动端模态框高度锁定与内部滑动 */
 .icebreaker-modal__dialog {
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(9, 13, 22, 0.95) 100%);
+  /* 🎯 修复：大弹窗背景同样接入主题变量，支持浅色主题下变为柔和亮色 */
+  background: var(--bg-card, linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(9, 13, 22, 0.95) 100%));
   border: 1px solid var(--border-card);
   border-radius: 24px;
   width: 100%;
   max-width: 560px; /* 略微加宽以容纳长文本 */
   padding: 32px 24px;
   text-align: center;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  box-shadow: 0 24px 64px var(--shadow-color, rgba(0, 0, 0, 0.8)), inset 0 1px 1px rgba(255, 255, 255, 0.15);
   transform: scale(0.9) translateY(20px);
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   
@@ -184,15 +191,23 @@
 }
 
 .icebreaker-modal--mutual .icebreaker-modal__dialog {
+  /* 双向奔赴弹窗：特例，永远保持深紫浪漫渐变 */
   background: linear-gradient(180deg, rgba(88, 28, 135, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
   border-color: rgba(217, 70, 239, 0.4);
   box-shadow: 0 24px 64px rgba(192, 38, 211, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.2);
 }
 
+/* 🎯 修复：由于双向奔赴弹窗底色强制为深紫，文本必须强制亮色，防止浅色主题下黑字溶于黑底 */
+.icebreaker-modal--mutual .icebreaker-modal__title,
+.icebreaker-modal--mutual .icebreaker-letter__quote {
+  color: #ffffff !important;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
 .icebreaker-modal__badge {
   display: inline-block;
   background: rgba(245, 158, 11, 0.15);
-  color: #fde68a;
+  color: var(--accent-gold, #fde68a);
   padding: 4px 14px;
   border-radius: 20px;
   font-size: 11px;
@@ -205,15 +220,15 @@
 .icebreaker-modal__title {
   font-size: 20px;
   font-weight: 900;
-  /* 🎯 修复：主标题采用霞光粉暖白，在深色暗夜背景下实现高亮温润展示 */
-  color: #FCE4EC !important;
+  color: var(--text-hero, var(--text-main, #fff));
+  text-shadow: 0 1px 3px var(--shadow-color, rgba(0,0,0,0.1));
   margin-bottom: 24px;
 }
 
 /* 接收到的信笺展现框：为长文本专门扩容 */
 .icebreaker-letter {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px dashed rgba(245, 158, 11, 0.3);
+  background: var(--bg-overlay, rgba(255, 255, 255, 0.03));
+  border: 1px dashed var(--accent-gold, rgba(245, 158, 11, 0.3));
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 30px;
@@ -222,9 +237,8 @@
 
 .icebreaker-letter__quote {
   font-size: 14.5px;
-  line-height: 1.7;
-  /* 🎯 修复：正文采用羊皮纸暖白/暖杏米白，拉升对比度至 10:1 以上，呈现信笺治愈感 */
-  color: #FFF3E0 !important;
+  line-height: 1.75;
+  color: var(--text-main, #f8fafc);
   font-style: italic;
   font-weight: 600;
   text-align: left;
@@ -260,14 +274,13 @@
 }
 
 .icebreaker-btn-secondary {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  /* 🎯 修复：将紫黑色按钮文字提亮为柔浅灰紫/淡暖白，使其按钮轮廓与文字界限分明 */
-  color: #E2D8F0 !important;
+  background: var(--bg-overlay, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border-card, rgba(255, 255, 255, 0.1));
+  color: var(--text-sub, #94a3b8);
 }
 
 .icebreaker-btn-secondary:active {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--bg-card-hover, rgba(255, 255, 255, 0.08));
 }
 
 .icebreaker-cooling-box {
@@ -293,7 +306,7 @@
   position: fixed;
   top: -80px; left: 50%;
   transform: translateX(-50%);
-  background: rgba(15, 23, 42, 0.95);
+  background: var(--bg-card, rgba(15, 23, 42, 0.95));
   border: 1px solid var(--accent-gold, #f59e0b);
   border-radius: 30px;
   padding: 12px 24px;
@@ -323,7 +336,7 @@
   flex: 1;
   font-size: 13.5px;
   font-weight: 800;
-  color: #fff;
+  color: var(--text-main, #fff);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -333,7 +346,7 @@
   font-size: 12px;
   color: var(--accent-gold, #fde68a);
   font-weight: 900;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--bg-overlay, rgba(255, 255, 255, 0.1));
   padding: 4px 10px;
   border-radius: 12px;
 }
@@ -345,7 +358,7 @@
 
 /* ---------------- 历史足迹记录 ---------------- */
 .icebreaker-history-wrap {
-  border-top: 1px dashed rgba(255, 255, 255, 0.15);
+  border-top: 1px dashed var(--border-card, rgba(255, 255, 255, 0.15));
   padding-top: 24px;
 }
 
@@ -374,21 +387,21 @@
   padding: 24px;
   color: var(--text-sub, #64748b);
   font-size: 12.5px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-overlay, rgba(255, 255, 255, 0.02));
   border-radius: 14px;
 }
 
 .icebreaker-history-item {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-overlay, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--border-card, rgba(255, 255, 255, 0.08));
   border-radius: 16px;
   padding: 16px;
   transition: all 0.2s;
 }
 
 .icebreaker-history-item:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(245, 158, 11, 0.3);
+  background: var(--bg-card-hover, rgba(255, 255, 255, 0.06));
+  border-color: var(--accent-gold, rgba(245, 158, 11, 0.3));
 }
 
 .icebreaker-history-item__header {
@@ -442,6 +455,6 @@
 }
 
 .icebreaker-history-btn:hover {
-  background: rgba(245, 158, 11, 0.8);
+  background: var(--accent-gold, rgba(245, 158, 11, 0.8));
   color: #fff;
 }
