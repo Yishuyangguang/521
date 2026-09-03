@@ -1,7 +1,7 @@
 /**
  * 恋爱时光轴 & 漫游宇宙 (Love Universe)
  * 文件名: css/components.css
- * 升级：星轨中枢导航网格 (Navigation Dock) + 全屏沉浸分幕系统 (Stage Modals) + 极简半透明悬浮爱心音乐晶体 (Heart Capsule)
+ * 升级：星轨中枢导航网格 + 全屏沉浸分幕系统 + 科幻防遮挡门禁舱 + 极简爱心音乐晶体
  */
 
 .universe-canvas,
@@ -61,7 +61,7 @@
   -webkit-backdrop-filter: blur(8px);
 }
 
-/* ================= 门禁层 ================= */
+/* ================= 🌟 星轨高科门禁舱重构 (修复红屏、实现极致对称与防遮挡) ================= */
 .gatekeeper {
   position: fixed;
   inset: 0;
@@ -70,7 +70,7 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: radial-gradient(circle at center, #231d45 0%, #070a14 80%);
+  background: radial-gradient(circle at center, #131b2e 0%, #030712 80%);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   transition: opacity 0.5s var(--ease-spring), visibility 0.5s;
@@ -79,27 +79,37 @@
 .gatekeeper__dialog {
   width: 100%;
   max-width: 400px;
-  background: var(--space-card);
-  border: 1.5px solid var(--glass-border);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.85) 0%, rgba(3, 7, 18, 0.95) 100%);
+  border: 1.5px solid rgba(56, 189, 248, 0.3); /* 科技青边缘 */
   border-radius: 26px;
   padding: 30px 24px;
-  box-shadow: var(--glass-shadow), 0 0 35px rgba(244, 63, 94, 0.2);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(56, 189, 248, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.2);
   text-align: center;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s;
+}
+
+/* 🎯 iPhone 软键盘防遮挡（焦点激活时丝滑上浮） */
+@media (max-width: 640px) {
+  .gatekeeper__dialog:focus-within {
+    transform: translateY(-15vh) !important;
+    box-shadow: 0 34px 70px rgba(0, 0, 0, 0.9), 0 0 50px rgba(56, 189, 248, 0.2);
+  }
 }
 
 .gatekeeper__badge {
   font-size: 10.5px;
   font-weight: 900;
   letter-spacing: 1.8px;
-  color: var(--rose-gold);
-  background: rgba(251, 113, 133, 0.12);
-  border: 1px solid rgba(251, 113, 133, 0.3);
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.3);
   padding: 3px 10px;
   border-radius: 20px;
   display: inline-block;
   margin-bottom: 10px;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
 }
 
 .gatekeeper__title {
@@ -107,58 +117,94 @@
   font-weight: 900;
   color: #ffffff;
   margin-bottom: 14px;
+  letter-spacing: 1px;
 }
 
 .gatekeeper__question {
   font-size: 13.5px;
-  color: var(--text-muted);
+  color: #94a3b8;
   line-height: 1.5;
   margin-bottom: 16px;
 }
 
-.gatekeeper__input-wrap { margin-bottom: 12px; }
+/* 🎯 矩阵重构：强行 1fr 54px 的等高网格实现物理级绝对对称 */
+.gatekeeper__input-group { 
+  display: grid;
+  grid-template-columns: 1fr 54px;
+  gap: 12px;
+  margin-bottom: 16px;
+  align-items: stretch;
+}
 
 .gatekeeper__input {
   width: 100%;
-  background: rgba(3, 7, 18, 0.75);
+  background: rgba(0, 0, 0, 0.4);
   border: 1.5px solid rgba(255, 255, 255, 0.15);
   border-radius: 14px;
-  padding: 12px 16px;
+  padding: 14px 16px;
   font-size: 16px;
-  font-weight: 700;
-  color: #ffffff;
+  font-weight: 800;
+  color: #38bdf8;
   text-align: center;
+  font-family: 'ui-monospace', 'SFMono-Regular', monospace;
   letter-spacing: 4px;
   box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.6);
   transition: all 0.2s ease;
+  outline: none;
 }
 
 .gatekeeper__input:focus {
-  border-color: var(--primary-pink);
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.6), 0 0 16px var(--rose-gold-glow);
+  border-color: #38bdf8;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.6), 0 0 14px rgba(56, 189, 248, 0.4);
 }
+.gatekeeper__input::placeholder { color: #475569; letter-spacing: 1px; font-family: sans-serif; font-weight: 600;}
+
+/* 全息独立麦克风按钮 */
+.voice-unlock-btn {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 14px !important;
+  color: #94a3b8 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  height: 100% !important; /* 跟随 Grid 拉伸与 Input 绝对同高 */
+}
+.voice-unlock-btn:hover { background: rgba(56, 189, 248, 0.15) !important; border-color: #38bdf8 !important; }
 
 .gatekeeper__hint {
   font-size: 11.5px;
-  color: #fbbf24;
+  color: #fde68a;
   margin-bottom: 20px;
   min-height: 18px;
 }
 
-.gatekeeper__btn { width: 100%; padding: 13px 20px; font-size: 15px; }
+/* 宇宙时空激活按钮 (替换大红) */
+.gatekeeper__btn { 
+  width: 100%; 
+  padding: 14px 20px; 
+  font-size: 15px; 
+  background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+  border: 1px solid rgba(56, 189, 248, 0.5);
+  box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+.gatekeeper__btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(14, 165, 233, 0.55), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+}
+.gatekeeper__btn:active { transform: scale(0.98); }
 
 /* ================= 头部视差区 ================= */
 .hero-section {
   text-align: center;
   margin-bottom: 30px;
   padding-top: 10px;
-  /* 已移除破坏滚动的 contain 属性 */
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-/* 🌟 修改：注入防选中、强交互反馈安全样式，安全作为隐秘入口 */
 .hero-section__names {
   font-size: 38px;
   font-weight: 900;
@@ -176,8 +222,6 @@
   justify-content: center;
   flex-wrap: nowrap;
   transition: all 0.3s ease;
-  
-  /* 专属防暗病隔离样式 */
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
@@ -506,7 +550,7 @@
   line-height: 1.2;
 }
 
-/* ================= 🎪 全屏沉浸分幕系统 (Stage Modals) 核心架构重构 ================= */
+/* ================= 🎪 全屏沉浸分幕系统 ================= */
 .stage-overlay {
   position: fixed;
   inset: 0;
@@ -541,7 +585,6 @@
   pointer-events: auto;
 }
 
-/* 【修复：剥离导致黑屏的 backdrop-filter，建立独立 Stacking Context】 */
 .stage-modal {
   position: absolute;
   inset: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
@@ -563,7 +606,6 @@
   z-index: 1;
 }
 
-/* 【修复：利用伪元素承载 GPU Blur 计算，彻底解决 iOS 滚动区域黑洞问题】 */
 .stage-modal::before {
   content: "";
   position: absolute;
@@ -640,7 +682,6 @@
   overflow-x: hidden;
   padding: 24px 20px;
   -webkit-overflow-scrolling: touch;
-  /* 修复：移除 overscroll-behavior 并在滚动容器强制开启硬件合成防撕裂 */
   transform: translateZ(0);
 }
 
@@ -685,7 +726,6 @@
   -webkit-perspective: 1000px;
   cursor: pointer;
   user-select: none;
-  /* 修复：移除了破坏原生滚动的 touch-action: pan-y 和 contain: layout paint */
 }
 
 .polaroid-card__inner {
