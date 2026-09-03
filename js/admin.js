@@ -565,7 +565,6 @@ function renderIcebreakerSettings() {
     return `
       <div class="item-card highlight-panel" style="margin-bottom:14px; padding:16px;">
         <div class="highlight-text" style="font-size:14px; margin-bottom:12px;">${st.name}</div>
-        <!-- 🌟 核心拦截：为激增的 14 个卡片加入内建滚动防御容器，防止撑破管理台 -->
         <div style="display:flex; flex-direction:column; gap:10px; max-height:420px; overflow-y:auto; padding-right:8px; scrollbar-width:thin;">
           ${list.map((act, actIdx) => `
             <div style="background:rgba(0,0,0,0.1); border:1px solid var(--timer-unit-border); border-radius:12px; padding:12px;">
@@ -847,6 +846,7 @@ function testPreviewAudio(url, btnId, songTitle) {
   previewAudioObj.onended = () => { if (currentBtn) currentBtn.textContent = "🎧 试听"; };
 }
 
+// 🌟 核心修复1：重构主题陈列卡片的层级解构，赋予清晰且美观的边界与排版
 function renderThemeShowroom() {
   const boyBox = document.getElementById("boyThemesContainer");
   const girlBox = document.getElementById("girlThemesContainer");
@@ -859,16 +859,17 @@ function renderThemeShowroom() {
     boyBox.innerHTML = presets.boy.map(item => {
       const isSel = item.id === curBoy;
       return `
-        <div class="theme-card ${isSel ? 'theme-card--selected' : ''}" onclick="selectBoyTheme('${item.id}')"
-          style="border-radius: 14px; padding: 14px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between;">
-          <div>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <span style="font-size:14px; font-weight:900;">${item.name}</span>
-              <span class="highlight-text" style="font-size:10px; padding:2px 6px; border-radius:10px;">${item.tag}</span>
+        <div class="theme-card ${isSel ? 'theme-card--selected' : ''}" onclick="selectBoyTheme('${item.id}')">
+          <div class="theme-card-body">
+            <div class="theme-card-top">
+              <span class="theme-name">${escapeHtml(item.name)}</span>
+              <span class="theme-tag">${escapeHtml(item.tag)}</span>
             </div>
-            <p style="font-size:11.5px; line-height:1.4; margin-bottom:10px;">${item.desc}</p>
+            <p class="theme-desc">${escapeHtml(item.desc)}</p>
           </div>
-          <div style="font-size:11.5px; font-weight:800; text-align:right;">${isSel ? '✓ 当前选定' : '点击选定'}</div>
+          <div class="theme-card-footer">
+            ${isSel ? '✨ 当前选定' : '点击选定'}
+          </div>
         </div>
       `;
     }).join("");
@@ -878,16 +879,17 @@ function renderThemeShowroom() {
     girlBox.innerHTML = presets.girl.map(item => {
       const isSel = item.id === curGirl;
       return `
-        <div class="theme-card ${isSel ? 'theme-card--selected' : ''}" onclick="selectGirlTheme('${item.id}')"
-          style="border-radius: 14px; padding: 14px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; justify-content: space-between;">
-          <div>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <span style="font-size:14px; font-weight:900;">${item.name}</span>
-              <span class="highlight-text" style="font-size:10px; padding:2px 6px; border-radius:10px;">${item.tag}</span>
+        <div class="theme-card ${isSel ? 'theme-card--selected' : ''}" onclick="selectGirlTheme('${item.id}')">
+          <div class="theme-card-body">
+            <div class="theme-card-top">
+              <span class="theme-name">${escapeHtml(item.name)}</span>
+              <span class="theme-tag">${escapeHtml(item.tag)}</span>
             </div>
-            <p style="font-size:11.5px; line-height:1.4; margin-bottom:10px;">${item.desc}</p>
+            <p class="theme-desc">${escapeHtml(item.desc)}</p>
           </div>
-          <div style="font-size:11.5px; font-weight:800; text-align:right;">${isSel ? '✓ 当前选定' : '点击选定'}</div>
+          <div class="theme-card-footer">
+            ${isSel ? '✨ 当前选定' : '点击选定'}
+          </div>
         </div>
       `;
     }).join("");
