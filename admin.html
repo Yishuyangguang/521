@@ -2,94 +2,54 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>👑 雅歌之印 · 契约管理控制中心</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>👑 雅歌时空 · 契约管理控制中心</title>
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=2.0">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=2.0">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2.0">
-  <link rel="stylesheet" href="css/admin.css?v=2.5">
-  <link rel="stylesheet" href="css/themes.css?v=2.5">
   
-  <style>
-    .universe-bg-layer {
-      position: fixed; inset: 0; z-index: -999;
-      background-color: var(--bg-primary, #090d16);
-      background-image: var(--theme-bg-gradient);
-      background-size: cover; background-position: center center; background-repeat: no-repeat;
-      transition: background-color 0.5s ease, background-image 0.5s ease;
-    }
-    .admin-layout { position: relative; z-index: 1; }
-    
-    /* 🌟 核心拦截：强制接管控制台一切深色死皮，100% 融入前台主页对应的主题色彩变量 */
-    body { color: var(--text-main) !important; background: transparent !important; }
-    .admin-header { background: var(--bg-card) !important; border-bottom: 1px solid var(--border-card) !important; }
-    .admin-sidebar { background: var(--bg-card) !important; border-right: 1px solid var(--border-card) !important; }
-    .tab-pane { background: var(--bg-card) !important; border: 1px solid var(--border-card) !important; box-shadow: var(--card-shadow) !important; }
-    
-    .item-card, .theme-card { background: var(--timer-unit-bg, var(--bg-card)) !important; border: 1px solid var(--timer-unit-border, var(--border-card)) !important; }
-    .theme-card--selected { border-color: var(--accent-gold) !important; background: var(--badge-bg) !important; box-shadow: 0 0 16px var(--accent-gold-glow) !important; }
-    
-    .admin-input, .admin-select, .admin-textarea {
-      background: var(--timer-unit-bg) !important;
-      border: 1px solid var(--timer-unit-border) !important;
-      color: var(--text-main) !important;
-    }
-    .admin-input:focus, .admin-select:focus, .admin-textarea:focus {
-      border-color: var(--accent-gold) !important;
-      box-shadow: 0 0 0 3px var(--badge-bg) !important;
-    }
-    
-    h1, h2, h3, h4, .admin-brand-title, .item-card-title, label { color: var(--text-hero, var(--text-main)) !important; }
-    p, span, .pane-header p, .form-group span, .admin-brand-sub { color: var(--text-sub) !important; }
-    
-    .tab-btn { color: var(--text-sub) !important; background: transparent !important; }
-    .tab-btn.active {
-      background: var(--drawer-active-bg) !important;
-      color: var(--drawer-active-title, var(--accent-gold)) !important;
-      border-color: var(--drawer-active-border, var(--accent-gold)) !important;
-    }
-    
-    /* 解耦内联样式的语义化面板 */
-    .highlight-panel {
-      background: var(--badge-bg) !important;
-      border: 1.5px solid var(--badge-border) !important;
-      border-radius: 16px; padding: 18px; margin-bottom: 20px;
-    }
-    .highlight-text, .highlight-panel label { color: var(--accent-gold) !important; font-weight: 800; }
-    
-    /* 🌟 移动端对称美化矩阵 (解决按钮错乱长短不一) */
-    .admin-header-actions { display: flex; gap: 12px; }
-    @media (max-width: 640px) {
-      .admin-header { flex-direction: column; align-items: stretch; padding: 16px; gap: 14px; }
-      .admin-header-actions { width: 100%; display: flex; gap: 10px; justify-content: space-between; margin-top: 4px; }
-      /* 顶部按钮绝对对称 */
-      .admin-header-actions a, .admin-header-actions button { flex: 1; text-align: center; justify-content: center; padding: 12px 0; font-size: 13px; }
+  <!-- 🎯 引入全局主题与控制台专属样式 -->
+  <link rel="stylesheet" href="css/themes.css?v=2.5">
+  <link rel="stylesheet" href="css/admin.css?v=2.6">
+  
+  <!-- 🎯 主题变色龙引擎：极速拦截计算黑夜/白昼模式 -->
+  <script>
+    (function() {
+      const themeId = localStorage.getItem("love_current_theme_id") || "sunset-twilight";
+      const perspective = localStorage.getItem("love_user_perspective") || "boy";
+      const themeType = (perspective === "girl" || themeId.includes("cream") || themeId.includes("sakura") || themeId.includes("monet") || themeId.includes("dew") || themeId.includes("blush") || themeId.includes("orange")) ? "light" : "dark";
       
-      /* 上传与动作组合绝对对称 */
-      .upload-input-group { flex-direction: column; width: 100%; gap: 8px; }
-      .upload-input-group input { width: 100%; }
-      .upload-input-group button { width: 100%; text-align: center; justify-content: center; padding: 12px 0; }
-      
-      /* 列表控制按钮矩阵对称 */
-      .item-card-header { flex-direction: column; align-items: stretch; gap: 12px; }
-      .item-card-header > div { display: flex; flex-wrap: wrap; width: 100%; gap: 8px; }
-      .item-card-header > div > button { flex: 1; min-width: calc(50% - 8px); text-align: center; justify-content: center; padding: 10px 0; }
-      
-      /* 表单网格移动端占满 */
-      .form-grid { grid-template-columns: 1fr; }
-    }
-  </style>
+      document.documentElement.setAttribute("data-theme-type", themeType);
+      document.addEventListener("DOMContentLoaded", () => {
+        document.body.classList.add(`theme-${themeId}`);
+        document.body.setAttribute("data-theme-type", themeType);
+
+        const customBg = localStorage.getItem("love_current_custom_bg");
+        if (customBg) {
+          const bgEl = document.getElementById("universe-bg-layer");
+          if (bgEl) {
+            const scrim = themeType === "light" 
+              ? "linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4))"
+              : "linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45))";
+            bgEl.style.backgroundImage = `${scrim}, url('${customBg}')`;
+          }
+        }
+      });
+    })();
+  </script>
 </head>
 <body>
 
+  <!-- 动态宇宙背景层 -->
   <div id="universe-bg-layer" class="universe-bg-layer"></div>
 
   <div class="admin-layout" id="adminLayout" style="display:none;">
+    <!-- 顶层操作舱控制台 -->
     <header class="admin-header">
       <div class="admin-brand">
         <span class="admin-brand-icon">🌟</span>
         <div>
-          <h1 class="admin-brand-title">众水不灭 · 控制台</h1>
+          <h1 class="admin-brand-title">雅歌时空 · 控制台</h1>
           <p class="admin-brand-sub" id="adminDomainBadge">我的网址: 连接中...</p>
         </div>
       </div>
@@ -100,6 +60,7 @@
     </header>
 
     <div class="admin-main">
+      <!-- 左侧飞船侧翼导航 -->
       <nav class="admin-sidebar">
         <button class="tab-btn active" data-tab="tab-meta">👫 1. 基础档案与生命</button>
         <button class="tab-btn" data-tab="tab-gatekeeper">🔒 2. 门禁关卡与防偷窥</button>
@@ -115,6 +76,7 @@
         <button class="tab-btn" data-tab="tab-license">💎 12. 契约授权</button>
       </nav>
 
+      <!-- 核心动力矩阵数据区 -->
       <div class="admin-content">
         <section id="tab-meta" class="tab-pane active">
           <div class="pane-header"><h3>👫 基础档案与生命周期阶段设置</h3></div>
@@ -127,20 +89,20 @@
               </div>
               <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:14px;">
                 <div>
-                  <label style="font-size:11.5px; margin-bottom:4px; display:block;">原管理密码 (旧密码)</label>
+                  <label class="label-tech">原管理密码 (旧密码)</label>
                   <input type="password" id="admin_oldPassword" class="admin-input" placeholder="请输入当前旧密码...">
                 </div>
                 <div>
-                  <label style="font-size:11.5px; margin-bottom:4px; display:block;">新管理密码</label>
+                  <label class="label-tech">新管理密码</label>
                   <input type="password" id="admin_newPassword" class="admin-input" placeholder="输入新管理密码...">
                 </div>
                 <div>
-                  <label style="font-size:11.5px; margin-bottom:4px; display:block;">确认新管理密码</label>
+                  <label class="label-tech">确认新管理密码</label>
                   <input type="password" id="admin_confirmPassword" class="admin-input" placeholder="再次输入新密码...">
                 </div>
               </div>
               <div style="display:flex; justify-content:flex-end; gap:10px; align-items:center;">
-                <button type="button" class="btn-tool" style="background:var(--accent-gold); color:#fff; border:none; padding:8px 18px; font-weight:800; border-radius:12px;" onclick="modifyAdminPasswordWithOld()">🔐 验证原密码并更新</button>
+                <button type="button" class="btn-tool btn-tool-accent" onclick="modifyAdminPasswordWithOld()">🔐 验证原密码并更新</button>
               </div>
               <input type="hidden" id="admin_customPassword" value="521">
             </div>
@@ -190,7 +152,7 @@
         </section>
 
         <section id="tab-timeline" class="tab-pane">
-          <div class="pane-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <div class="pane-header pane-header-flex">
             <div>
               <h3>🪐 时光轴轨迹与拍立得照片墙</h3>
               <p>提示：节点 #1 的正面照片将自动作为网页左上角专属情侣头像固定展示。</p>
@@ -201,19 +163,17 @@
         </section>
 
         <section id="tab-anniversary" class="tab-pane">
-          <div class="pane-header" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
+          <div class="pane-header pane-header-flex">
             <div>
               <h3>📅 倒数日与恒久纪念日管理</h3>
-              <p>支持阳历与阴历农历智能换算、每年重复倒数、同行已过天数、生命羁绊计算及专属照片录音绑定。</p>
+              <p>支持阳历与阴历智能换算、每年重复倒数、生命羁绊计算及专属相册录音。</p>
             </div>
-            <div style="display:flex; gap:8px;">
-              <button class="btn-add" onclick="addCustomAnniversaryItem()">➕ 自定义新增</button>
-            </div>
+            <button class="btn-add" onclick="addCustomAnniversaryItem()">➕ 自定义新增</button>
           </div>
 
           <div class="highlight-panel">
-            <span class="highlight-text" style="display:block; margin-bottom:8px;">⚡ 一键快速添加常用纪念日模板：</span>
-            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <span class="highlight-text" style="display:block; margin-bottom:12px;">⚡ 一键快速添加常用纪念日模板：</span>
+            <div class="template-btns-grid">
               <button class="btn-tool" onclick="addPresetAnniversaryTemplate('birthday_girl')">🎂 她的农历生日</button>
               <button class="btn-tool" onclick="addPresetAnniversaryTemplate('birthday_boy')">🪐 他的公历生日</button>
               <button class="btn-tool" onclick="addPresetAnniversaryTemplate('love_start')">💖 恋爱同行起点</button>
@@ -222,62 +182,53 @@
               <button class="btn-tool" onclick="addPresetAnniversaryTemplate('travel')">✈️ 甜蜜旅行之约</button>
             </div>
           </div>
-
           <div id="anniversariesListContainer" class="dynamic-list"></div>
         </section>
 
         <section id="tab-icebreaker" class="tab-pane">
-          <div class="pane-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div class="pane-header pane-header-flex">
             <div>
               <h3>🕊️ 破冰与情感信号箱控制中心</h3>
-              <p>管理三阶段和解台阶文案、情绪冷静期时长、音效反馈与历史和好备忘录重置。</p>
+              <p>管理三阶段和解台阶文案、情绪冷静期时长、音效反馈与历史和好备忘录。</p>
             </div>
-            <button class="btn-tool" onclick="clearIcebreakerHistory()">🧹 清空和好历史足迹</button>
+            <button class="btn-tool" onclick="clearIcebreakerHistory()">🧹 清空和好历史</button>
           </div>
 
           <div class="form-grid" style="margin-bottom:20px;">
             <div class="form-group">
               <label>是否启用破冰信号箱</label>
-              <select id="icebreaker_enabled" class="admin-select">
-                <option value="true">开启功能</option>
-                <option value="false">关闭功能</option>
-              </select>
+              <select id="icebreaker_enabled" class="admin-select"><option value="true">开启功能</option><option value="false">关闭功能</option></select>
             </div>
             <div class="form-group">
               <label>是否启用提示音效</label>
-              <select id="icebreaker_soundEnabled" class="admin-select">
-                <option value="true">开启音效 (风铃声)</option>
-                <option value="false">静音模式</option>
-              </select>
+              <select id="icebreaker_soundEnabled" class="admin-select"><option value="true">开启音效 (风铃声)</option><option value="false">静音模式</option></select>
             </div>
             <div class="form-group highlight-panel" style="grid-column: 1 / -1;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <label class="highlight-text" style="margin-bottom:0;">⏳ 情绪冷静期倒计时锁时长 (防频繁施压)</label>
                 <span id="icebreaker_cooldown_val" class="highlight-text">15 分钟</span>
               </div>
-              <input type="range" id="icebreaker_cooldownMinutes" min="5" max="60" step="5" value="15" class="admin-input" style="cursor:pointer;" oninput="document.getElementById('icebreaker_cooldown_val').textContent = this.value + ' 分钟';">
+              <input type="range" id="icebreaker_cooldownMinutes" min="5" max="60" step="5" value="15" style="width:100%; cursor:pointer;" oninput="document.getElementById('icebreaker_cooldown_val').textContent = this.value + ' 分钟';">
             </div>
           </div>
 
-          <div class="pane-header" style="margin-top:20px;">
-            <h4>📜 三阶段和解台阶文案管理 (严格恪守伦理边界)</h4>
-          </div>
+          <div class="pane-header" style="margin-top:20px;"><h4>📜 三阶段和解台阶文案管理 (严格恪守伦理边界)</h4></div>
           <div id="icebreakerActionsContainer" style="display:flex; flex-direction:column; gap:14px;"></div>
         </section>
 
         <section id="tab-checklist" class="tab-pane">
-          <div class="pane-header" style="display:flex; justify-content:space-between;">
-            <div>
-              <h3>📝 同行心愿与待办清单</h3>
-              <p>支持五大阶段：恋爱、订婚、结婚、孕期前后、婚后进阶。</p>
-            </div>
+          <div class="pane-header pane-header-flex">
+            <div><h3>📝 同行心愿与待办清单</h3><p>支持五大阶段：恋爱、订婚、结婚、孕期前后、婚后进阶。</p></div>
             <button class="btn-add" onclick="addChecklistItem()">➕ 新增心愿</button>
           </div>
           <div id="checklistItemsContainer" class="dynamic-list"></div>
         </section>
 
         <section id="tab-scratch" class="tab-pane">
-          <div class="pane-header" style="display:flex; justify-content:space-between;"><div><h3>🎟️ 刮刮乐</h3></div><button class="btn-add" onclick="addScratchCard()">➕ 新增</button></div>
+          <div class="pane-header pane-header-flex">
+            <div><h3>🎟️ 刮刮乐</h3></div>
+            <button class="btn-add" onclick="addScratchCard()">➕ 新增</button>
+          </div>
           <div id="scratchCardsContainer" class="dynamic-list"></div>
         </section>
 
@@ -289,28 +240,28 @@
 
           <div class="highlight-panel">
             <label class="highlight-text" style="margin-bottom:10px; display:block;">🔍 在线搜索云端音乐 (0存储占用)</label>
-            <div class="search-bar-wrap" style="display:flex; gap:8px; margin-bottom:12px;">
+            <div class="upload-input-group" style="margin-bottom:12px;">
               <input type="text" id="musicSearchKeyword" class="admin-input" placeholder="输入歌名/歌手 (例如: 周杰伦 / 告白气球 / 浪漫钢琴)..." onkeydown="if(event.key==='Enter') executeOnlineMusicSearch();">
-              <button class="btn-tool" style="background:var(--accent-gold); color:#fff; flex-shrink:0; padding:8px 18px;" onclick="executeOnlineMusicSearch()">🔎 搜索歌曲</button>
+              <button class="btn-tool btn-tool-accent" onclick="executeOnlineMusicSearch()">🔎 搜索歌曲</button>
             </div>
             <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px;">
               <span style="font-size:11px; font-weight:700; align-self:center;">热门推荐：</span>
-              <button class="btn-tool" onclick="quickSearchTag('周杰伦 告白气球')">🎵 告白气球</button>
-              <button class="btn-tool" onclick="quickSearchTag('周杰伦 晴天')">🎵 晴天</button>
-              <button class="btn-tool" onclick="quickSearchTag('Sweet Memories 唯美之约')">🎹 唯美浪漫钢琴</button>
+              <button class="btn-tool btn-tool-mini" onclick="quickSearchTag('周杰伦 告白气球')">🎵 告白气球</button>
+              <button class="btn-tool btn-tool-mini" onclick="quickSearchTag('周杰伦 晴天')">🎵 晴天</button>
+              <button class="btn-tool btn-tool-mini" onclick="quickSearchTag('Sweet Memories 唯美之约')">🎹 唯美钢琴</button>
             </div>
             <div id="onlineSearchResultList" style="display:flex; flex-direction:column; gap:8px; max-height:240px; overflow-y:auto;">
-              <div style="text-align:center; padding:12px;">输入歌名搜索，即可一键加入播放列表或设为主打背景音乐</div>
+              <div style="text-align:center; padding:12px; color:var(--text-sub);">输入歌名搜索，即可一键加入播放列表或设为主打音乐</div>
             </div>
           </div>
 
           <div class="highlight-panel">
-            <div class="playlist-header-wrap" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+            <div class="pane-header-flex" style="margin-bottom:14px; padding-bottom:0; border:none;">
               <div>
                 <span class="highlight-text" style="font-size:15px;">📑 播放列表管理</span>
-                <span id="playlistCountBadge">(0 / 30 首 · 本地已传 0 / 5)</span>
+                <span id="playlistCountBadge" style="font-size:12px;">(0 / 30 首 · 本地已传 0 / 5)</span>
               </div>
-              <div class="playlist-actions admin-header-actions">
+              <div class="admin-header-actions">
                 <button class="btn-tool" type="button" onclick="triggerDirectUploadLocalSong()">📤 传本地MP3</button>
                 <button class="btn-add" type="button" onclick="addCustomPlaylistItem()">➕ 手动加曲目</button>
               </div>
@@ -320,31 +271,24 @@
 
           <div class="form-grid">
             <div class="form-group">
-              <label>是否尝试自动播放 BGM</label>
-              <select id="audio_bgmAutoPlay" class="admin-select">
-                <option value="true">开启自动播放 (推荐)</option>
-                <option value="false">关闭自动播放 (手动点击黑胶)</option>
-              </select>
+              <label>自动播放 BGM</label>
+              <select id="audio_bgmAutoPlay" class="admin-select"><option value="true">开启 (推荐)</option><option value="false">关闭 (手动)</option></select>
             </div>
             <div class="form-group">
-              <label>播放循环模式</label>
-              <select id="audio_playMode" class="admin-select">
-                <option value="list-loop">🔁 列表循环 (播完自动切下一首)</option>
-                <option value="single-loop">🔂 单曲循环 (单首无限循环)</option>
-                <option value="random">🔀 随机播放 (随机选取下一首)</option>
-              </select>
+              <label>循环模式</label>
+              <select id="audio_playMode" class="admin-select"><option value="list-loop">🔁 列表循环</option><option value="single-loop">🔂 单曲循环</option><option value="random">🔀 随机播放</option></select>
             </div>
             <div class="form-group"><label>默认首播曲名</label><input type="text" id="audio_bgmTitle" class="admin-input"></div>
-            <div class="form-group"><label>默认首播艺术家</label><input type="text" id="audio_bgmArtist" class="admin-input"></div>
+            <div class="form-group"><label>默认首播歌手</label><input type="text" id="audio_bgmArtist" class="admin-input"></div>
             <div class="form-group" style="grid-column: 1 / -1;">
-              <label>默认音频直链地址</label>
+              <label>默认音频直链</label>
               <div class="upload-input-group">
                 <input type="text" id="audio_bgmUrl" class="admin-input">
                 <button class="btn-upload" onclick="triggerDirectUploadSingleBgm()">📤 上传MP3</button>
               </div>
             </div>
             <div class="form-group" style="grid-column: 1 / -1;">
-              <label>黑胶唱片中心默认封面图片链接</label>
+              <label>黑胶唱片默认封面</label>
               <div class="upload-input-group">
                 <input type="text" id="audio_vinylCover" class="admin-input">
                 <button class="btn-upload" onclick="triggerDirectUpload('audio_vinylCover', 'image/*')">🖼️ 上传封面</button>
@@ -356,8 +300,8 @@
         <section id="tab-eggs" class="tab-pane">
           <div class="pane-header"><h3>🐣 隐藏角落彩蛋悄悄话</h3></div>
           <div class="form-grid">
-            <div class="form-group" style="grid-column: 1 / -1;"><label>🌟 星星彩蛋文案</label><textarea id="egg_1_message" class="admin-textarea" rows="3"></textarea></div>
-            <div class="form-group" style="grid-column: 1 / -1;"><label>🐾 猫爪彩蛋文案</label><textarea id="egg_2_message" class="admin-textarea" rows="3"></textarea></div>
+            <div class="form-group" style="grid-column: 1 / -1;"><label>🌟 星星彩蛋</label><textarea id="egg_1_message" class="admin-textarea" rows="3"></textarea></div>
+            <div class="form-group" style="grid-column: 1 / -1;"><label>🐾 猫爪彩蛋</label><textarea id="egg_2_message" class="admin-textarea" rows="3"></textarea></div>
           </div>
         </section>
 
@@ -365,11 +309,11 @@
           <div class="pane-header"><h3>🎨 双视角主题陈列室</h3></div>
           <div class="highlight-panel">
             <div class="highlight-text" style="font-size:15px; margin-bottom:14px;">🪐 他的星河 · 男生深色主题</div>
-            <div class="theme-showroom-grid" id="boyThemesContainer" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap:14px; margin-bottom:16px;"></div>
+            <div class="theme-showroom-grid" id="boyThemesContainer" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:14px; margin-bottom:16px;"></div>
             <div class="form-group" style="margin-bottom:0;">
-              <label>🖼️ 男生视角自定义背景图</label>
+              <label>🖼️ 专属自定义壁纸 (支持静态图与动态 GIF/WEBP)</label>
               <div class="upload-input-group">
-                <input type="text" id="theme_customBgUrlBoy" class="admin-input" placeholder="输入图片直链，或点击上传 / 恢复默认...">
+                <input type="text" id="theme_customBgUrlBoy" class="admin-input" placeholder="输入图片直链，或点击右侧上传...">
                 <button class="btn-upload" type="button" onclick="triggerDirectUpload('theme_customBgUrlBoy', 'image/*')">📤 上传壁纸</button>
                 <button class="btn-tool" type="button" onclick="clearCustomBg('boy')">🔄 恢复默认</button>
               </div>
@@ -377,11 +321,11 @@
           </div>
           <div class="highlight-panel">
             <div class="highlight-text" style="font-size:15px; margin-bottom:14px;">🌸 她的花汐 · 女生浅色主题</div>
-            <div class="theme-showroom-grid" id="girlThemesContainer" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap:14px; margin-bottom:16px;"></div>
+            <div class="theme-showroom-grid" id="girlThemesContainer" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:14px; margin-bottom:16px;"></div>
             <div class="form-group" style="margin-bottom:0;">
-              <label>🖼️ 女生视角自定义背景图</label>
+              <label>🖼️ 专属自定义壁纸 (支持静态图与动态 GIF/WEBP)</label>
               <div class="upload-input-group">
-                <input type="text" id="theme_customBgUrlGirl" class="admin-input" placeholder="输入图片直链，或点击上传 / 恢复默认...">
+                <input type="text" id="theme_customBgUrlGirl" class="admin-input" placeholder="输入图片直链，或点击右侧上传...">
                 <button class="btn-upload" type="button" onclick="triggerDirectUpload('theme_customBgUrlGirl', 'image/*')">📤 上传壁纸</button>
                 <button class="btn-tool" type="button" onclick="clearCustomBg('girl')">🔄 恢复默认</button>
               </div>
