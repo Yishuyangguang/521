@@ -60,12 +60,12 @@
       z-index: 1;
     }
 
-    /* 顶部导航 */
+    /* 🎯 顶部导航（利用 Grid 实现主标题绝对居中对齐） */
     .top-header {
-      display: flex;
+      display: grid;
+      grid-template-columns: 100px 1fr 100px;
       align-items: center;
-      justify-content: space-between;
-      padding: max(20px, env(safe-area-inset-top)) 16px 16px;
+      padding: max(20px, env(safe-area-inset-top)) 16px 12px;
       position: sticky;
       top: 0;
       background: var(--bg-card, rgba(15, 23, 42, 0.85));
@@ -75,20 +75,29 @@
       border-bottom: 1px solid var(--border-card, rgba(255,255,255,0.05));
     }
     .back-btn {
+      justify-self: start;
       background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
-      color: var(--text-main, #fff); padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 700;
-      cursor: pointer; text-decoration: none;
+      color: var(--text-main, #fff); padding: 8px 12px; border-radius: 20px; font-size: 13.5px; font-weight: 700;
+      cursor: pointer; text-decoration: none; display: flex; align-items: center; justify-content: center;
     }
-    .page-title { font-size: 18px; font-weight: 900; color: var(--text-main, #e2e8f0); letter-spacing: 1px; }
+    .page-title { 
+      justify-self: center;
+      font-size: 17.5px; font-weight: 900; color: var(--text-main, #e2e8f0); 
+      letter-spacing: 1px; white-space: nowrap;
+    }
 
-    /* 横向防挤压滑动胶囊 */
+    /* ========================================================
+       🌟 核心视觉重构：阶段选择胶囊条 (响应式引擎)
+       ======================================================== */
+    
+    /* 1. 默认 PC 端样式 (维持单行居中排布，不换行) */
     .capsule-nav-container {
       width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
-      scrollbar-width: none; padding: 14px 0 16px;
+      scrollbar-width: none; padding: 16px 0 16px;
     }
     .capsule-nav-container::-webkit-scrollbar { display: none; }
     .capsule-nav-scroll {
-      display: flex; gap: 10px; width: max-content; padding: 0 16px;
+      display: flex; gap: 10px; width: max-content; padding: 0 16px; margin: 0 auto;
     }
     .capsule-btn {
       background: var(--bg-card, rgba(255,255,255,0.06)); 
@@ -102,10 +111,42 @@
       transform: translateY(-2px);
     }
 
+    /* 2. 移动端强力劫持 (≤ 768px): 切断滚动，强制 3+2 倒金字塔两行布局 */
+    @media (max-width: 768px) {
+      .capsule-nav-container {
+        padding: 12px 16px 16px;
+        overflow: visible; /* 关闭横向滚动条机制 */
+      }
+      .capsule-nav-scroll {
+        width: 100%;
+        padding: 0;
+        flex-wrap: wrap; /* 开启换行 */
+        justify-content: center;
+        gap: 10px 8px; /* 行距 10px，列距 8px，紧凑美观 */
+      }
+      .capsule-btn {
+        /* 前三个胶囊（恋爱、订婚、结婚）按 33.3% 三等分，减去 gap 边距 */
+        flex: 1 1 calc(33.333% - 6px);
+        padding: 10px 4px;
+        font-size: 13px;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      /* 后两个胶囊（孕期、进阶）按 50% 均分，形成倒梯形稳固视觉 */
+      .capsule-btn:nth-child(4),
+      .capsule-btn:nth-child(5) {
+        flex: 0 1 calc(50% - 4px);
+        max-width: 160px; /* 防止屏幕过宽时被拉长变形 */
+      }
+    }
+
     /* 霓虹流光吸顶进度条 */
     .neon-progress-wrap {
       padding: 0 16px 16px;
       position: sticky;
+      /* 补偿新的顶部高度 */
       top: calc(max(20px, env(safe-area-inset-top)) + 45px);
       z-index: 90;
       background: var(--bg-primary, #090d16);
@@ -177,7 +218,8 @@
     <header class="top-header">
       <a href="index.html" class="back-btn">➔ 返回星轨</a>
       <span class="page-title">同行约定清单</span>
-      <div style="width: 86px;"></div> 
+      <!-- 右侧留空对应的 Grid 占位符由 CSS 自动接管，此处无需冗余元素 -->
+      <div></div> 
     </header>
 
     <div class="capsule-nav-container">
