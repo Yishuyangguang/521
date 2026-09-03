@@ -52,22 +52,16 @@
   --drawer-active-title: #fde68a;
 }
 
-html,
-body,
-.universe-body {
+html, body, .universe-body {
   background-color: var(--bg-primary, #090d16) !important;
   transition: background-color 0.4s ease;
 }
 
 .universe-bg-layer {
-  position: fixed;
-  inset: 0;
-  z-index: -999;
+  position: fixed; inset: 0; z-index: -999;
   background-color: var(--bg-primary, #090d16);
   background-image: var(--theme-bg-gradient);
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
+  background-size: cover; background-position: center center; background-repeat: no-repeat;
   transition: background-color 0.4s ease, background-image 0.4s ease;
 }
 
@@ -136,7 +130,7 @@ body.theme-aurora-night {
 body.theme-french-cream {
   --bg-primary: #f7eee4;
   --theme-bg-gradient: linear-gradient(180deg, #fdfbf7 0%, #f7eee4 40%, #eddcd0 100%);
-  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-card: rgba(255, 255, 255, 0.85);
   --border-card: rgba(120, 53, 15, 0.35);
   --card-shadow: 0 16px 36px rgba(120, 53, 15, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
   --text-hero: #451a03;
@@ -152,7 +146,7 @@ body.theme-french-cream {
 body.theme-sakura-romance {
   --bg-primary: #fce7f3;
   --theme-bg-gradient: linear-gradient(180deg, #fff1f2 0%, #fce7f3 45%, #fbcfe8 100%);
-  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-card: rgba(255, 255, 255, 0.85);
   --border-card: rgba(225, 29, 72, 0.35);
   --text-hero: #881337;
   --text-hero-gradient: linear-gradient(135deg, #881337 0%, #be123c 50%, #e11d48 100%);
@@ -165,7 +159,7 @@ body.theme-sakura-romance {
 body.theme-monet-garden {
   --bg-primary: #dcfce7;
   --theme-bg-gradient: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 45%, #bbf7d0 100%);
-  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-card: rgba(255, 255, 255, 0.85);
   --border-card: rgba(22, 101, 52, 0.35);
   --text-hero: #14532d;
   --text-hero-gradient: linear-gradient(135deg, #14532d 0%, #166534 50%, #15803d 100%);
@@ -178,7 +172,7 @@ body.theme-monet-garden {
 body.theme-morning-dew {
   --bg-primary: #f1f5f9;
   --theme-bg-gradient: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 45%, #e2e8f0 100%);
-  --bg-card: rgba(255, 255, 255, 0.96);
+  --bg-card: rgba(255, 255, 255, 0.85);
   --border-card: rgba(71, 85, 105, 0.35);
   --text-hero: #0f172a;
   --text-hero-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
@@ -188,11 +182,10 @@ body.theme-morning-dew {
   --accent-gold: #d97706;
 }
 
-/* 🌟 针对当前截图：甜梦紫色高饱和清晰配色体系 */
 body.theme-sunset-blush {
   --bg-primary: #f3e8ff;
   --theme-bg-gradient: linear-gradient(180deg, #faf5ff 0%, #f3e8ff 45%, #e9d5ff 100%);
-  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-card: rgba(255, 255, 255, 0.85);
   --border-card: rgba(147, 51, 234, 0.35);
   --text-hero: #581c87;
   --text-hero-gradient: linear-gradient(135deg, #581c87 0%, #7e22ce 50%, #c026d3 100%);
@@ -205,7 +198,7 @@ body.theme-sunset-blush {
 body.theme-orange-sea {
   --bg-primary: #ffedd5;
   --theme-bg-gradient: linear-gradient(180deg, #fff7ed 0%, #ffedd5 45%, #fed7aa 100%);
-  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-card: rgba(255, 255, 255, 0.85);
   --border-card: rgba(234, 88, 12, 0.35);
   --text-hero: #7c2d12;
   --text-hero-gradient: linear-gradient(135deg, #7c2d12 0%, #c2410c 50%, #ea580c 100%);
@@ -243,11 +236,7 @@ body[data-theme-type="light"] .hub-dock__title {
   text-shadow: none !important;
 }
 
-/* ================= 🌟 核心接管：名字与契约誓言副标题高可用重构 ================= */
-/* 
- * 采用双轨选择器（data-theme-type="light" + 具体类名）：
- * 彻底消除漫反射白光模糊，确保在浅色背景下笔画锐利、高对比立显。
- */
+/* 契约标题深度穿透 (去除模糊阴影，改为硬朗高对比阴影) */
 body[data-theme-type="light"] .hero-section__names,
 body.theme-french-cream .hero-section__names,
 body.theme-sakura-romance .hero-section__names,
@@ -262,31 +251,17 @@ body.theme-orange-sea .hero-section__names {
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   text-shadow: none !important;
-  /* 摒弃发白发虚的纯白扩散晕轮，使用微距柔和深色阴影勾勒字形 */
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08)) drop-shadow(0 4px 14px rgba(88, 28, 135, 0.12)) !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08)) !important;
 }
 
-body[data-theme-type="light"] .name-connector,
-body.theme-french-cream .name-connector,
-body.theme-sakura-romance .name-connector,
-body.theme-monet-garden .name-connector,
-body.theme-morning-dew .name-connector,
-body.theme-sunset-blush .name-connector,
-body.theme-orange-sea .name-connector {
+body[data-theme-type="light"] .name-connector {
   background: linear-gradient(135deg, #d97706 0%, #ea580c 50%, #e11d48 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.08)) !important;
 }
 
-/* 契约誓言副标题接管：强制绑定高对比度深色变量，字重强化至 800 */
-body[data-theme-type="light"] .hero-section__subtitle,
-body.theme-french-cream .hero-section__subtitle,
-body.theme-sakura-romance .hero-section__subtitle,
-body.theme-monet-garden .hero-section__subtitle,
-body.theme-morning-dew .hero-section__subtitle,
-body.theme-sunset-blush .hero-section__subtitle,
-body.theme-orange-sea .hero-section__subtitle {
+body[data-theme-type="light"] .hero-section__subtitle {
   color: var(--text-subtitle) !important;
   font-weight: 800 !important;
   text-shadow: none !important;
@@ -294,7 +269,7 @@ body.theme-orange-sea .hero-section__subtitle {
   letter-spacing: 0.6px !important;
 }
 
-/* ================= 🌟 胶囊徽章与计时器玻璃拟态接管 ================= */
+/* 计时器玻璃拟态深度接管 */
 .hero-section__badge {
   background: var(--badge-bg) !important;
   border: 1px solid var(--badge-border) !important;
