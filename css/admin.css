@@ -243,7 +243,7 @@ body {
 .form-group { display: flex; flex-direction: column; gap: 7px; }
 .form-group label { font-size: 12.5px; font-weight: 800; color: var(--text-hero, #cbd5e1); }
 
-/* 🎯 修复: 多主题极清视界输入框 (防瞎眼防看不清) */
+/* 🎯 多主题极清视界输入框 (防瞎眼防看不清) */
 .admin-input, .admin-select, .admin-textarea {
   background: var(--bg-input, rgba(3, 7, 18, 0.75));
   border: 1.2px solid var(--border-card, rgba(255, 255, 255, 0.12));
@@ -285,6 +285,46 @@ body {
 }
 .item-card-title { font-size: 14.5px; font-weight: 800; color: var(--accent-gold, #fde68a); }
 
+/* ================= 🎯 核心修复1：主题陈列卡片专属边界约束样式 ================= */
+.theme-card {
+  background: var(--bg-overlay, rgba(255, 255, 255, 0.03));
+  border: 1.5px solid var(--border-card, rgba(255, 255, 255, 0.1));
+  border-radius: 16px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+.theme-card:hover {
+  background: var(--bg-card-hover, rgba(255, 255, 255, 0.08));
+  border-color: var(--accent-gold, #f59e0b);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+.theme-card--selected {
+  background: var(--badge-bg, rgba(245, 158, 11, 0.1)) !important;
+  border-color: var(--accent-gold, #f59e0b) !important;
+  box-shadow: 0 0 16px var(--badge-bg, rgba(245, 158, 11, 0.2)) !important;
+}
+.theme-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px; }
+.theme-name { font-size: 15px; font-weight: 900; color: var(--text-hero, #fff); }
+.theme-tag { 
+  font-size: 10.5px; font-weight: 800; color: var(--accent-gold, #f59e0b); 
+  background: var(--bg-overlay, rgba(0,0,0,0.2)); padding: 3px 8px; 
+  border-radius: 12px; border: 1px solid var(--border-card); white-space: nowrap; 
+}
+.theme-desc { font-size: 12.5px; line-height: 1.5; color: var(--text-sub, #94a3b8); margin-bottom: 12px; }
+.theme-card-footer { 
+  font-size: 12px; font-weight: 800; text-align: right; 
+  color: var(--text-muted); padding-top: 10px; 
+  border-top: 1px dashed var(--border-card); transition: color 0.3s; 
+}
+.theme-card--selected .theme-card-footer { color: var(--accent-gold, #f59e0b); }
+
+
 /* 3D Toast 悬浮胶囊 */
 .admin-toast {
   position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(120px);
@@ -303,7 +343,6 @@ body {
     padding: 12px 10px 80px; /* 底部预留 80px Safe Area，防止系统键盘遮挡表单 */
   }
   
-  /* 头部区域完美 2 列网格化，实现双引擎按压级对称 */
   .admin-header {
     flex-direction: column;
     align-items: stretch;
@@ -315,25 +354,22 @@ body {
     justify-content: center;
     text-align: center;
   }
+  
+  /* 🎯 核心修复2：移除破坏布局的 span 2，强行让双发引擎1:1并列 */
   .admin-header-actions {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     width: 100%;
   }
-  .admin-header-actions .btn-tool {
+  .admin-header-actions .btn-tool,
+  .admin-header-actions .btn-save-main {
+    grid-column: span 1; /* 约束为严格等距 */
     width: 100%;
     padding: 14px 6px;
     font-size: 14px;
     justify-content: center;
-  }
-  .admin-header-actions .btn-save-main {
-    grid-column: span 2;
-    width: 100%;
-    padding: 16px;
-    font-size: 15px;
-    justify-content: center;
-    border-radius: 16px;
+    border-radius: 14px;
   }
 
   /* 主体切换为单列 */
