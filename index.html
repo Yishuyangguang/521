@@ -213,21 +213,23 @@
       <div class="romantic-canvas-wrap"><canvas id="rose-particle-canvas"></canvas></div>
     </div>
     <div id="rose-click-overlay" style="position: absolute; inset: 0; z-index: 5; cursor: pointer;" title="点击唤醒专属时空"></div>
-    <div class="gatekeeper__dialog gatekeeper__dialog--hidden" id="gatekeeper-dialog" style="position: relative; z-index: 10;">
+    
+    <!-- 🌟 修复: 清理内联样式，交由 css/components.css 中的科技矩阵处理布局 -->
+    <div class="gatekeeper__dialog gatekeeper__dialog--hidden" id="gatekeeper-dialog">
       <div class="gatekeeper__header">
         <div class="gatekeeper__badge">SACRED ARCHIVE</div>
         <h2 class="gatekeeper__title" id="gatekeeper-title">🔒 验证恒久契约</h2>
       </div>
       <div class="gatekeeper__content">
         <p class="gatekeeper__question" id="gatekeeper-question">请输入纪念日口令，或点击麦克风念出誓言：</p>
-        <div class="gatekeeper__input-group" style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
-          <input type="password" id="gatekeeper-input" class="gatekeeper__input" placeholder="输入6位口令..." maxlength="20" autocomplete="off" style="flex: 1;">
-          <button id="voice-unlock-btn" class="btn-universe btn-universe--secondary" title="点击念出誓言语音解锁" style="padding: 12px 16px; border-radius: 14px;">🎙️</button>
+        <div class="gatekeeper__input-group">
+          <input type="password" id="gatekeeper-input" class="gatekeeper__input" placeholder="输入口令..." maxlength="20" autocomplete="off">
+          <button id="voice-unlock-btn" class="btn-universe btn-universe--secondary voice-unlock-btn" title="点击念出誓言">🎙️</button>
         </div>
         <p class="gatekeeper__hint" id="gatekeeper-hint">提示：包容与接纳，爱是永不止息</p>
       </div>
       <div class="gatekeeper__footer">
-        <button id="gatekeeper-btn" class="btn-universe btn-universe--primary gatekeeper__btn">
+        <button id="gatekeeper-btn" class="btn-universe gatekeeper__btn">
           <span>开启专属时空</span>
           <span class="gatekeeper__btn-icon">➔</span>
         </button>
@@ -266,7 +268,7 @@
       </div>
     </section>
 
-    <!-- 🌟 星轨功能中枢导航网格 -->
+    <!-- 星轨功能中枢导航网格 -->
     <nav class="hub-dock" id="hub-dock">
       <div class="hub-dock__header">
         <span class="hub-dock__badge">SACRED ARCHIVES</span>
@@ -281,7 +283,6 @@
             <span class="hub-btn__desc">雅歌印记 · 3D拍立得</span>
           </div>
         </div>
-
         <div class="hub-btn" data-open-stage="anniversary" onclick="if(window.StageManager) window.StageManager.openStage('anniversary')">
           <div class="hub-btn__glow"></div>
           <span class="hub-btn__icon">📅</span>
@@ -290,7 +291,6 @@
             <span class="hub-btn__desc">恒久倒数 · 恩典纪念</span>
           </div>
         </div>
-
         <div class="hub-btn" data-open-stage="icebreaker" onclick="if(window.StageManager) window.StageManager.openStage('icebreaker')">
           <div class="hub-btn__glow"></div>
           <span class="hub-btn__icon">🕊️</span>
@@ -299,8 +299,6 @@
             <span class="hub-btn__desc">情感信号箱 · 避风港</span>
           </div>
         </div>
-
-        <!-- 🌟 核心：精准切断原弹窗路由，替换为全屏新视窗打开 -->
         <div class="hub-btn" onclick="window.open('checklist.html', '_blank')">
           <div class="hub-btn__glow"></div>
           <span class="hub-btn__icon">📝</span>
@@ -309,7 +307,6 @@
             <span class="hub-btn__desc">阶段待办 · 100件心愿</span>
           </div>
         </div>
-
         <div class="hub-btn" onclick="window.open('diary.html', '_blank')">
           <div class="hub-btn__glow"></div>
           <span class="hub-btn__icon">📔</span>
@@ -318,7 +315,6 @@
             <span class="hub-btn__desc">酸甜苦辣 · 记录生活</span>
           </div>
         </div>
-
         <div class="hub-btn" data-open-stage="badges" onclick="if(window.StageManager) window.StageManager.openStage('badges')">
           <div class="hub-btn__glow"></div>
           <span class="hub-btn__icon">🎖️</span>
@@ -327,7 +323,6 @@
             <span class="hub-btn__desc">成就徽章 · 荣誉陈列</span>
           </div>
         </div>
-
         <div class="hub-btn" data-open-stage="scratch" onclick="if(window.StageManager) window.StageManager.openStage('scratch')">
           <div class="hub-btn__glow"></div>
           <span class="hub-btn__icon">🎟️</span>
@@ -336,7 +331,6 @@
             <span class="hub-btn__desc">包容特权券 · 刮刮乐</span>
           </div>
         </div>
-
         <div class="hub-btn" data-open-stage="poster" onclick="if(window.StageManager) window.StageManager.openStage('poster')">
           <div class="hub-btn__glow"></div>
           <span class="hub-btn__icon">📸</span>
@@ -355,7 +349,6 @@
 
   <div id="stage-modal-overlay" class="stage-overlay" onclick="if(window.StageManager) window.StageManager.closeStage()"></div>
   <div id="stage-modal-container" class="stage-container">
-
     <section id="stage-badges" class="stage-modal">
       <div class="stage-modal__header">
         <div class="stage-modal__title-box">
@@ -372,7 +365,6 @@
       </div>
     </section>
 
-    <!-- 保留原有其他 Stage 结构 -->
     <section id="stage-timeline" class="stage-modal">
       <div class="stage-modal__header">
         <div class="stage-modal__title-box"><span class="stage-modal__icon">🪐</span><h2 class="stage-modal__title">时光轨迹 · 雅歌印记</h2></div>
@@ -405,8 +397,6 @@
         </div>
       </div>
     </section>
-
-    <!-- 🌟 这里已经彻底移除了旧的 #stage-checklist DOM 节点，为页面减负提速 -->
 
     <section id="stage-scratch" class="stage-modal">
       <div class="stage-modal__header">
@@ -467,7 +457,6 @@
     </div>
   </div>
 
-  <!-- 各种底部的海报模态框 -->
   <div class="poster-modal" id="poster-modal">
     <div class="poster-modal__dialog">
       <div class="poster-modal__preview-box" id="poster-preview-box"></div>
@@ -478,6 +467,7 @@
       </div>
     </div>
   </div>
+  
   <div class="poster-modal" id="single-poster-modal" style="display:none;">
     <div class="poster-modal__dialog">
       <div class="poster-modal__preview-box" id="single-poster-preview-box"></div>
@@ -488,6 +478,7 @@
       </div>
     </div>
   </div>
+  
   <div id="icebreaker-modal" class="icebreaker-modal">
     <div class="icebreaker-modal__dialog">
       <div id="icebreaker-modal-badge" class="icebreaker-modal__badge">SACRED COVENANT</div>
@@ -496,6 +487,7 @@
       <div id="icebreaker-modal-actions" class="icebreaker-modal__actions"></div>
     </div>
   </div>
+  
   <div class="poster-modal" id="icebreaker-poster-modal" style="display:none;">
     <div class="poster-modal__dialog">
       <div class="poster-modal__preview-box" id="icebreaker-poster-preview-box"></div>
@@ -507,7 +499,6 @@
     </div>
   </div>
 
-  <!-- 🌟 高级控制台密钥鉴权弹窗 -->
   <div id="hq-admin-auth-modal" class="hq-auth-modal">
     <div class="hq-auth-dialog">
       <div class="hq-auth-icon">⚙️</div>
@@ -542,6 +533,7 @@
   <script src="js/core.js?v=2.5"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      // 保留玫瑰花的初始化，但移除了产生竞态条件的点击事件（转移至 core.js 处理异步锁）
       if (window.RomanticRoseEngine) {
         window.roseEngineInstance = new window.RomanticRoseEngine();
         window.roseEngineInstance.init();
@@ -549,33 +541,6 @@
           if (window.roseEngineInstance) window.roseEngineInstance.destroy();
         });
       }
-
-      const roseOverlay = document.getElementById('rose-click-overlay');
-      const gatekeeperDialog = document.getElementById('gatekeeper-dialog');
-      if (roseOverlay && gatekeeperDialog) {
-        roseOverlay.addEventListener('click', () => {
-          roseOverlay.style.display = 'none';
-          
-          const config = window.LOVE_CONFIG || {};
-          let isGatekeeperEnabled = true;
-          
-          if (config.gatekeeper && typeof config.gatekeeper.enabled !== 'undefined') {
-            isGatekeeperEnabled = config.gatekeeper.enabled;
-          } else {
-            const snapshot = localStorage.getItem("love_gatekeeper_enabled_snapshot");
-            if (snapshot !== null) {
-              isGatekeeperEnabled = (snapshot === "true");
-            }
-          }
-          
-          if (isGatekeeperEnabled) {
-            gatekeeperDialog.classList.remove('gatekeeper__dialog--hidden'); 
-          } else {
-            window.dispatchEvent(new Event('gatekeeper:bypass'));
-          }
-        });
-      }
-
       if (window.ThemeEngine) window.ThemeEngine.init();
       if (window.StageManager) window.StageManager.init();
       if (window.AnniversaryManager && window.LOVE_CONFIG) {
