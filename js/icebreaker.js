@@ -187,16 +187,20 @@ class IceBreakerManager {
     this.showToast("⏳ 正在飞向对方时空，请稍候...");
 
     try {
+      // 修复：把所点按钮的真实正文作为 customText 发出（经纯逻辑层构建载荷），
+      // 后端透传后接收端才能显示该按钮对应的内容，而非写死的固定文案。
+      const signalPayload = (window.LOVE_ICE_ACTIONS && window.LOVE_ICE_ACTIONS.buildSignalPayload)
+        ? window.LOVE_ICE_ACTIONS.buildSignalPayload(this.config, {
+            stage: phase,
+            senderGender: perspective,
+            senderDeviceId: this.deviceId,
+            actionType
+          })
+        : { stage: phase, senderGender: perspective, senderDeviceId: this.deviceId, actionType, customText: "" };
       const res = await fetch("/api/love/signal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          stage: phase,
-          senderGender: perspective,
-          senderDeviceId: this.deviceId,
-          actionType: actionType,
-          customText: ""
-        })
+        body: JSON.stringify(signalPayload)
       });
 
       const data = await res.json();
@@ -264,20 +268,22 @@ class IceBreakerManager {
   // 🌟 核心引擎补充：动态全库字典溯源方法，用于彻底消灭写死的 if-else
   _getActionMeta(actionType) {
     const allActions = this.config.icebreaker?.actions || window.LOVE_CONFIG?.icebreaker?.actions || {};
+    // 统一走共享纯逻辑层（icebreaker-actions.js），保证前端解析与单测一致。
+    const resolver = window.LOVE_ICE_ACTIONS && window.LOVE_ICE_ACTIONS.resolveActionMeta;
+    if (typeof resolver === "function") {
+      return resolver(allActions, actionType);
+    }
+    // 兼容兜底：若纯逻辑层未加载，退回本地遍历。
     let foundMeta = null;
-    
-    // 遍历所有阶段（dating, engaged, married）去匹配发来的 actionType
     for (const stageKey in allActions) {
       if (Array.isArray(allActions[stageKey])) {
-        const match = allActions[stageKey].find(a => a.type === actionType);
+        const match = allActions[stageKey].find(a => a && a.type === actionType);
         if (match) {
           foundMeta = match;
           break;
         }
       }
     }
-
-    // 兜底返回，防止空指针崩溃
     return foundMeta || { 
       label: "温情信笺", 
       icon: "💌", 
