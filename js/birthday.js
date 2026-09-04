@@ -1,7 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印 (Love Universe)
  * 文件名: js/birthday.js
- * 作用: 星轨生辰 3D 盲盒、时间锁降级保护、陀螺仪视差与 300DPI 极清海报渲染
+ * 作用: 星轨生辰 3D 盲盒、时间锁测试穿透、陀螺仪视差与 300DPI 极清海报渲染
  */
 
 class BirthdayManager {
@@ -47,11 +47,19 @@ class BirthdayManager {
 
     this.capsules = (window.LOVE_CONFIG && window.LOVE_CONFIG.birthdayCapsules) || [];
     
-    // 过滤出送给当前视角的礼物（或者显示所有，但区分状态）
+    // 过滤出送给当前视角的礼物
     const myCapsules = this.capsules.filter(c => c.target === this.currentPerspective);
 
+    // 🌟 修复 1：空状态容灾降级（Empty State Fallback）
     if (myCapsules.length === 0) {
-      container.innerHTML = `<div style="text-align:center; padding:40px 20px; color:#94a3b8; font-size:13.5px; line-height:1.6;">🌌<br>当前时空暂未探测到属于你的生辰胶囊。<br>等待对方在控制台为你封装专属惊喜吧...</div>`;
+      container.innerHTML = `
+        <div style="text-align:center; padding:40px 20px;">
+          <div style="font-size:40px; margin-bottom:12px; opacity:0.8;">🌌</div>
+          <div style="color:#fde68a; font-size:15px; font-weight:800; margin-bottom:8px;">当前时空暂无生辰胶囊</div>
+          <div style="color:#94a3b8; font-size:12.5px; line-height:1.6;">
+            等待对方在控制台为你封装专属惊喜吧...
+          </div>
+        </div>`;
       return;
     }
 
@@ -78,17 +86,21 @@ class BirthdayManager {
         const m = Math.floor((diff / 1000 / 60) % 60);
         const s = Math.floor((diff / 1000) % 60);
 
+        // 🌟 修复 2：为锁定状态增加“测试穿透”预览按钮，解决“无法随时测试”的核心诉求
         return `
           <div class="bd-capsule-card locked">
             <div class="bd-capsule-icon">🔒</div>
-            <div class="bd-capsule-title">时空胶囊尚未解锁</div>
+            <div class="bd-capsule-title" style="color:#94a3b8;">时空胶囊尚未解锁</div>
             <div class="bd-capsule-subtitle">神秘的生日礼物正在路上...</div>
-            <div class="bd-countdown-box">
+            <div class="bd-countdown-box" style="margin-bottom:14px;">
               <div class="bd-cd-item"><span>${d}</span><small>天</small></div>:
               <div class="bd-cd-item"><span>${String(h).padStart(2, '0')}</span><small>时</small></div>:
               <div class="bd-cd-item"><span>${String(m).padStart(2, '0')}</span><small>分</small></div>:
               <div class="bd-cd-item"><span>${String(s).padStart(2, '0')}</span><small>秒</small></div>
             </div>
+            <button class="btn-universe btn-universe--secondary" style="font-size:11.5px; padding:6px 14px; border-radius:12px;" onclick="window.BirthdayInstance.openCardModal('${cap.id}')">
+              🔍 提前预览 (测试)
+            </button>
           </div>
         `;
       }
@@ -277,7 +289,6 @@ class BirthdayManager {
     
     ctx.save();
     if (tpl === 'C') {
-      // 柔和圆角
       ctx.beginPath(); ctx.roundRect ? ctx.roundRect(px, py, pw, ph, 40) : ctx.rect(px, py, pw, ph); ctx.clip();
     } else if (tpl === 'A' || tpl === 'B') {
       ctx.beginPath(); ctx.roundRect ? ctx.roundRect(px, py, pw, ph, 20) : ctx.rect(px, py, pw, ph); ctx.clip();
