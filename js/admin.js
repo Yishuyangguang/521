@@ -93,7 +93,6 @@ function parseSongFilename(filename) {
   return { artist: "本地上传", title: clean };
 }
 
-// 🌟 核心拦截：将 birthdayCapsules 完全接入配置对象的生命周期
 function mergeWithDefaultConfig(cloudCfg) {
   const base = JSON.parse(JSON.stringify(window.LOVE_CONFIG || {}));
   if (!cloudCfg || typeof cloudCfg !== "object") return base;
@@ -123,7 +122,6 @@ function mergeWithDefaultConfig(cloudCfg) {
     checklist100: (Array.isArray(cloudCfg.checklist100) && cloudCfg.checklist100.length > 0) ? cloudCfg.checklist100 : (base.checklist100 || []),
     scratchCards: (Array.isArray(cloudCfg.scratchCards) && cloudCfg.scratchCards.length > 0) ? cloudCfg.scratchCards : (base.scratchCards || []),
     easterEggs: (Array.isArray(cloudCfg.easterEggs) && cloudCfg.easterEggs.length > 0) ? cloudCfg.easterEggs : (base.easterEggs || []),
-    // 新增：生日胶囊阵列
     birthdayCapsules: (Array.isArray(cloudCfg.birthdayCapsules) && cloudCfg.birthdayCapsules.length > 0) ? cloudCfg.birthdayCapsules : (base.birthdayCapsules || []),
     
     _license: cloudCfg._license || base._license || null,
@@ -326,7 +324,7 @@ function renderAllForms() {
     renderIcebreakerSettings();
     renderChecklist();
     renderScratchCards();
-    renderBirthdayCapsules(); // 🌟 触发胶囊渲染
+    renderBirthdayCapsules(); 
 
     const audio = currentConfig.audio || {};
     document.getElementById("audio_bgmAutoPlay").value = String(audio.bgmAutoPlay !== false);
@@ -383,7 +381,7 @@ async function submitDomainLicense() {
   }
 }
 
-/* ================= 🌟 核心表单区域：生日胶囊渲染 ================= */
+/* ================= 🌟 核心表单区域：生日胶囊渲染（带专属录音舱） ================= */
 function renderBirthdayCapsules() {
   const container = document.getElementById("birthdayCapsulesContainer");
   if (!container) return;
@@ -421,6 +419,14 @@ function renderBirthdayCapsules() {
             <button class="btn-upload" onclick="triggerDirectUpload('bd_photo_${idx}', 'image/*')">🖼️ 上传照片</button>
           </div>
         </div>
+        <!-- 🌟 新增：专属全息语音流输入框 -->
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label>🎙️ 专属录音音频直链 (20秒内)</label>
+          <div class="upload-input-group">
+            <input type="text" class="admin-input" id="bd_voice_${idx}" value="${escapeHtml(item.voiceAudio || "")}">
+            <button class="btn-upload" onclick="triggerDirectUpload('bd_voice_${idx}', 'audio/*')">🎙️ 上传录音</button>
+          </div>
+        </div>
         <div class="form-group" style="grid-column: 1 / -1;">
           <label>贺卡祝福语 (支持换行，建议 50 字以内)</label>
           <textarea class="admin-textarea" id="bd_msg_${idx}" rows="3">${escapeHtml(item.message || "")}</textarea>
@@ -433,7 +439,7 @@ function renderBirthdayCapsules() {
 
 function addBirthdayCapsule() { 
   if (!currentConfig.birthdayCapsules) currentConfig.birthdayCapsules = []; 
-  currentConfig.birthdayCapsules.push({ id: "bd_" + Date.now(), target: "girl", date: "2026-05-20", template: "C", photo: "", message: "生日快乐，我的唯一！\n\n在漫长的一生一世里，我愿将最纯洁的爱全部毫无保留地交给你。" }); 
+  currentConfig.birthdayCapsules.push({ id: "bd_" + Date.now(), target: "girl", date: "2026-05-20", template: "C", photo: "", voiceAudio: "", message: "生日快乐，我的唯一！\n\n在漫长的一生一世里，我愿将最纯洁的爱全部毫无保留地交给你。" }); 
   renderBirthdayCapsules(); 
 }
 
@@ -441,7 +447,6 @@ function deleteBirthdayCapsule(idx) {
   if (confirm("⚠️ 确定要删除该生日盲盒胶囊吗？")) { currentConfig.birthdayCapsules.splice(idx, 1); renderBirthdayCapsules(); } 
 }
 
-/* （篇幅原因，此处中间包含原本不需修改的方法 renderAnniversariesList / renderChecklist 等完整结构已保持一致） */
 function renderAnniversariesList() {
   const container = document.getElementById("anniversariesListContainer");
   if (!container) return;
@@ -1240,6 +1245,9 @@ async function saveAllConfigToCloud(overrideToken) {
     item.template = document.getElementById(`bd_tpl_${idx}`)?.value || "A";
     item.photo = document.getElementById(`bd_photo_${idx}`)?.value.trim() || "";
     item.message = document.getElementById(`bd_msg_${idx}`)?.value.trim() || "";
+    
+    // 🌟 核心：保存后台录入的专属录音音频直链
+    item.voiceAudio = document.getElementById(`bd_voice_${idx}`)?.value.trim() || "";
   });
 
   showToast("⏳ 正在发布到独立存储空间...");
