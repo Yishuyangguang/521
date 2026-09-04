@@ -1,7 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印 (Love Universe)
  * 文件名: js/birthday.js
- * 作用: 星轨生辰 3D 盲盒、时间锁测试穿透、陀螺仪视差与 300DPI 极清海报渲染
+ * 作用: 星轨生辰 3D 盲盒、时间锁测试穿透、专属全息语音、陀螺仪视差与极清海报渲染
  */
 
 class BirthdayManager {
@@ -11,6 +11,8 @@ class BirthdayManager {
     this.timerId = null;
     this.currentPerspective = localStorage.getItem("love_user_perspective") || "boy";
     this.tiltHandler = this.handleDeviceTilt.bind(this);
+    this.audioObj = null;
+    this.isPlaying = false;
   }
 
   init() {
@@ -46,11 +48,8 @@ class BirthdayManager {
     if (!container) return;
 
     this.capsules = (window.LOVE_CONFIG && window.LOVE_CONFIG.birthdayCapsules) || [];
-    
-    // 过滤出送给当前视角的礼物
     const myCapsules = this.capsules.filter(c => c.target === this.currentPerspective);
 
-    // 🌟 修复 1：空状态容灾降级（Empty State Fallback）
     if (myCapsules.length === 0) {
       container.innerHTML = `
         <div style="text-align:center; padding:40px 20px;">
@@ -65,7 +64,7 @@ class BirthdayManager {
 
     const now = Date.now();
     
-    container.innerHTML = `<div class="bd-capsule-grid">` + myCapsules.map((cap, idx) => {
+    container.innerHTML = `<div class="bd-capsule-grid">` + myCapsules.map((cap) => {
       const targetTime = new Date(cap.date).getTime();
       const isUnlocked = now >= targetTime;
       const isToday = isUnlocked && (now - targetTime < 24 * 60 * 60 * 1000);
@@ -86,7 +85,6 @@ class BirthdayManager {
         const m = Math.floor((diff / 1000 / 60) % 60);
         const s = Math.floor((diff / 1000) % 60);
 
-        // 🌟 修复 2：为锁定状态增加“测试穿透”预览按钮，解决“无法随时测试”的核心诉求
         return `
           <div class="bd-capsule-card locked">
             <div class="bd-capsule-icon">🔒</div>
@@ -127,7 +125,7 @@ class BirthdayManager {
     const tplClass = `bd-tpl-${cap.template || 'A'}`;
     const escapedMsg = this.escapeHtml(cap.message || "").replace(/\n/g, "<br>");
     
-    // 渲染高定模版 DOM 结构
+    // 🌟 核心：为 4 种模版注入独立的 CSS3D 层叠结构与专属音频舱
     modal.innerHTML = `
       <div class="bd-3d-overlay" onclick="window.BirthdayInstance.closeCardModal()"></div>
       <div class="bd-3d-scene">
@@ -141,20 +139,32 @@ class BirthdayManager {
             <div class="bd-card-content">
               <div class="bd-card-title">Happy Birthday</div>
               <div class="bd-card-msg">${escapedMsg}</div>
+              
+              <!-- 专属语音声纹操作舱 -->
+              ${cap.voiceAudio ? `
+                <div class="bd-audio-capsule">
+                  <button class="bd-play-btn" id="bd-play-voice-btn" onclick="window.BirthdayInstance.toggleAudio('${cap.voiceAudio}')">
+                    <span class="icon">▶</span> 收听时空密语
+                  </button>
+                </div>
+              ` : ''}
+              
             </div>
             ${cap.template === 'D' ? `<div class="bd-card-stamp">LOVE</div>` : ''}
           </div>
         </div>
-        <button class="bd-export-btn" id="bd-export-btn" onclick="window.BirthdayInstance.exportPoster('${cap.id}')">✨ 生成极清贺卡并分享</button>
+        <button class="bd-export-btn" id="bd-export-btn" onclick="window.BirthdayInstance.exportPoster('${cap.id}')">✨ 生成极清海报并分享</button>
       </div>
     `;
 
     setTimeout(() => modal.classList.add("active"), 50);
 
-    // 绑定陀螺仪视差与鼠标跟随
+    // 绑定苹果级设备陀螺仪视差
     if (window.DeviceOrientationEvent) {
       window.addEventListener("deviceorientation", this.tiltHandler, true);
     }
+    
+    // 兼容 PC 端鼠标视差
     const scene = modal.querySelector(".bd-3d-scene");
     if (scene) {
       scene.addEventListener("mousemove", (e) => {
@@ -180,21 +190,69 @@ class BirthdayManager {
     }
   }
 
+  // 🌟 Web Audio API 音频防抖控制流
+  toggleAudio(url) {
+    const btn = document.getElementById("bd-play-voice-btn");
+    
+    if (this.isPlaying && this.audioObj) {
+      this.audioObj.pause();
+      this.isPlaying = false;
+      if (btn) {
+        btn.classList.remove("playing");
+        btn.innerHTML = `<span class="icon">▶</span> 收听时空密语`;
+      }
+      return;
+    }
+
+    if (!this.audioObj) {
+      this.audioObj = new Audio(url);
+      this.audioObj.onended = () => {
+        this.isPlaying = false;
+        if (btn) {
+          btn.classList.remove("playing");
+          btn.innerHTML = `<span class="icon">▶</span> 收听时空密语`;
+        }
+      };
+    }
+
+    if (btn) {
+      btn.classList.add("playing");
+      btn.innerHTML = `<span class="icon">🎶</span> 密语解读中...`;
+    }
+
+    this.audioObj.play().then(() => {
+      this.isPlaying = true;
+    }).catch(err => {
+      alert("⚠️ 无法播放语音，请检查网络或授权：" + err.message);
+      if (btn) {
+        btn.classList.remove("playing");
+        btn.innerHTML = `<span class="icon">▶</span> 收听时空密语`;
+      }
+    });
+  }
+
   handleDeviceTilt(e) {
     const wrapper = document.getElementById("bd-card-wrapper");
     if (!wrapper || !e.gamma || !e.beta) return;
+    // 限制翻转阈值防雪崩
     let x = e.gamma; 
     let y = e.beta;
     if (x > 30) x = 30; if (x < -30) x = -30;
     if (y > 60) y = 60; if (y < 0) y = 0; 
     
-    const rotateY = x * 0.5;
-    const rotateX = (y - 30) * -0.5;
+    const rotateY = x * 0.6;
+    const rotateX = (y - 30) * -0.6;
     
     wrapper.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
   }
 
   closeCardModal() {
+    if (this.audioObj) {
+      this.audioObj.pause();
+      this.audioObj = null;
+      this.isPlaying = false;
+    }
+
     const modal = document.getElementById("bd-3d-modal");
     if (modal) {
       modal.classList.remove("active");
@@ -203,6 +261,7 @@ class BirthdayManager {
     window.removeEventListener("deviceorientation", this.tiltHandler, true);
   }
 
+  // 🌟 导出 Retina 高清 300DPI 极清卡片海报
   async exportPoster(id) {
     const cap = this.capsules.find(c => c.id === id);
     if (!cap) return;
@@ -216,23 +275,23 @@ class BirthdayManager {
     try {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
-      // 采用 Retina 3x 分辨率标准，保障相册极限清晰度
+      // 采用 1200x1600 保障高 PPI
       canvas.width = 1200;
       canvas.height = 1600;
 
-      // 1. 绘制底层背景
+      // 1. 绘制底层结构背景
       this.drawPosterBackground(ctx, cap.template || 'A');
 
-      // 2. 加载并绘制照片
+      // 2. 加载相册相片并裁切
       if (cap.photo) {
         const img = await this.loadImage(cap.photo);
         this.drawPosterPhoto(ctx, img, cap.template || 'A');
       }
 
-      // 3. 绘制文字与装饰
+      // 3. 渲染高定排版文字
       this.drawPosterText(ctx, cap, cap.template || 'A');
 
-      const dataUrl = canvas.toDataURL("image/jpeg", 1.0);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
       
       const link = document.createElement("a");
       link.download = `雅歌生辰_时空贺卡_${Date.now()}.jpg`;
@@ -244,7 +303,7 @@ class BirthdayManager {
     } finally {
       if (btn) {
         btn.disabled = false;
-        btn.innerText = "✨ 生成极清贺卡并分享";
+        btn.innerText = "✨ 生成极清海报并分享";
       }
     }
   }
@@ -255,23 +314,41 @@ class BirthdayManager {
       const grad = ctx.createLinearGradient(0, 0, w, h);
       grad.addColorStop(0, "#0f172a"); grad.addColorStop(1, "#020617");
       ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
-      ctx.strokeStyle = "rgba(56, 189, 248, 0.4)"; ctx.lineWidth = 10;
+      
+      // 绘制青蓝色机甲边框
+      ctx.strokeStyle = "rgba(56, 189, 248, 0.5)"; ctx.lineWidth = 8;
       ctx.strokeRect(40, 40, w - 80, h - 80);
-      ctx.fillStyle = "rgba(56, 189, 248, 0.1)"; ctx.fillRect(60, 60, w - 120, h - 120);
+      
+      // 模拟矩阵背景线
+      ctx.fillStyle = "rgba(56, 189, 248, 0.05)";
+      for(let i=0; i<w; i+=40) { ctx.fillRect(i, 0, 2, h); }
     } 
     else if (tpl === 'B') {
       const grad = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, h);
       grad.addColorStop(0, "#27272a"); grad.addColorStop(1, "#000000");
       ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
+      
+      // 绘制鎏金边框与模拟光晕
       ctx.strokeStyle = "#d97706"; ctx.lineWidth = 12;
+      ctx.shadowColor = "#fcd34d"; ctx.shadowBlur = 20;
       ctx.strokeRect(50, 50, w - 100, h - 100);
+      ctx.shadowBlur = 0;
     }
     else if (tpl === 'C') {
       const grad = ctx.createLinearGradient(0, 0, 0, h);
       grad.addColorStop(0, "#fdfbf7"); grad.addColorStop(1, "#fce7f3");
       ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
-      ctx.fillStyle = "rgba(255,255,255,0.6)"; ctx.fillRect(40, 40, w - 80, h - 80);
+      
+      ctx.fillStyle = "rgba(255,255,255,0.7)"; ctx.fillRect(40, 40, w - 80, h - 80);
       ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 8; ctx.strokeRect(40, 40, w - 80, h - 80);
+      
+      // 模拟冰晶雪花散落
+      ctx.fillStyle = "#ffffff";
+      for(let i=0; i<30; i++) {
+        ctx.beginPath();
+        ctx.arc(Math.random()*w, Math.random()*h, Math.random()*4+2, 0, Math.PI*2);
+        ctx.fill();
+      }
     }
     else if (tpl === 'D') {
       ctx.fillStyle = "#f3f4f6"; ctx.fillRect(0, 0, w, h);
@@ -289,9 +366,14 @@ class BirthdayManager {
     
     ctx.save();
     if (tpl === 'C') {
+      // 冰晶模版：大圆角裁切
       ctx.beginPath(); ctx.roundRect ? ctx.roundRect(px, py, pw, ph, 40) : ctx.rect(px, py, pw, ph); ctx.clip();
     } else if (tpl === 'A' || tpl === 'B') {
+      // 机甲与黑金：中等圆角
       ctx.beginPath(); ctx.roundRect ? ctx.roundRect(px, py, pw, ph, 20) : ctx.rect(px, py, pw, ph); ctx.clip();
+    } else {
+      // 复古相纸：直角裁切
+      ctx.beginPath(); ctx.rect(px, py, pw, ph); ctx.clip();
     }
     
     const imgRatio = img.naturalWidth / img.naturalHeight;
@@ -302,6 +384,8 @@ class BirthdayManager {
     } else {
       sw = img.naturalWidth; sh = sw / boxRatio; sx = 0; sy = (img.naturalHeight - sh) / 2;
     }
+    
+    // 渲染图层
     ctx.drawImage(img, sx, sy, sw, sh, px, py, pw, ph);
     ctx.restore();
     
@@ -338,7 +422,7 @@ class BirthdayManager {
     });
 
     if (tpl === 'D') {
-      ctx.fillStyle = "#e11d48"; ctx.font = "bold 40px sans-serif";
+      ctx.fillStyle = "#e11d48"; ctx.font = "bold 50px sans-serif";
       ctx.save(); ctx.translate(950, 1400); ctx.rotate(-15 * Math.PI / 180);
       ctx.fillText("♥ LOVE", 0, 0); ctx.restore();
     }
