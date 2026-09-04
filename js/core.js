@@ -1,7 +1,7 @@
 /**
  * 众水不灭 · 雅歌之印 (Love Universe) 前台核心主控
  * 文件名: js/core.js
- * 作用: 门禁鉴权、异步竞态锁防闪烁、高定版控制台密码入口、软键盘失焦防白屏
+ * 作用: 门禁鉴权、异步竞态锁防闪烁、高定版控制台密码入口、全局状态分发重组
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -11,7 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => unlockMainUniverse(false), 50);
   }
 
-  // 🌟 核心修复1：创建一个 Promise，让其承载拉取远程配置的使命
   const cloudSyncPromise = syncCloudData();
 
   function escapeHtml(s) {
@@ -122,15 +121,12 @@ document.addEventListener("DOMContentLoaded", () => {
   initGatekeeperUI();
   initAdminPortalTrigger(); 
 
-  // 🌟 核心修复2：接管玫瑰点击事件，利用 Await 同步锁彻底解决竞态弹窗问题
   const roseOverlay = document.getElementById('rose-click-overlay');
   if (roseOverlay) {
     roseOverlay.addEventListener('click', async () => {
-      // 点击瞬间立即隐藏玫瑰，提供即时反馈，防止重复点击
       roseOverlay.style.pointerEvents = 'none';
       roseOverlay.style.display = 'none';
       
-      // 【关键阻塞锁】等待云端配置全部获取完毕，再判断门禁状态。绝对摒弃陈旧缓存猜测。
       await cloudSyncPromise;
       
       const isGatekeeperEnabled = config.gatekeeper && typeof config.gatekeeper.enabled !== 'undefined' 
@@ -369,6 +365,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // 🌟 核心修复3：将强同步写入单例管理器中，解决脏读！
   async function syncCloudData() {
     try {
       const res = await fetch("/api/love/config");
@@ -377,7 +374,6 @@ document.addEventListener("DOMContentLoaded", () => {
         config = mergeWithDefaultConfig(data.config);
         window.LOVE_CONFIG = config;
         
-        // 此处的 LocalStorage snapshot 可留作边缘降级兜底，主逻辑已不再受其影响
         const isGatekeeperEnabled = config.gatekeeper ? config.gatekeeper.enabled !== false : true;
         localStorage.setItem("love_gatekeeper_enabled_snapshot", isGatekeeperEnabled ? "true" : "false");
 
@@ -385,6 +381,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (window.Effects) {
           window.Effects.updateConfig(config);
+        }
+        
+        // 【关键】：如果主界面已经解锁，此时需要立刻通知后台管理器更新它们内部的本地缓存
+        if (sessionStorage.getItem("universe_unlocked") === "true") {
+           if (window.AnniversaryManager) {
+               // 查找由于时序问题提前生成但使用了脏数据的单例
+               const currentInstance = Object.values(window).find(val => val instanceof window.AnniversaryManager);
+               if (currentInstance) currentInstance.init(); 
+           }
         }
       }
     } catch (_) {}
@@ -514,6 +519,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const lifecycleMgr = new window.LifecycleEngine(config);
       lifecycleMgr.init();
     }
+    
+    // 【关键同步点】如果在没有刷新的情况下解锁，强行实例化纪念日单体保证最新数据渲染
+    if (window.AnniversaryManager) {
+        if (!window.AnniversaryInstance) {
+           window.AnniversaryInstance = new window.AnniversaryManager(config);
+        }
+        window.AnniversaryInstance.init();
+    }
+    
     if (window.TimelineManager) {
       const timelineMgr = new window.TimelineManager(config);
       timelineMgr.init();
