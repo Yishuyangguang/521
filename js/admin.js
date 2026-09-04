@@ -93,6 +93,7 @@ function parseSongFilename(filename) {
   return { artist: "本地上传", title: clean };
 }
 
+// 🌟 核心拦截：将 birthdayCapsules 完全接入配置对象的生命周期
 function mergeWithDefaultConfig(cloudCfg) {
   const base = JSON.parse(JSON.stringify(window.LOVE_CONFIG || {}));
   if (!cloudCfg || typeof cloudCfg !== "object") return base;
@@ -122,6 +123,9 @@ function mergeWithDefaultConfig(cloudCfg) {
     checklist100: (Array.isArray(cloudCfg.checklist100) && cloudCfg.checklist100.length > 0) ? cloudCfg.checklist100 : (base.checklist100 || []),
     scratchCards: (Array.isArray(cloudCfg.scratchCards) && cloudCfg.scratchCards.length > 0) ? cloudCfg.scratchCards : (base.scratchCards || []),
     easterEggs: (Array.isArray(cloudCfg.easterEggs) && cloudCfg.easterEggs.length > 0) ? cloudCfg.easterEggs : (base.easterEggs || []),
+    // 新增：生日胶囊阵列
+    birthdayCapsules: (Array.isArray(cloudCfg.birthdayCapsules) && cloudCfg.birthdayCapsules.length > 0) ? cloudCfg.birthdayCapsules : (base.birthdayCapsules || []),
+    
     _license: cloudCfg._license || base._license || null,
     adminSecurity: cloudCfg.adminSecurity || base.adminSecurity || { password: "521" }
   };
@@ -322,6 +326,7 @@ function renderAllForms() {
     renderIcebreakerSettings();
     renderChecklist();
     renderScratchCards();
+    renderBirthdayCapsules(); // 🌟 触发胶囊渲染
 
     const audio = currentConfig.audio || {};
     document.getElementById("audio_bgmAutoPlay").value = String(audio.bgmAutoPlay !== false);
@@ -378,6 +383,65 @@ async function submitDomainLicense() {
   }
 }
 
+/* ================= 🌟 核心表单区域：生日胶囊渲染 ================= */
+function renderBirthdayCapsules() {
+  const container = document.getElementById("birthdayCapsulesContainer");
+  if (!container) return;
+  container.innerHTML = "";
+  (currentConfig.birthdayCapsules || []).forEach((item, idx) => {
+    const card = document.createElement("div");
+    card.className = "item-card";
+    card.innerHTML = `
+      <div class="item-card-header">
+        <span class="item-card-title">🎁 时空盲盒 #${idx + 1}</span>
+        <div><button class="btn-del" onclick="deleteBirthdayCapsule(${idx})">🗑️ 删除</button></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>送给谁？</label>
+          <select class="admin-select" id="bd_target_${idx}" onchange="currentConfig.birthdayCapsules[${idx}].target=this.value">
+            <option value="girl" ${item.target==='girl'?'selected':''}>送给她 (女孩视角)</option>
+            <option value="boy" ${item.target==='boy'?'selected':''}>送给他 (男孩视角)</option>
+          </select>
+        </div>
+        <div class="form-group"><label>解锁日期 (如: 2026-05-20)</label><input type="text" class="admin-input" id="bd_date_${idx}" value="${escapeHtml(item.date || "")}"></div>
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label>高定 3D 模版选项 (自动适配屏幕尺寸引擎)</label>
+          <select class="admin-select highlight-text" id="bd_tpl_${idx}" onchange="currentConfig.birthdayCapsules[${idx}].template=this.value">
+            <option value="A" ${item.template==='A'?'selected':''}>🪐 模版 A · 深空机甲 (男·炫酷科幻闪烁)</option>
+            <option value="B" ${item.template==='B'?'selected':''}>👑 模版 B · 黑金岁月 (男·高奢镭射反光)</option>
+            <option value="C" ${item.template==='C'?'selected':''}>❄️ 模版 C · 法式初雪 (女·清透毛玻璃冰晶)</option>
+            <option value="D" ${item.template==='D'?'selected':''}>📸 模版 D · 复古相纸 (女·浪漫打字机滤镜)</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label>贺卡中心照片直链</label>
+          <div class="upload-input-group">
+            <input type="text" class="admin-input" id="bd_photo_${idx}" value="${escapeHtml(item.photo || "")}">
+            <button class="btn-upload" onclick="triggerDirectUpload('bd_photo_${idx}', 'image/*')">🖼️ 上传照片</button>
+          </div>
+        </div>
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label>贺卡祝福语 (支持换行，建议 50 字以内)</label>
+          <textarea class="admin-textarea" id="bd_msg_${idx}" rows="3">${escapeHtml(item.message || "")}</textarea>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function addBirthdayCapsule() { 
+  if (!currentConfig.birthdayCapsules) currentConfig.birthdayCapsules = []; 
+  currentConfig.birthdayCapsules.push({ id: "bd_" + Date.now(), target: "girl", date: "2026-05-20", template: "C", photo: "", message: "生日快乐，我的唯一！\n\n在漫长的一生一世里，我愿将最纯洁的爱全部毫无保留地交给你。" }); 
+  renderBirthdayCapsules(); 
+}
+
+function deleteBirthdayCapsule(idx) { 
+  if (confirm("⚠️ 确定要删除该生日盲盒胶囊吗？")) { currentConfig.birthdayCapsules.splice(idx, 1); renderBirthdayCapsules(); } 
+}
+
+/* （篇幅原因，此处中间包含原本不需修改的方法 renderAnniversariesList / renderChecklist 等完整结构已保持一致） */
 function renderAnniversariesList() {
   const container = document.getElementById("anniversariesListContainer");
   if (!container) return;
@@ -846,7 +910,6 @@ function testPreviewAudio(url, btnId, songTitle) {
   previewAudioObj.onended = () => { if (currentBtn) currentBtn.textContent = "🎧 试听"; };
 }
 
-// 🌟 核心修复1：重构主题陈列卡片的层级解构，赋予清晰且美观的边界与排版
 function renderThemeShowroom() {
   const boyBox = document.getElementById("boyThemesContainer");
   const girlBox = document.getElementById("girlThemesContainer");
@@ -1169,6 +1232,15 @@ async function saveAllConfigToCloud(overrideToken) {
     vinylCover: document.getElementById("audio_vinylCover").value.trim(),
     playlist: playlistToSave
   };
+
+  // 🌟 将新增的 birthdayCapsules 属性保存到云端持久化
+  (currentConfig.birthdayCapsules || []).forEach((item, idx) => {
+    item.target = document.getElementById(`bd_target_${idx}`)?.value || "girl";
+    item.date = document.getElementById(`bd_date_${idx}`)?.value.trim() || "";
+    item.template = document.getElementById(`bd_tpl_${idx}`)?.value || "A";
+    item.photo = document.getElementById(`bd_photo_${idx}`)?.value.trim() || "";
+    item.message = document.getElementById(`bd_msg_${idx}`)?.value.trim() || "";
+  });
 
   showToast("⏳ 正在发布到独立存储空间...");
   const token = overrideToken || getAuthToken();
