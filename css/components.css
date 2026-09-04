@@ -61,7 +61,7 @@
   -webkit-backdrop-filter: blur(8px);
 }
 
-/* ================= 🌟 星轨高科门禁舱重构 (修复竞态红屏、实现极简对称防遮挡) ================= */
+/* ================= 🌟 星轨高科门禁舱重构 (修复红屏、实现极致对称与防遮挡) ================= */
 .gatekeeper {
   position: fixed;
   inset: 0;
@@ -171,6 +171,7 @@
 }
 .gatekeeper__input::placeholder { color: #475569; letter-spacing: 1px; font-family: sans-serif; font-weight: 600;}
 
+/* 全息独立麦克风按钮 */
 .voice-unlock-btn {
   background: rgba(255, 255, 255, 0.05) !important;
   border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
@@ -191,6 +192,7 @@
   min-height: 18px;
 }
 
+/* 宇宙时空激活按钮 (替换大红) */
 .gatekeeper__btn { 
   width: 100%; 
   padding: 14px 20px; 
@@ -753,7 +755,7 @@
 .bd-export-btn:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
 .bd-export-btn:active { transform: scale(0.95); }
 
-/* ================= 其他保留的旧版组件样式（拍立得、刮刮乐等） ================= */
+/* ================= 📸 拍立得时光轴 ================= */
 .timeline-flow { display: flex; flex-direction: column; gap: 28px; max-width: 640px; margin: 0 auto; position: relative; }
 .timeline-node { display: flex; flex-direction: column; position: relative; }
 .timeline-node__time { font-size: 12px; font-weight: 900; color: var(--accent-gold, #f59e0b); letter-spacing: 1px; margin-bottom: 8px; display: inline-flex; align-items: center; gap: 6px; }
@@ -785,40 +787,141 @@
 .polaroid-voice-icon { width: 26px; height: 26px; border-radius: 50%; background: rgba(244, 63, 94, 0.15); color: #e11d48; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; }
 .polaroid-voice-pill.playing .polaroid-voice-icon { background: rgba(255, 255, 255, 0.25); color: #ffffff; }
 
+.polaroid-voice-waves { display: flex; align-items: center; gap: 3px; height: 16px; }
+.polaroid-wave-bar { width: 3px; height: 6px; background: #f43f5e; border-radius: 2px; transition: height 0.2s ease; }
+.polaroid-voice-pill.playing .polaroid-wave-bar { background: #ffffff; animation: polaroidWaveAnimation 0.9s ease-in-out infinite alternate; }
+.polaroid-voice-pill.playing .polaroid-wave-bar:nth-child(1) { animation-delay: 0.1s; }
+.polaroid-voice-pill.playing .polaroid-wave-bar:nth-child(2) { animation-delay: 0.3s; }
+.polaroid-voice-pill.playing .polaroid-wave-bar:nth-child(3) { animation-delay: 0.2s; }
+.polaroid-voice-pill.playing .polaroid-wave-bar:nth-child(4) { animation-delay: 0.4s; }
+.polaroid-voice-pill.playing .polaroid-wave-bar:nth-child(5) { animation-delay: 0.15s; }
+@keyframes polaroidWaveAnimation { 0% { height: 4px; } 100% { height: 16px; } }
+
+.polaroid-voice-info { display: flex; flex-direction: column; }
+.polaroid-voice-title { font-size: 12px; font-weight: 800; color: #9f1239; line-height: 1.2; }
+.polaroid-voice-pill.playing .polaroid-voice-title { color: #ffffff; }
+.polaroid-voice-duration { font-size: 10px; font-weight: 700; color: #e11d48; font-family: ui-monospace, monospace; }
+.polaroid-voice-pill.playing .polaroid-voice-duration { color: rgba(255, 255, 255, 0.9); }
+.polaroid-card__back-footer { display: flex; justify-content: space-between; font-size: 11px; color: #9ca3af; font-weight: 700; }
+
+/* ================= 📝 100 件事清单 ================= */
+.checklist-card { background: var(--bg-card, var(--space-card)); border: 1.5px solid var(--border-card, var(--glass-border)); border-radius: 24px; padding: 24px 20px; box-shadow: var(--card-shadow, var(--glass-shadow)); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); max-width: 680px; margin: 0 auto; transition: all 0.3s ease; }
+.checklist-card__progress-bar { width: 100%; height: 8px; background: rgba(3, 7, 18, 0.3); border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
+.checklist-card__progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--sun-gold), var(--primary-pink)); box-shadow: 0 0 10px var(--rose-gold-glow); transition: width 0.4s var(--ease-spring); }
+.checklist-card__stats { font-size: 12.5px; font-weight: 800; color: var(--text-sub, #fde68a); text-align: right; margin-bottom: 16px; transition: color 0.3s ease; }
 .checklist-grid { display: flex; flex-direction: column; gap: 10px; max-height: 480px; overflow-y: auto; padding-right: 6px; }
 .checklist-item { background: var(--drawer-item-bg, rgba(3, 7, 18, 0.5)); border: 1px solid var(--border-card, rgba(255, 255, 255, 0.06)); border-radius: 12px; padding: 10px 14px; transition: all 0.2s; }
-.checklist-item__label { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.checklist-item:hover { background: rgba(255, 255, 255, 0.1); }
+.checklist-item__label { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
 .checklist-item__checkbox { display: none; }
-.checklist-item__custom-box { width: 18px; height: 18px; border-radius: 6px; border: 1.5px solid var(--rose-gold, #f43f5e); display: flex; align-items: center; justify-content: center; }
+.checklist-item__custom-box { width: 18px; height: 18px; border-radius: 6px; border: 1.5px solid var(--rose-gold, #f43f5e); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s ease; }
 .checklist-item__checkbox:checked + .checklist-item__custom-box { background: var(--primary-pink, #f43f5e); border-color: var(--primary-pink); }
 .checklist-item__checkbox:checked + .checklist-item__custom-box::after { content: "✓"; color: #ffffff; font-size: 12px; font-weight: 900; }
-.checklist-item__text { font-size: 13.5px; font-weight: 700; color: var(--text-main); }
+.checklist-item__text { font-size: 13.5px; font-weight: 700; color: var(--text-main); transition: all 0.2s ease; }
+.checklist-item--checked .checklist-item__text { color: var(--text-muted); text-decoration: line-through; opacity: 0.6; }
 
+/* ================= 🎟️ 刮刮乐 ================= */
 .scratch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; max-width: 680px; margin: 0 auto; }
 .scratch-card { position: relative; min-height: 180px; border-radius: 20px; overflow: hidden; background: linear-gradient(135deg, rgba(255, 253, 245, 0.95) 0%, rgba(254, 243, 199, 0.95) 100%); border: 1.5px solid rgba(253, 230, 138, 0.6); box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25); }
-.scratch-card__content { padding: 20px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; color: #374151; }
+.scratch-card__content { padding: 20px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; color: #374151; position: relative; }
 .scratch-card__header { display: flex; align-items: center; gap: 8px; }
+.scratch-card__icon { font-size: 24px; }
+.scratch-card__title { font-size: 16px; font-weight: 900; color: #92400e; }
+.scratch-card__text { font-size: 13.5px; font-weight: 600; color: #451a03; line-height: 1.5; margin: 10px 0; }
 .scratch-card__canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 5; touch-action: none; cursor: grab; }
+.scratch-stamp { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg) scale(2); opacity: 0; pointer-events: none; z-index: 10; transition: all 0.25s var(--ease-spring); }
+.scratch-stamp--visible { opacity: 0.9; transform: translate(-50%, -50%) rotate(-15deg) scale(1); }
+.scratch-stamp__circle { width: 96px; height: 96px; border: 3px dashed var(--stamp-red); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 16px var(--stamp-red-glow), inset 0 0 8px var(--stamp-red-glow); background: rgba(220, 38, 38, 0.08); }
+.scratch-stamp__status { font-size: 18px; font-weight: 900; color: var(--stamp-red); letter-spacing: 2px; }
+.scratch-stamp__time { font-size: 9.5px; font-weight: 800; color: var(--stamp-red); font-family: ui-monospace, monospace; }
 
-.vinyl-player { position: fixed; bottom: max(20px, env(safe-area-inset-bottom, 20px)); left: max(16px, env(safe-area-inset-left, 16px)); z-index: 55000; }
-.heart-music-capsule { width: 50px; height: 50px; border-radius: 50%; background: var(--bg-card, rgba(20, 20, 38, 0.75)); border: 1.5px solid var(--border-card, rgba(255, 255, 255, 0.25)); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; }
-.heart-music-capsule:hover { transform: scale(1.1) translateY(-2px); border-color: var(--accent-gold, #f59e0b); }
-.heart-music-core { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+/* ================= 🌟 极简半透明悬浮爱心音乐晶体 ================= */
+.vinyl-player { position: fixed; bottom: max(20px, env(safe-area-inset-bottom, 20px)); left: max(16px, env(safe-area-inset-left, 16px)); z-index: 55000; display: flex; align-items: center; pointer-events: auto; transform: translateZ(0); -webkit-transform: translateZ(0); }
+.heart-music-capsule { width: 50px; height: 50px; border-radius: 50%; background: var(--bg-card, rgba(20, 20, 38, 0.75)); border: 1.5px solid var(--border-card, rgba(255, 255, 255, 0.25)); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 16px var(--rose-gold-glow, rgba(251, 113, 133, 0.35)); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; pointer-events: auto; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+.heart-music-capsule:hover { transform: scale(1.1) translateY(-2px); border-color: var(--accent-gold, #f59e0b); box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5), 0 0 22px var(--accent-gold-glow, rgba(245, 158, 11, 0.45)); }
+.heart-music-capsule:active { transform: scale(0.95); }
+.heart-music-core { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%); border: 1.5px solid rgba(255, 255, 255, 0.6); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; box-shadow: 0 2px 8px rgba(244, 63, 94, 0.4); pointer-events: none; }
+.heart-music-icon { font-size: 15px; line-height: 1; pointer-events: none; transition: transform 0.3s ease; }
+.heart-music-capsule.playing .heart-music-icon { animation: heartBeatPulse 1.2s infinite ease-in-out; }
+.heart-music-cover { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; pointer-events: none; }
+.heart-music-pulse { position: absolute; inset: -4px; border-radius: 50%; border: 1.5px solid var(--primary-pink, #f43f5e); opacity: 0; pointer-events: none; }
+.heart-music-capsule.playing .heart-music-pulse { animation: heartPulseRipple 2s infinite ease-out; }
+
+@keyframes heartBeatPulse { 0%, 100% { transform: scale(1); } 25% { transform: scale(1.22); } 50% { transform: scale(0.95); } 75% { transform: scale(1.15); } }
+@keyframes heartPulseRipple { 0% { transform: scale(0.9); opacity: 0.8; } 100% { transform: scale(1.5); opacity: 0; } }
+
+/* ================= 🎵 歌曲列表抽屉 ================= */
+.playlist-drawer { position: fixed; bottom: calc(max(20px, env(safe-area-inset-bottom, 20px)) + 62px); left: max(16px, env(safe-area-inset-left, 16px)); width: 310px; max-width: calc(100vw - 32px); max-height: 380px; background: var(--drawer-bg); border: 1.5px solid var(--drawer-border); border-radius: 20px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4), 0 0 20px var(--accent-gold-glow, rgba(245, 158, 11, 0.15)); z-index: 56000; display: flex; flex-direction: column; overflow: hidden; opacity: 0; visibility: hidden; transform: translateY(16px) scale(0.95); pointer-events: none; transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1); }
+.playlist-drawer.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); pointer-events: auto; }
+.playlist-drawer__header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border-card, rgba(255, 255, 255, 0.1)); background: rgba(0, 0, 0, 0.05); }
+.playlist-drawer__title { font-size: 13.5px; font-weight: 800; color: var(--text-hero, #fde68a); display: flex; align-items: center; gap: 6px; }
+.playlist-drawer__close { background: transparent; border: none; color: var(--text-sub, #94a3b8); font-size: 16px; cursor: pointer; padding: 2px 6px; line-height: 1; border-radius: 6px; transition: all 0.2s; }
+.playlist-drawer__close:hover { color: var(--text-main, #ffffff); background: rgba(0, 0, 0, 0.1); }
+.playlist-drawer__list { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 6px; -webkit-overflow-scrolling: touch; }
+.playlist-drawer__item { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-radius: 12px; background: var(--drawer-item-bg); border: 1px solid var(--drawer-item-border); cursor: pointer; transition: all 0.2s ease; user-select: none; }
+.playlist-drawer__item:hover { background: rgba(245, 158, 11, 0.15); border-color: var(--accent-gold); transform: translateX(3px); }
+.playlist-drawer__item.active { background: var(--drawer-active-bg); border-color: var(--drawer-active-border); box-shadow: 0 2px 10px rgba(245, 158, 11, 0.2); }
+.playlist-drawer__item-info { flex: 1; overflow: hidden; margin-right: 8px; }
+.playlist-drawer__item-title { font-size: 12.5px; font-weight: 800; color: var(--drawer-item-title); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.playlist-drawer__item.active .playlist-drawer__item-title { color: var(--drawer-active-title); }
+.playlist-drawer__item-artist { font-size: 11px; color: var(--drawer-item-artist); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.playlist-drawer__item-icon { font-size: 12px; color: var(--accent-gold); flex-shrink: 0; }
+.playlist-drawer__empty { padding: 24px 12px; text-align: center; color: var(--text-sub); font-size: 12px; line-height: 1.6; }
+
+/* ================= 彩蛋与海报 ================= */
+.easter-egg-trigger { position: fixed; font-size: 20px; cursor: pointer; z-index: 40000; user-select: none; opacity: 0.8; transition: opacity 0.2s, transform 0.2s; transform: translateZ(0); }
+.easter-egg-trigger:hover { opacity: 1; transform: scale(1.2); }
+.easter-egg-trigger--star { top: 30px; right: 25px; }
+.easter-egg-trigger--paw { bottom: max(24px, env(safe-area-inset-bottom, 24px)); right: 25px; }
+.egg-modal, .poster-modal { position: fixed; inset: 0; background: rgba(7, 10, 20, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 60000; display: none; align-items: center; justify-content: center; padding: 20px; }
+.egg-modal__dialog, .poster-modal__dialog { background: var(--bg-card, var(--space-card)); border: 1.5px solid var(--border-card, var(--glass-border)); border-radius: 24px; padding: 24px; box-shadow: var(--card-shadow, var(--glass-shadow)); max-width: 380px; width: 100%; text-align: center; }
+.egg-modal__body { font-size: 14.5px; line-height: 1.6; color: var(--text-main, #fef3c7); font-weight: 700; margin-bottom: 20px; }
+.poster-modal__tip { font-size: 12px; color: var(--text-sub, var(--text-muted)); margin-top: 10px; }
+.poster-modal__actions { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+
+/* ================= 防御性兜底 ================= */
+.parallax-photo-wall, .timeline-flow, .stage-modal__body { scroll-snap-type: none !important; overscroll-behavior: auto !important; }
+.body--locked { position: fixed !important; width: 100% !important; overflow: hidden !important; }
 
 /* ================= 📱 移动端视口深度调优 ================= */
 @media (max-width: 640px) {
   .hero-section { padding-top: max(72px, calc(env(safe-area-inset-top, 0px) + 68px)); margin-bottom: 22px; }
   .hero-section__names { font-size: 28px; letter-spacing: 1.8px; }
-  
+  .name-connector { margin: 0 5px; font-size: 0.85em; }
+  .hero-section__badge { font-size: 9px; letter-spacing: 2px; padding: 2.5px 11px; margin-bottom: 8px; }
+  .hero-section__subtitle { font-size: 11.5px; padding: 0 12px; line-height: 1.4; margin-bottom: 16px; }
+
+  .perspective-capsule { top: max(10px, env(safe-area-inset-top, 10px)); right: 10px; padding: 2.5px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .perspective-btn { padding: 5px 10px; font-size: 11px; }
+  .easter-egg-trigger--star { top: max(56px, calc(env(safe-area-inset-top, 0px) + 52px)) !important; right: 12px !important; }
+
+  .love-timer { padding: 14px 10px; border-radius: 20px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .love-timer__grid { gap: 4px; }
+  .love-timer__unit { min-width: 44px; padding: 7px 4px; border-radius: 10px; }
+  .love-timer__num { font-size: 18px; }
+  .love-timer__label { font-size: 9px; }
+
   .hub-dock { padding: 18px 12px; border-radius: 22px; margin-bottom: 24px; }
-  .hub-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; } /* 保持移动端也是 3x3 矩阵，防止按钮变形 */
+  .hub-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .hub-btn { padding: 12px 8px; border-radius: 16px; }
   .hub-btn__icon { font-size: 24px; margin-bottom: 4px; }
   .hub-btn__title { font-size: 11px; }
-  .hub-btn__desc { display: none; } /* 移动端隐藏描述，保持图标和标题紧凑 */
+  .hub-btn__desc { display: none; }
 
+  .stage-container { padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)) 8px; }
   .stage-modal { inset: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)) 8px; border-radius: 22px; }
+  .stage-modal__header { padding: 12px 16px; }
+  .stage-modal__title { font-size: 14.5px; }
+  .stage-modal__body { padding: 16px 12px; }
+
+  .vinyl-player { bottom: max(16px, env(safe-area-inset-bottom, 16px)); left: 12px; }
+  .heart-music-capsule { width: 44px; height: 44px; }
+  .heart-music-core { width: 28px; height: 28px; }
+  .heart-music-icon { font-size: 13px; }
+
+  .playlist-drawer { left: 12px; bottom: calc(max(16px, env(safe-area-inset-bottom, 16px)) + 54px); width: calc(100vw - 24px); max-width: 320px; max-height: 320px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  
   .bd-3d-scene { padding: 10px; }
-  .bd-card-wrapper { aspect-ratio: 3 / 4; max-height: 65vh; } /* 防止移动端高度溢出 */
+  .bd-card-wrapper { aspect-ratio: 3 / 4; max-height: 65vh; }
   .bd-export-btn { padding: 12px 20px; font-size: 13.5px; }
 }
