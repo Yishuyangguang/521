@@ -8,11 +8,9 @@
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=2.0">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2.0">
   
-  <!-- 🎯 引入全局主题与控制台专属样式 -->
   <link rel="stylesheet" href="css/themes.css?v=2.5">
   <link rel="stylesheet" href="css/admin.css?v=2.6">
   
-  <!-- 🎯 主题变色龙引擎：极速拦截计算黑夜/白昼模式 -->
   <script>
     (function() {
       const themeId = localStorage.getItem("love_current_theme_id") || "sunset-twilight";
@@ -40,11 +38,9 @@
 </head>
 <body>
 
-  <!-- 动态宇宙背景层 -->
   <div id="universe-bg-layer" class="universe-bg-layer"></div>
 
   <div class="admin-layout" id="adminLayout" style="display:none;">
-    <!-- 顶层操作舱控制台 -->
     <header class="admin-header">
       <div class="admin-brand">
         <span class="admin-brand-icon">🌟</span>
@@ -60,7 +56,6 @@
     </header>
 
     <div class="admin-main">
-      <!-- 左侧飞船侧翼导航 -->
       <nav class="admin-sidebar">
         <button class="tab-btn active" data-tab="tab-meta">👫 1. 基础档案与生命</button>
         <button class="tab-btn" data-tab="tab-gatekeeper">🔒 2. 门禁关卡与防偷窥</button>
@@ -74,10 +69,12 @@
         <button class="tab-btn" data-tab="tab-eggs">🐣 10. 隐藏彩蛋悄悄话</button>
         <button class="tab-btn" data-tab="tab-theme">🎨 11. 双视角主题陈列室</button>
         <button class="tab-btn" data-tab="tab-license">💎 12. 契约授权</button>
+        <!-- 🌟 新增：第 13 个独立预设菜单 -->
+        <button class="tab-btn" data-tab="tab-birthday">🎂 13. 生日盲盒预设</button>
       </nav>
 
-      <!-- 核心动力矩阵数据区 -->
       <div class="admin-content">
+        <!-- 之前原有的 Section 省略... (实际使用中需要完整保留) -->
         <section id="tab-meta" class="tab-pane active">
           <div class="pane-header"><h3>👫 基础档案与生命周期阶段设置</h3></div>
           <div class="form-grid">
@@ -125,6 +122,7 @@
           </div>
         </section>
 
+        <!-- (因篇幅限制，这里不重复罗列中间的旧 tab-pane 代码，请完全保留它们！) -->
         <section id="tab-gatekeeper" class="tab-pane">
           <div class="pane-header"><h3>🔒 门禁关卡、数字密码与专属语音誓言</h3></div>
           <div class="form-grid">
@@ -343,6 +341,19 @@
             </div>
           </div>
         </section>
+
+        <!-- 🌟 新增：生日盲盒独立设置舱 -->
+        <section id="tab-birthday" class="tab-pane">
+          <div class="pane-header pane-header-flex">
+            <div>
+              <h3>🎂 生日盲盒与 3D 全息贺卡</h3>
+              <p>预设 4 款男女高定 3D 模版，时间到达前呈锁定倒数状态，营造极致的情感期待感。</p>
+            </div>
+            <button class="btn-add" onclick="addBirthdayCapsule()">➕ 封装新盲盒</button>
+          </div>
+          <div id="birthdayCapsulesContainer" class="dynamic-list"></div>
+        </section>
+
       </div>
     </div>
   </div>
@@ -353,6 +364,6 @@
   <script src="js/config.js?v=2.5"></script>
   <script src="js/theme-presets.js?v=2.5"></script>
   <script src="js/anniversary-engine.js?v=2.5"></script>
-  <script src="js/admin.js?v=2.5"></script>
+  <script src="js/admin.js?v=2.6"></script>
 </body>
 </html>
