@@ -267,7 +267,7 @@
       </div>
     </section>
 
-    <!-- 🌟 星轨功能中枢导航网格（完美九宫格） -->
+    <!-- 星轨功能中枢导航网格 -->
     <nav class="hub-dock" id="hub-dock">
       <div class="hub-dock__header">
         <span class="hub-dock__badge">SACRED ARCHIVES</span>
@@ -338,7 +338,6 @@
             <span class="hub-btn__desc">超清海报 · 单文件铸造</span>
           </div>
         </div>
-        <!-- 🌟 新增：第 9 个绝美功能按钮，实现 3x3 完美矩阵 -->
         <div class="hub-btn" data-open-stage="birthday" onclick="if(window.StageManager) window.StageManager.openStage('birthday')">
           <div class="hub-btn__glow"></div>
           <span class="hub-btn__icon">🎂</span>
@@ -445,7 +444,7 @@
       <div class="stage-modal__body">
         <div class="section-title"><span class="section-title__desc">时空胶囊已封装，将在特定时刻为你解锁全息 3D 贺卡</span></div>
         <div id="birthday-capsule-container" class="birthday-container">
-          <!-- 核心：由第二批次即将发送的 birthday.js 动态接管渲染 -->
+          <!-- 核心：由 birthday.js 动态接管渲染 -->
         </div>
       </div>
     </section>
@@ -554,12 +553,12 @@
   <script src="js/pet.js?v=2.5"></script>
   <script src="js/export-eternal.js?v=2.5"></script>
   
-  <!-- 🌟 新增：盲盒专属 3D 渲染引擎入口 -->
   <script src="js/birthday.js?v=2.6"></script>
   
   <script src="js/core.js?v=2.5"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      // 保留玫瑰花的初始化，但移除了产生竞态条件的点击事件（转移至 core.js 处理异步锁）
       if (window.RomanticRoseEngine) {
         window.roseEngineInstance = new window.RomanticRoseEngine();
         window.roseEngineInstance.init();
@@ -580,6 +579,10 @@
       if (window.GracePetManager && window.LOVE_CONFIG) {
         const petMgr = new window.GracePetManager(window.LOVE_CONFIG);
         petMgr.init();
+      }
+      // 🌟 修复：必须在此处注入盲盒引擎的生命周期启动钩子，否则 DOM 不会渲染！
+      if (window.BirthdayInstance) {
+        window.BirthdayInstance.init();
       }
     });
   </script>
