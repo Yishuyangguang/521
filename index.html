@@ -30,7 +30,7 @@
   <meta name="apple-mobile-web-app-title" content="雅歌之印">
 
   <link rel="stylesheet" href="css/base.css?v=2.5">
-  <link rel="stylesheet" href="css/components.css?v=2.5">
+  <link rel="stylesheet" href="css/components.css?v=2.6">
   <link rel="stylesheet" href="css/animations.css?v=2.5">
   <link rel="stylesheet" href="css/themes.css?v=2.5">
   <link rel="stylesheet" href="css/anniversary.css?v=2.5">
@@ -214,7 +214,6 @@
     </div>
     <div id="rose-click-overlay" style="position: absolute; inset: 0; z-index: 5; cursor: pointer;" title="点击唤醒专属时空"></div>
     
-    <!-- 🌟 修复: 清理内联样式，交由 css/components.css 中的科技矩阵处理布局 -->
     <div class="gatekeeper__dialog gatekeeper__dialog--hidden" id="gatekeeper-dialog">
       <div class="gatekeeper__header">
         <div class="gatekeeper__badge">SACRED ARCHIVE</div>
@@ -268,7 +267,7 @@
       </div>
     </section>
 
-    <!-- 星轨功能中枢导航网格 -->
+    <!-- 🌟 星轨功能中枢导航网格（完美九宫格） -->
     <nav class="hub-dock" id="hub-dock">
       <div class="hub-dock__header">
         <span class="hub-dock__badge">SACRED ARCHIVES</span>
@@ -337,6 +336,15 @@
           <div class="hub-btn__info">
             <span class="hub-btn__title">数字永存</span>
             <span class="hub-btn__desc">超清海报 · 单文件铸造</span>
+          </div>
+        </div>
+        <!-- 🌟 新增：第 9 个绝美功能按钮，实现 3x3 完美矩阵 -->
+        <div class="hub-btn" data-open-stage="birthday" onclick="if(window.StageManager) window.StageManager.openStage('birthday')">
+          <div class="hub-btn__glow"></div>
+          <span class="hub-btn__icon">🎂</span>
+          <div class="hub-btn__info">
+            <span class="hub-btn__title">生日盲盒</span>
+            <span class="hub-btn__desc">3D时空贺卡 · 永存</span>
           </div>
         </div>
       </div>
@@ -427,6 +435,21 @@
         </div>
       </div>
     </section>
+
+    <!-- 🌟 新增：生日盲盒 3D 舞台系统 -->
+    <section id="stage-birthday" class="stage-modal">
+      <div class="stage-modal__header">
+        <div class="stage-modal__title-box"><span class="stage-modal__icon">🎂</span><h2 class="stage-modal__title">星轨生辰 · 专属盲盒</h2></div>
+        <button class="stage-modal__close-btn" onclick="if(window.StageManager) window.StageManager.closeStage()">✕</button>
+      </div>
+      <div class="stage-modal__body">
+        <div class="section-title"><span class="section-title__desc">时空胶囊已封装，将在特定时刻为你解锁全息 3D 贺卡</span></div>
+        <div id="birthday-capsule-container" class="birthday-container">
+          <!-- 核心：由第二批次即将发送的 birthday.js 动态接管渲染 -->
+        </div>
+      </div>
+    </section>
+
   </div>
 
   <aside class="vinyl-player" id="vinyl-player">
@@ -530,10 +553,13 @@
   <script src="js/pet-celebration.js?v=2.5"></script>
   <script src="js/pet.js?v=2.5"></script>
   <script src="js/export-eternal.js?v=2.5"></script>
+  
+  <!-- 🌟 新增：盲盒专属 3D 渲染引擎入口 -->
+  <script src="js/birthday.js?v=2.6"></script>
+  
   <script src="js/core.js?v=2.5"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      // 保留玫瑰花的初始化，但移除了产生竞态条件的点击事件（转移至 core.js 处理异步锁）
       if (window.RomanticRoseEngine) {
         window.roseEngineInstance = new window.RomanticRoseEngine();
         window.roseEngineInstance.init();
